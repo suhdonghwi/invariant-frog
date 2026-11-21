@@ -20,7 +20,7 @@ const BADGES = 24;
 const dummy = new THREE.Object3D();
 const GHOST = new THREE.Color(COLORS.ghostFrog);
 const ECHO = new THREE.Color(COLORS.frog);
-// A trail's copies are faded; Check's frogs themselves are solid.
+// A real frog's trail: faded green copies where it stood.
 const ECHO_FADE = 0.48;
 
 function easeSlot(f: FrogSim, target: Slot, t: number, dt: number, k: number): Slot {
@@ -33,12 +33,11 @@ function easeSlot(f: FrogSim, target: Slot, t: number, dt: number, k: number): S
   return f.slot;
 }
 
-function placeEchoes(walkers: FrogSim[], t: number, from: number, depth: THREE.InstancedMesh, ghosts: THREE.InstancedMesh, fades: THREE.InstancedBufferAttribute, rims: THREE.InstancedBufferAttribute): number {
+function placeEchoes(walkers: FrogSim[], t: number, from: number, depth: THREE.InstancedMesh, ghosts: THREE.InstancedMesh, fades: THREE.InstancedBufferAttribute, clears: THREE.InstancedBufferAttribute): number {
   let n = from;
   for (const walker of walkers) {
     const trail = walker.trail!;
     const fade = ECHO_FADE * leaveFade(walker, t);
-    const color = walker.kind === 'test' ? GHOST : ECHO;
     leftTiles(walker).forEach(([x, y], i) => {
       if (n >= MAX_FROGS) return;
       const [tx, ty] = trail[i + 1] ?? [walker.hop!.tx, walker.hop!.ty];
@@ -49,8 +48,8 @@ function placeEchoes(walkers: FrogSim[], t: number, from: number, depth: THREE.I
       depth.setMatrixAt(n, dummy.matrix);
       ghosts.setMatrixAt(n, dummy.matrix);
       fades.setX(n, fade);
-      rims.setX(n, walker.kind === 'test' ? 1 : 0);
-      ghosts.setColorAt(n++, color);
+      clears.setX(n, 0);
+      ghosts.setColorAt(n++, ECHO);
     });
   }
   return n;
@@ -62,13 +61,13 @@ export function Frogs() {
   const ghostDepth = useRef<THREE.InstancedMesh>(null);
   const shadows = useRef<THREE.InstancedMesh>(null);
   const geom = useMemo(() => frogGeometry(), []);
-  const { ghostGeom, fades, rims } = useMemo(() => {
+  const { ghostGeom, fades, clears } = useMemo(() => {
     const g = geom.clone();
     const a = new THREE.InstancedBufferAttribute(new Float32Array(MAX_FROGS).fill(1), 1);
     const r = new THREE.InstancedBufferAttribute(new Float32Array(MAX_FROGS), 1);
     g.setAttribute('aFade', a);
-    g.setAttribute('aRim', r);
-    return { ghostGeom: g, fades: a, rims: r };
+    g.setAttribute('aClear', r);
+    return { ghostGeom: g, fades: a, clears: r };
   }, [geom]);
   const mat = useMemo(() => frogMaterial(), []);
   const ghostDepthMat = useMemo(() => ghostDepthMaterial(), []);
@@ -137,7 +136,7 @@ export function Frogs() {
         gd.setMatrixAt(nGhost, dummy.matrix);
         gh.setMatrixAt(nGhost, dummy.matrix);
         fades.setX(nGhost, (f.fade ?? 1) * leaveFade(f, t));
-        rims.setX(nGhost, 1);
+        clears.setX(nGhost, 1);
         gh.setColorAt(nGhost++, GHOST);
       } else b.setMatrixAt(nReal++, dummy.matrix);
       const air = Math.max(0, py - p.ground);
@@ -149,7 +148,7 @@ export function Frogs() {
       sh.setMatrixAt(n, dummy.matrix);
       n++;
     }
-    nGhost = placeEchoes(walkers, t, nGhost, gd, gh, fades, rims);
+    nGhost = placeEchoes(walkers, t, nGhost, gd, gh, fades, clears);
     for (let i = badges; i < BADGES; i++) {
       const sp = badgeRefs.current[i];
       if (sp) sp.visible = false;
@@ -158,7 +157,7 @@ export function Frogs() {
     gh.count = gd.count = nGhost;
     sh.count = n;
     uploadInstances(nReal, b.instanceMatrix);
-    uploadInstances(nGhost, gh.instanceMatrix, gd.instanceMatrix, gh.instanceColor, fades, rims);
+    uploadInstances(nGhost, gh.instanceMatrix, gd.instanceMatrix, gh.instanceColor, fades, clears);
     uploadInstances(n, sh.instanceMatrix);
   });
 

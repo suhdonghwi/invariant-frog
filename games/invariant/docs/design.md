@@ -50,8 +50,8 @@ bound*.
 
 **Visual language.** Everything the level fixes is quiet grayscale; the
 learner's area is the only saturated surface (blue slabs, height). Other
-colours are reserved: real frogs green, Check's frogs a darker shade of the area's blue (solid,
-with a white rim so they stay readable on the slabs),
+colours are reserved: real frogs green, Check's frogs pale blue and
+see-through (clear in the middle, solid at the silhouette),
 goals amber, and **red only for failures** (and Reset's confirmation).
 
 Each idea has one channel, and the channels stack without changing each
@@ -63,17 +63,25 @@ a striped blue slab with no pool, as heavy as any other slab. Nothing is
 drawn as a line: the stop region has no outline, and the axes are only their
 labels.
 
-**Real frogs and blue frogs.** Real frogs are actual runs: they hatch from
-eggs. The frogs Check places to test the area's claim are **blue frogs**
-(파란 개구리): a shade darker than the slabs, solid, with a white rim, rising
-out of the slab of their tile. Blue is the area's colour, so they read as
-"the area's claim, acted out" without an explanation. They stand on their
-tile rather than float, since the area claims a frog could be right there.
-They have no name of their own: "ghost" read as "no frog can get here", and
-a frog that looked like a real one would read as "a frog gets here", while
-Check says neither. The captions make the area the subject instead ("Your
-area says a frog could be at …"). Every frog Check shows is a blue frog,
-and real frogs come only from the learner's own runs.
+**Real frogs and see-through frogs.** Real frogs are actual runs: they hatch
+from eggs. The frogs Check places to test the area's claim are
+**see-through frogs** (반투명 개구리): pale blue, clear in the middle and
+solid at the silhouette, rising out of the slab of their tile. They stand on
+their tile rather than float, since the area claims a frog could be right
+there, and they never hop: a see-through frog draws the hop it would make,
+as a dashed arc, since Check asks where a frog here would go rather than
+running one. So they leave no trail either. They used to be called "ghost
+frogs", which read as "no frog can get here"; a frog that looked like a
+real one would read as "a frog gets here", and Check says neither. The
+captions make the area the subject ("Your area says a frog could be at
+…"). Every frog Check shows is a see-through frog, and real frogs come only
+from the learner's own runs.
+
+See-through means "no frog stands here now", and colour says whose frog it
+is. A real frog's trail is faded green copies (a real frog was here); a
+see-through frog is pale blue (the area claims a frog could be here). The
+hover readout's frog stays see-through green: it answers the same question,
+but it is the learner's own pointing, not Check.
 
 ## The narrative: intuition first, then the rules
 
@@ -95,17 +103,17 @@ The game never leads with the rules; each is met as a picture first:
    question, asked over the outlined tiles a frog can stop on, opens
    Exit.
 
-## Blue frogs: why unreachable frogs matter
+## See-through frogs: why unreachable frogs matter
 
 The most common objection is *"that frog could never actually be there!"* The
 answer: Check never runs real frogs, because where they go is exactly what
 is being proved. The area claims a frog could be on any of its tiles, so
 Check asks of every tile: if a frog were here, where would it land, or where
-would it stop? A blue frog acts out that question. If you don't want a frog
-there, shrink the claim — that is **strengthening**.
+would it stop? A see-through frog acts out that question. If you don't want
+a frog there, shrink the claim — that is **strengthening**.
 
-A blue frog says nothing about whether a real frog gets to its tile, and
-it looks the same either way. Check can't tell in general: knowing which
+A see-through frog says nothing about whether a real frog gets to its tile,
+and it looks the same either way. Check can't tell in general: knowing which
 tiles no frog reaches takes an invariant, the very thing the learner is
 looking for, and searching runs only finds the tiles some frog does reach.
 The rules don't ask either, since they are about every tile of the area.
@@ -113,7 +121,7 @@ The rules don't ask either, since they are about every tile of the area.
 frog, hopping from its egg, and raised a see-through "ghost frog"
 otherwise. Since the search was bounded, "ghost" only meant "not found on a
 run", but the contrast read as "no frog can get here".) What the learner can see is the
-eggs: a blue frog standing on an egg is on a tile a real frog does start
+eggs: a see-through frog standing on an egg is on a tile a real frog does start
 from, and that frog can be run to check.
 
 Nothing else stages the scene: tags, outlines, the spotlight, lit code lines
@@ -168,13 +176,13 @@ programmer expects, and have room for arrays.)
   all three.
 - **Check never says whether a real frog gets there.** An Initialization
   failure is an egg off the area, and only the egg is marked; a Maintenance
-  or Exit failure is a tile of the area, and a blue frog stands on it (see
-  *Blue frogs* above).
+  or Exit failure is a tile of the area, and a see-through frog stands on it (see
+  *See-through frogs* above).
 - **Three verdicts**, played rule by rule (see experience.md, *Verifying*):
   proved (the level is cleared); a counterexample (an egg off the area, or a
-  blue frog on the area); **undecided** (said in the
+  see-through frog on the area); **undecided** (said in the
   caption, the level is *not* cleared). Before giving up, the checker tries
-  proving the formula equivalent to a known solution. Blue frogs only show
+  proving the formula equivalent to a known solution. See-through frogs only show
   where they would hop: Check asks the question, it doesn't run the frog.
 - **One definition, three uses.** The same parsed program and formula drive
   the frogs, the proofs and the floor, so what the learner sees and what is
@@ -203,7 +211,7 @@ language:
   quantifiers are the sources of *undecided*, and a formula that divides is
   then told to avoid division;
 - **arrays** are read-only inputs: `A[k]` is a cell, and **a cell outside the
-  array reads as 0**, so a blue frog past the end sees zeros (the levels say
+  array reads as 0**, so a see-through frog past the end sees zeros (the levels say
   so when it matters);
 - **`forall 0 <= k < i: A[k] <= m`** and `exists …`: the range is a chain of
   `<` and `<=` around the bound names (`forall 0 <= j <= k < n: A[j] <= A[k]`
@@ -300,8 +308,8 @@ endless as the loop it stands in for. Both are real levels (`tutorialLevel`,
   or else by a demo of that stage's pitfall, after the learner predicts the
   outcome (yes or no; the caption says if they were right, nothing is
   counted). Initialization's pitfall leaves an egg off the area;
-  Maintenance's fails on a blue frog standing on an egg; Exit's (`i >= 0`)
-  on a blue frog on a tile no real frog reaches, which is where the
+  Maintenance's fails on a see-through frog standing on an egg; Exit's (`i >= 0`)
+  on a see-through frog on a tile no real frog reaches, which is where the
   objection above is answered (the caption says so: the tutorial's author
   knows, Check doesn't).
 - **One hint per stage:** a sentence that names the fact that matters,
@@ -329,7 +337,7 @@ or not, is too weak.
 | Loop guard false | the loop **stops** here | 멈춘다 (빗금 친 칸) |
 | The learner's formula | the **area** (**invariant area**); it is the **loop invariant** | 영역 (불변식 영역), 루프 불변식 |
 | Raised tiles | **slabs** | 블록 |
-| A state placed to test the area's claim | a **blue frog** (no name of its own) | 파란 개구리 |
+| A state placed to test the area's claim | a **see-through frog** | 반투명 개구리 |
 | What an area says | a **claim**: every frog is always on it | 주장 |
 | Passes Initialization and Maintenance | an **invariant** | 불변식 |
 | Also passes Exit | **strong enough** to prove the postcondition | 사후 조건을 증명하기에 충분히 강한 |

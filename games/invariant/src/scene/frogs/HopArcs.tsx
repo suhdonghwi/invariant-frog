@@ -25,6 +25,8 @@ interface Arc {
   plane: string;
   t0: number;
   fade: number;
+  /** Ring the landing tile green: the hop lands on the area. */
+  ring?: boolean;
 }
 
 const useHopArcs = create<{ arcs: Arc[] }>(() => ({ arcs: [] }));
@@ -116,7 +118,7 @@ export function HopArcs() {
     }
     let nr = 0;
     for (const a of arcs) {
-      if (a.plane !== plane) continue;
+      if (a.plane !== plane || a.ring === false) continue;
       const shown = clamp01((t - a.t0 - ARC_DRAW) / APPEAR);
       if (shown <= 0) continue;
       const { scale, alpha } = ringPop(shown);

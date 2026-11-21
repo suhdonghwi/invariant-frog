@@ -8,9 +8,11 @@ import { showState } from '../levels/level';
 import { tileOf } from '../levels/tiles';
 import { BEAT, ms } from '../motion';
 import { cameraRig } from '../scene/cameraRig';
-import { sceneNow, sleep } from '../scene/sceneTime';
-import { hopFrog, sendFrogsHome } from './frogs';
-import { GHOST_RISE, raiseGhost } from './ghosts';
+import { ARC_DRAW } from '../scene/frogs/HopArcs';
+import { after, sceneNow, sleep } from '../scene/sceneTime';
+import { traceHop } from './codeTrace';
+import { sendFrogsHome } from './frogs';
+import { ARC_AFTER_RISE, GHOST_RISE, previewHop, raiseGhost } from './ghosts';
 import { busyWhile, currentLevel, type Token } from './sequence';
 
 export interface CounterexampleOptions {
@@ -18,7 +20,7 @@ export interface CounterexampleOptions {
   area?: string;
   tone?: CaptionTone;
   extra?: string;
-  /** Said after a blue frog's caption: a Maintenance or Exit failure. */
+  /** Said after a see-through frog's caption: a Maintenance or Exit failure. */
   ghostExtra?: string;
   action?: () => Caption['action'];
 }
@@ -65,9 +67,9 @@ export function playCounterexample(cex: Counterexample, opts: CounterexampleOpti
 // Every counterexample is shown the same way, whether or not a real frog can
 // get there: Check can't tell, and the rules don't ask. An Initialization
 // failure is an egg off the area, so only the egg is marked. A Maintenance or
-// Exit failure is a tile of the area, so a blue frog stands on it: the area
-// claims a frog could be there. Like a real frog, it leaves a trail when it
-// hops.
+// Exit failure is a tile of the area, so a see-through frog stands on it: the
+// area claims a frog could be there. It never hops; a Maintenance failure
+// draws the hop it would make, as the proof picture does.
 export async function counterexample(tok: Token, cex: Counterexample, opts: CounterexampleOptions) {
   const L = currentLevel();
   useGame.setState({ failMark: null, region: null });
@@ -86,16 +88,19 @@ export async function counterexample(tok: Token, cex: Counterexample, opts: Coun
     return;
   }
   sfx.ghost();
-  const f = raiseGhost(cex.state, 1, { trail: true });
-  await sleep(ms(GHOST_RISE + BEAT));
-  if (!tok.alive) return;
   let text: string;
   if (cex.rule === 'maintenance' && cex.next) {
-    await hopFrog(L, f, cex.next);
+    const { state, next } = cex;
+    previewHop(state, 1, next, false);
+    after(ms(GHOST_RISE + ARC_AFTER_RISE), () => tok.alive && traceHop(L, state, next, ARC_DRAW));
+    await sleep(ms(GHOST_RISE + ARC_AFTER_RISE + ARC_DRAW));
     if (!tok.alive) return;
-    markFailure(...tileOf(L, cex.next), say.landsOutsideTag(area));
+    markFailure(...tileOf(L, next), say.landsOutsideTag(area));
     text = `${prefix}${say.landsOutside(fmt(cex.state), fmt(cex.next), area)}${broken}`;
   } else {
+    raiseGhost(cex.state);
+    await sleep(ms(GHOST_RISE + BEAT));
+    if (!tok.alive) return;
     markFailure(x, y, say.offGoalTag);
     text = `${prefix}${say.offGoal(fmt(cex.state), area)}`;
   }
