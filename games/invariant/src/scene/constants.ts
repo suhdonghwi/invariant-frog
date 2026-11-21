@@ -17,7 +17,7 @@ export const COLORS = {
   egg: '#f8efd9',
   frog: '#52c24a',
   trail: '#2f9e44',
-  ghostFrog: '#b9caff',
+  ghostFrog: '#3a78d8',
   fail: '#f04f55',
   outline: '#2a3142',
   label: '#3b4456',

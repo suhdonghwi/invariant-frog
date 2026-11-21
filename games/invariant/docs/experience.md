@@ -13,7 +13,7 @@ behind many small decisions; keep them when changing or adding UI.
   (`EXIT_MS`, 150 ms), except that a caption replaced by another just gives
   way to it. Use the presence helpers in `hooks/presence.ts` rather than
   unmounting outright. In the scene, frogs leave through `dismissFrogs` (they
-  shrink away, ghosts fade, their eggs grow back) and tags and outlines
+  shrink away, Check's blue frogs fade, their eggs grow back) and tags and outlines
   through `useExitFade`. Only a rebuild (Back, skipping ahead) may cut.
 - **Quick, never sluggish.** The learner should never wait on decoration.
 - **No layout shift.** Reserve space up front (the 3D title has a fixed
@@ -86,8 +86,8 @@ behind many small decisions; keep them when changing or adding UI.
   sudden is the run-up: see the failure rule below. An input the game
   changes lights up in the inputs panel.
 - **Things come from somewhere.** Frogs climb out of their egg; a frog that
-  is done goes back into it, and the egg grows back. Ghost frogs rise up
-  through the slab of the tile they test, spinning as they come, to a pop
+  is done goes back into it, and the egg grows back. Check's blue frogs rise
+  up through the slab of the tile they test, spinning as they come, to a pop
   that plays once per wave, and then stand on it like any frog: the area
   claims a frog could be right there, so they don't float.
 - **The scene pauses when the page is hidden** and carries on where it was.
@@ -101,7 +101,7 @@ behind many small decisions; keep them when changing or adding UI.
 - **One rule at a time, with a visible seam.** Every light to be checked
   spins from the press. Each rule's picture plays in turn: Initialization
   rings the eggs in view in one sweep along their line, with rising ticks,
-  the last tick on the last ring; Maintenance raises ghost frogs together,
+  the last tick on the last ring; Maintenance raises blue frogs together,
   spread apart and fading with distance, each drawing its dashed hop and
   ringing its landing tile; Exit sweeps every stop on the area like
   the eggs. Then the light turns, the picture clears, and a short pause
@@ -113,10 +113,11 @@ behind many small decisions; keep them when changing or adding UI.
   mark.
 - **A failure looks the same whether or not a real frog gets there.** An
   Initialization failure rings the egg off the area with its red tag; a
-  Maintenance failure raises a ghost frog on the tile, which hops off the
+  Maintenance failure raises a blue frog on the tile, which hops off the
   area; an Exit failure raises one on the stop that is not a goal. Check
-  never stages a real frog's run (design.md, *Ghost frogs*), so frogs on
-  the board go home and Check's frogs are always ghost frogs.
+  never stages a real frog's run (design.md, *Blue frogs*), so frogs on
+  the board go home and Check's frogs are always blue frogs. The caption
+  puts the area first: "Your area says a frog could be at …".
 - **The board changes only when the learner asks.** If the failing case is
   on another board, nothing moves: the rule's light turns red and the
   caption says nothing breaks near this board, but something does at the
@@ -170,7 +171,7 @@ behind many small decisions; keep them when changing or adding UI.
 - **Step and Run move one frog: the one the learner picked.** Clicking an
   egg hatches its frog, which waits. Step hops it once; Run hops it until it
   stops, and turns into Pause meanwhile. In a level there is one real frog
-  at a time: picking another egg sends the last one home, and Check's ghost
+  at a time: picking another egg sends the last one home, and Check's blue
   frog with it, trail and all. Pressed with no
   frog, Step and Run point at an egg ("pick an egg first"), unless the
   board has only one egg (both axes start at fixed values): then there is
@@ -187,13 +188,13 @@ behind many small decisions; keep them when changing or adding UI.
   joins each to the next, the same arc a hop draws. The trail grows with
   each hop and stays after the frog stops, so where it came from can still
   be read. One trail shows at a time: the frog the learner picked, or
-  Check's ghost frog. It goes when the frog does, fading with it
-  rather than vanishing. A ghost frog is pale blue. Check's ghost frog
-  leaves the same trail in its own colours, a pale blue copy where it stood
-  and a dark dashed arc, so a failure reads the same as a real frog's hop.
+  Check's blue frog. It goes when the frog does, fading with it
+  rather than vanishing. Check's blue frog leaves the same trail in its own
+  colours, a faded blue copy where it stood and a dark dashed arc, so a
+  failure reads the same as a real frog's hop.
   It starts where Check put it, so its trail never goes back to an egg. The
-  ghost frogs of Maintenance's proof picture and the hover readout draw
-  only their dark arc. The
+  blue frogs of Maintenance's proof picture and the hover readout draw only
+  their dark arc. The
   tutorial's ten tested frogs and the example's looping frogs leave no
   trail.
 - **Reset puts the screen back as the level opened**: frogs in their eggs,
@@ -201,7 +202,8 @@ behind many small decisions; keep them when changing or adding UI.
   verdicts stay, since those are the learner's work.
 - **Hovering a tile answers Check's question.** The readout gives the tile's
   values, where it hops or that it stops, and whether it is on the area; a
-  ghost frog shows the hop, on the same dashed line Check's ghost frogs draw.
+  see-through green frog shows the hop, on the same dashed line Check's
+  blue frogs draw.
   Where a frog or a trail's echo already stands on the landing tile, only
   the line is drawn, so two see-through frogs never share a spot.
 - **Errors wait for Check.** A formula is never marked wrong while it is

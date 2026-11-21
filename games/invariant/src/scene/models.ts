@@ -40,11 +40,15 @@ export function frogGeometry({ fine = false }: { fine?: boolean } = {}): THREE.B
   return merged;
 }
 
-// Drawn just before a see-through frog, so only its front surface is blended, once.
+// Drawn just before a faded frog, so only its front surface is blended, once.
 export function ghostDepthMaterial(): THREE.MeshBasicMaterial {
   return new THREE.MeshBasicMaterial({ colorWrite: false, transparent: true, depthWrite: true });
 }
 
+// The rim: a white edge that keeps Check's blue frogs readable on the blue slabs.
+const RIM = { strength: 0.85, power: 2.2 };
+
+// `fade` adds per-instance opacity (aFade) and a per-instance white rim (aRim).
 export function frogMaterial(opts: { ghost?: boolean; fade?: boolean } = {}): THREE.MeshStandardMaterial {
   const m = new THREE.MeshStandardMaterial({
     vertexColors: true,
@@ -59,7 +63,7 @@ export function frogMaterial(opts: { ghost?: boolean; fade?: boolean } = {}): TH
     const f = (x: number) => x.toFixed(4);
     const [ax, ay, az] = TORSO.at.map(f);
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', `#include <common>\nattribute float aPart;\nuniform vec3 uTint;\nvarying vec3 vTorsoDir;\nvarying float vTorso;${opts.fade ? '\nattribute float aFade;\nvarying float vFade;' : ''}`)
+      .replace('#include <common>', `#include <common>\nattribute float aPart;\nuniform vec3 uTint;\nvarying vec3 vTorsoDir;\nvarying float vTorso;${opts.fade ? '\nattribute float aFade;\nattribute float aRim;\nvarying float vFade;\nvarying float vRim;' : ''}`)
       .replace(
         '#include <color_vertex>',
         /* glsl */ `
@@ -79,13 +83,13 @@ export function frogMaterial(opts: { ghost?: boolean; fade?: boolean } = {}): TH
         else if (aPart < 5.5) c = tint * 0.28;
         else c = vec3(1.0, 0.5, 0.56);
         vColor = vec4(c, 1.0);
-        ${opts.fade ? 'vFade = aFade;' : ''}
+        ${opts.fade ? 'vFade = aFade;\n        vRim = aRim;' : ''}
         `,
       );
     const c = Math.cos(BELLY.pitch);
     const s = Math.sin(BELLY.pitch);
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', `#include <common>\nvarying vec3 vTorsoDir;\nvarying float vTorso;${opts.fade ? '\nvarying float vFade;' : ''}`)
+      .replace('#include <common>', `#include <common>\nvarying vec3 vTorsoDir;\nvarying float vTorso;${opts.fade ? '\nvarying float vFade;\nvarying float vRim;' : ''}`)
       .replace(
         '#include <color_fragment>',
         /* glsl */ `#include <color_fragment>
@@ -96,6 +100,13 @@ export function frogMaterial(opts: { ghost?: boolean; fade?: boolean } = {}): TH
         float front = step(0.0, dot(dir.yz, vec2(${f(s)}, ${f(c)})));
         diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0, 1.0, 0.86), 0.55 * vTorso * front * (1.0 - smoothstep(1.0 - edge, 1.0 + edge, d)));
         ${opts.fade ? 'diffuseColor.a *= vFade;' : ''}`,
+      );
+    if (opts.fade)
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <opaque_fragment>',
+        /* glsl */ `float rim = pow(1.0 - clamp(abs(dot(normalize(normal), normalize(vViewPosition))), 0.0, 1.0), ${f(RIM.power)});
+        outgoingLight = mix(outgoingLight, vec3(1.0), ${f(RIM.strength)} * vRim * rim);
+        #include <opaque_fragment>`,
       );
   };
   m.customProgramCacheKey = () => (opts.fade ? 'frog-fade' : 'frog');

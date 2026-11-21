@@ -22,9 +22,9 @@ src/
   i18n/        the language switch, and every other line the game says (en.ts, ko.ts)
   game/        the zustand store, cleared levels (progress.ts), what the app's buttons do (actions.ts)
   director/    scripted sequences and the scopes that cancel them (sequence.ts); frogs, the player's Step/Run/egg controls, resets;
-               solver runs, counterexamples, rule-by-rule verification, ghost frogs and the proof wave; a hop's sound and code cursor
+               solver runs, counterexamples, rule-by-rule verification, Check's blue frogs (`ghosts.ts`) and the proof wave; a hop's sound and code cursor
   tutorial/    the tutorial's steps, and the beat/caption helpers they are written with
-  audio/       sound clips and the synthesised ghost siren
+  audio/       sound clips and the synthesised pop of Check's frogs (`sfx.ghost`)
   hooks/       React hooks the scene and the DOM share: exit animations, media queries
   storage.ts   localStorage behind a try/catch: language, mute, cleared levels, code panel width
   motion.ts    the motion tokens: every duration and pause (`--duration-*` in styles.css), EXIT_MS
@@ -135,13 +135,13 @@ backend agree. `pnpm validate` and the tests are the safety net.
   for the gaps between moves (`ms()` turns one into a `sleep`). The CSS
   mirrors them as `--duration-*`. A new wait picks the token for what it is
   for, not a number that felt right; only accent animations (hatching, a
-  cheer, a ghost's rise) keep their own lengths. Values that settle towards a
+  cheer, a blue frog's rise) keep their own lengths. Values that settle towards a
   target over time use `Toward` (`scene/easing.ts`), a timed smootherstep,
   not a per-frame exponential.
 
 ## Sequences
 
-- Anything scripted — counterexamples, Run, the ghost wave, looping frogs —
+- Anything scripted — counterexamples, Run, the proof wave, looping frogs —
   is a `director/` function. Each starts with `begin()`, which cancels
   whatever was playing; after every `await` it checks `tok.alive` and stops
   if it was superseded. `busy` locks the learner's input while one plays

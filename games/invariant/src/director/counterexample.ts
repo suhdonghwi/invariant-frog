@@ -18,7 +18,7 @@ export interface CounterexampleOptions {
   area?: string;
   tone?: CaptionTone;
   extra?: string;
-  /** Said after a ghost frog's caption: a Maintenance or Exit failure. */
+  /** Said after a blue frog's caption: a Maintenance or Exit failure. */
   ghostExtra?: string;
   action?: () => Caption['action'];
 }
@@ -65,7 +65,7 @@ export function playCounterexample(cex: Counterexample, opts: CounterexampleOpti
 // Every counterexample is shown the same way, whether or not a real frog can
 // get there: Check can't tell, and the rules don't ask. An Initialization
 // failure is an egg off the area, so only the egg is marked. A Maintenance or
-// Exit failure is a tile of the area, so a ghost frog stands on it: the area
+// Exit failure is a tile of the area, so a blue frog stands on it: the area
 // claims a frog could be there. Like a real frog, it leaves a trail when it
 // hops.
 export async function counterexample(tok: Token, cex: Counterexample, opts: CounterexampleOptions) {
@@ -97,7 +97,7 @@ export async function counterexample(tok: Token, cex: Counterexample, opts: Coun
     text = `${prefix}${say.landsOutside(fmt(cex.state), fmt(cex.next), area)}${broken}`;
   } else {
     markFailure(x, y, say.offGoalTag);
-    text = `${prefix}${say.offGoal(fmt(cex.state))}`;
+    text = `${prefix}${say.offGoal(fmt(cex.state), area)}`;
   }
   if (opts.ghostExtra) text += `\n\n${opts.ghostExtra}`;
   finish(cex, opts, text);
