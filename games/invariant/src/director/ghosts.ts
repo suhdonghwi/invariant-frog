@@ -16,7 +16,7 @@ import { busyWhile, currentLevel } from './sequence';
 
 export const GHOST_RISE = 0.6;
 const TURNS = 2;
-const ARC_AFTER_RISE = 0.1;
+export const ARC_AFTER_RISE = 0.1;
 export const PROOF_PICTURE = GHOST_RISE + ARC_AFTER_RISE + ARC_DRAW + APPEAR + BEAT;
 
 export function raiseGhost(s: State, fade = 1): FrogSim {
@@ -28,10 +28,12 @@ export function raiseGhost(s: State, fade = 1): FrogSim {
   return f;
 }
 
-export function previewHop(s: State, fade = 1): FrogSim {
+// A see-through frog never hops: it stands on its tile and draws the hop it
+// would make, so Check asks the question without running the frog.
+export function previewHop(s: State, fade = 1, to: State = hop(currentLevel(), s), ring = true): FrogSim {
   const L = currentLevel();
   const f = raiseGhost(s, fade);
-  const [tx, ty] = tileOf(L, hop(L, s));
+  const [tx, ty] = tileOf(L, to);
   hopArcs.add({
     frog: f.id,
     fx: f.x,
@@ -41,8 +43,9 @@ export function previewHop(s: State, fade = 1): FrogSim {
     plane: f.plane,
     t0: sceneNow() + GHOST_RISE + ARC_AFTER_RISE,
     fade,
+    ring,
   });
-  after(ms(GHOST_RISE + ARC_AFTER_RISE + ARC_DRAW), () => frogWorld.frogs.includes(f) && sfx.landing());
+  after(ms(GHOST_RISE + ARC_AFTER_RISE + ARC_DRAW), () => ring && frogWorld.frogs.includes(f) && sfx.landing());
   return f;
 }
 

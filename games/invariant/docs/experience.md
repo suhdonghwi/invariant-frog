@@ -13,7 +13,7 @@ behind many small decisions; keep them when changing or adding UI.
   (`EXIT_MS`, 150 ms), except that a caption replaced by another just gives
   way to it. Use the presence helpers in `hooks/presence.ts` rather than
   unmounting outright. In the scene, frogs leave through `dismissFrogs` (they
-  shrink away, ghosts fade, their eggs grow back) and tags and outlines
+  shrink away, Check's see-through frogs fade, their eggs grow back) and tags and outlines
   through `useExitFade`. Only a rebuild (Back, skipping ahead) may cut.
 - **Quick, never sluggish.** The learner should never wait on decoration.
 - **No layout shift.** Reserve space up front (the 3D title has a fixed
@@ -46,8 +46,8 @@ behind many small decisions; keep them when changing or adding UI.
 - **Overlap, don't queue.** The next move starts while the last one is
   finishing (frogs go home while the board changes).
   A sequence never waits on nothing.
-- **A new frog gets a beat before it moves.** Every hatch, in a
-  counterexample, Run or an example loop, finishes and rests for a beat
+- **A new frog gets a beat before it moves.** Every hatch, in Run or an
+  example loop, finishes and rests for a beat
   (`HATCHED_MS`) before the first hop, so its egg reads as where it starts.
 - **The camera's time follows the distance.** A short move is short, a long
   one is longer but never more than about a second, and it never jumps in
@@ -68,8 +68,7 @@ behind many small decisions; keep them when changing or adding UI.
 - **Quick where nothing is being shown.** A hop is the loop body running, so
   it takes long enough to follow, and every hop takes the same 0.34 s
   whichever button or sequence starts it, with the same short pause between
-  hops in a run. Only a long run staged by Check hops faster, so it ends in
-  a few seconds. Hatching, a frog going home,
+  hops in a run. Hatching, a frog going home,
   an egg coming back or stepping aside carry no content, so they take about
   a fifth of a second, and an egg starts coming back as its frog starts to
   leave rather than after it has gone.
@@ -87,9 +86,10 @@ behind many small decisions; keep them when changing or adding UI.
   sudden is the run-up: see the failure rule below. An input the game
   changes lights up in the inputs panel.
 - **Things come from somewhere.** Frogs climb out of their egg; a frog that
-  is done goes back into it, and the egg grows back. Ghost frogs break up
-  through the slab of the tile they test (chips fly off), spinning as they
-  rise, to a siren that plays once per wave.
+  is done goes back into it, and the egg grows back. Check's see-through frogs rise
+  up through the slab of the tile they test, spinning as they come, to a pop
+  that plays once per wave, and then stand on it like any frog: the area
+  claims a frog could be right there, so they don't float.
 - **The scene pauses when the page is hidden** and carries on where it was.
 
 ## Verifying
@@ -101,7 +101,7 @@ behind many small decisions; keep them when changing or adding UI.
 - **One rule at a time, with a visible seam.** Every light to be checked
   spins from the press. Each rule's picture plays in turn: Initialization
   rings the eggs in view in one sweep along their line, with rising ticks,
-  the last tick on the last ring; Maintenance raises ghost frogs together,
+  the last tick on the last ring; Maintenance raises see-through frogs together,
   spread apart and fading with distance, each drawing its dashed hop and
   ringing its landing tile; Exit sweeps every stop on the area like
   the eggs. Then the light turns, the picture clears, and a short pause
@@ -111,6 +111,14 @@ behind many small decisions; keep them when changing or adding UI.
   camera first goes to the nearest ones, so no rule is checked off screen. The first failing
   rule ends the check; an undecided one gets an amber light with a question
   mark.
+- **A failure looks the same whether or not a real frog gets there.** An
+  Initialization failure rings the egg off the area with its red tag; a
+  Maintenance failure raises a see-through frog on the tile, which stays
+  put and draws the hop it would make, off the area, as Maintenance's proof
+  picture does; an Exit failure raises one on the stop that is not a goal. Check
+  never stages a real frog's run (design.md, *See-through frogs*), so frogs on
+  the board go home and Check's frogs are always see-through frogs. The caption
+  puts the area first: "Your area says a frog could be at …".
 - **The board changes only when the learner asks.** If the failing case is
   on another board, nothing moves: the rule's light turns red and the
   caption says nothing breaks near this board, but something does at the
@@ -118,8 +126,8 @@ behind many small decisions; keep them when changing or adding UI.
   the input, and the boards stacked as floors, were both tried and read as
   busy.) The button switches the board at once with the slabs' sound, and
   the camera holds still on it for a beat; then, if it is off
-  screen, the camera flies to it and the frog sets off just before it
-  lands; if it is on screen the camera stays put. The light turns red as the caption arrives.
+  screen, the camera flies to it and the failure starts playing just
+  before it lands; if it is on screen the camera stays put. The light turns red as the caption arrives.
   The last picture stays under the result caption, and clear of it: a taller
   caption nudges the camera. A red light, like the caption's Replay, plays
   the failure again.
@@ -164,7 +172,8 @@ behind many small decisions; keep them when changing or adding UI.
 - **Step and Run move one frog: the one the learner picked.** Clicking an
   egg hatches its frog, which waits. Step hops it once; Run hops it until it
   stops, and turns into Pause meanwhile. In a level there is one real frog
-  at a time: picking another egg sends the last one home. Pressed with no
+  at a time: picking another egg sends the last one home, and Check's
+  see-through frog with it. Pressed with no
   frog, Step and Run point at an egg ("pick an egg first"), unless the
   board has only one egg (both axes start at fixed values): then there is
   nothing to choose, so they hatch it, wait the hatch's beat and go on.
@@ -175,14 +184,14 @@ behind many small decisions; keep them when changing or adding UI.
   frog is gone. So a frog looks the same on every tile, and only frogs
   sharing a tile with other frogs split it between them.
 - **A real frog leaves a trail.** On every tile it has left stands a
-  see-through green frog facing the way it went, standing exactly where the
+  faded green copy of it facing the way it went, standing exactly where the
   frog stood so the frog hopping away uncovers it, and a dashed green arc
   joins each to the next, the same arc a hop draws. The trail grows with
   each hop and stays after the frog stops, so where it came from can still
-  be read. One trail shows at a time: the frog the learner picked, or the
-  real frog Check staged. It goes when the frog does, fading with it
-  rather than vanishing. A ghost frog is pale
-  blue and has one dark dashed arc, its single hop: it has no past. The
+  be read. One trail shows at a time: the frog the learner picked. It goes
+  when the frog does, fading with it rather than vanishing. Check's
+  see-through frogs never hop, so they leave no trail: they and the hover
+  readout draw only a dark dashed arc to where the hop would land. The
   tutorial's ten tested frogs and the example's looping frogs leave no
   trail.
 - **Reset puts the screen back as the level opened**: frogs in their eggs,
@@ -190,7 +199,8 @@ behind many small decisions; keep them when changing or adding UI.
   verdicts stay, since those are the learner's work.
 - **Hovering a tile answers Check's question.** The readout gives the tile's
   values, where it hops or that it stops, and whether it is on the area; a
-  ghost frog shows the hop, on the same dashed line Check's ghost frogs draw.
+  see-through green frog shows the hop, on the same dashed line Check's
+  see-through frogs draw.
   Where a frog or a trail's echo already stands on the landing tile, only
   the line is drawn, so two see-through frogs never share a spot.
 - **Errors wait for Check.** A formula is never marked wrong while it is

@@ -1,5 +1,7 @@
 import type { Rule } from '../checker/types';
 
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 export const en = {
   gotIt: 'Got it',
 
@@ -133,20 +135,16 @@ export const en = {
     noLongerHolds: (part: string) => ` \`${part}\` no longer holds.`,
     falseThere: (part: string) => ` \`${part}\` is false there.`,
     startsOutsideTag: (area: string) => `starts outside ${area}`,
-    startsOutside: (state: string, area: string) => `This frog starts at ${state} — outside ${area}.`,
+    startsOutside: (state: string, area: string) => `The egg at ${state} is outside ${area}.`,
     landsOutsideTag: (area: string) => `lands outside ${area}`,
-    landsOutside: (from: string, to: string, area: string) => `A ghost frog at ${from} hops to ${to}, outside ${area}.`,
-    eggLandsOutside: (from: string, to: string, area: string) => `The frog from the egg at ${from} hops to ${to}, outside ${area}.`,
-    realLandsOutside: (egg: string, from: string, to: string, area: string) =>
-      `The frog from the egg at ${egg} gets to ${from}, and its next hop lands at ${to}, outside ${area}.`,
+    landsOutside: (from: string, to: string, area: string) => `${cap(area)} says a frog could be at ${from}. From there a hop lands on ${to}, outside ${area}.`,
     offGoalTag: 'stops, but not on a goal',
     holdsTag: {
       initialization: 'every egg is on the area',
       maintenance: 'every hop lands on the area',
       exit: 'every stop on the area is a goal',
     } satisfies Record<Rule, string>,
-    offGoal: (state: string) => `A ghost frog at ${state} stops there, but it isn't a goal: the postcondition doesn't hold.`,
-    realOffGoal: (egg: string, state: string) => `The frog from the egg at ${egg} stops at ${state}, but it isn't a goal: the postcondition doesn't hold.`,
+    offGoal: (state: string, area: string) => `${cap(area)} says a frog could be at ${state}. It stops there, but that isn't a goal: the postcondition doesn't hold.`,
   },
 
   langErrors: {
@@ -239,9 +237,9 @@ export const en = {
     askMaintenance: 'Now change your area so **no hop leads off it**. **Check** tests rules 1 and 2 together.',
     nudgeMaintenance: 'Every frog starts at `i = 0`, and a hop only ever increases `i`.',
     ghostMaintenance:
-      'The see-through frog is a **ghost frog**. Check never runs real frogs, and it doesn’t try tiles one by one: it reasons about your formula, which covers every tile of your area at once. This ghost frog shows one tile where a hop leads off it. No real frog may ever get here, but your area says one could.',
+      'The see-through frog didn’t hatch from an egg: Check put it on your area, because your area says a frog could be here. Check never runs real frogs, and it doesn’t try tiles one by one: it reasons about your formula, which covers every tile of your area at once. Its hop would land off your area, and that counts, whether or not a real frog ever gets here.',
     passedMaintenance:
-      'Correct! No hop leads off your area: **Maintenance** holds.\n\nThe see-through frogs are **ghost frogs**, just a few examples. Check never runs real frogs and doesn’t try tiles one by one: it reasons about your formula, like solving an equation, so it covers every tile of your area at once. From any tile on your area, a hop lands on your area.',
+      'Correct! No hop leads off your area: **Maintenance** holds.\n\nThe see-through frogs are just a few examples Check put on your area. Check never runs real frogs and doesn’t try tiles one by one: it reasons about your formula, like solving an equation, so it covers every tile of your area at once. From any tile on your area, a hop lands on your area.',
     questionMaintenance: 'Does every hop from the area land on the area?',
 
     together:
