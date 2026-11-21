@@ -21,8 +21,6 @@ const dummy = new THREE.Object3D();
 const GHOST = new THREE.Color(COLORS.ghostFrog);
 const ECHO = new THREE.Color(COLORS.frog);
 const ECHO_FADE = 0.6;
-const FLOAT = 0.12;
-const BOB = 0.035;
 
 function easeSlot(f: FrogSim, target: Slot, t: number, dt: number, k: number): Slot {
   if (!f.slot) return (f.slot = { ...target });
@@ -120,7 +118,7 @@ export function Frogs() {
       const px = p.x + slot.dx;
       const pz = p.z - slot.dy;
       const ghost = f.kind === 'test';
-      const py = ghost ? p.y + FLOAT + BOB * Math.sin(t * 2.6 + f.id * 1.7) : p.y;
+      const py = p.y;
       if (!f.drawn) f.drawn = { x: 0, y: 0, ground: 0, z: 0, scale: 1 };
       f.drawn.x = px;
       f.drawn.y = py;

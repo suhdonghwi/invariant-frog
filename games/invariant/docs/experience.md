@@ -86,9 +86,10 @@ behind many small decisions; keep them when changing or adding UI.
   sudden is the run-up: see the failure rule below. An input the game
   changes lights up in the inputs panel.
 - **Things come from somewhere.** Frogs climb out of their egg; a frog that
-  is done goes back into it, and the egg grows back. Ghost frogs break up
-  through the slab of the tile they test (chips fly off), spinning as they
-  rise, to a siren that plays once per wave.
+  is done goes back into it, and the egg grows back. Ghost frogs rise up
+  through the slab of the tile they test, spinning as they come, to a pop
+  that plays once per wave, and then stand on it like any frog: the area
+  claims a frog could be right there, so they don't float.
 - **The scene pauses when the page is hidden** and carries on where it was.
 
 ## Verifying
@@ -169,7 +170,8 @@ behind many small decisions; keep them when changing or adding UI.
 - **Step and Run move one frog: the one the learner picked.** Clicking an
   egg hatches its frog, which waits. Step hops it once; Run hops it until it
   stops, and turns into Pause meanwhile. In a level there is one real frog
-  at a time: picking another egg sends the last one home. Pressed with no
+  at a time: picking another egg sends the last one home, and Check's ghost
+  frog with it, trail and all. Pressed with no
   frog, Step and Run point at an egg ("pick an egg first"), unless the
   board has only one egg (both axes start at fixed values): then there is
   nothing to choose, so they hatch it, wait the hatch's beat and go on.

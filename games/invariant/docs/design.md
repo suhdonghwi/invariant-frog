@@ -64,8 +64,9 @@ labels.
 
 **Real frogs and ghost frogs.** Real frogs are actual runs: they hatch from
 eggs. **Ghost frogs** (유령 개구리) are hypothetical states placed to test the
-area's claim: see-through and floating a little above their tile, so they
-read as "put there by Check" without an explanation. Every frog Check shows
+area's claim: see-through, so they read as "put there by Check" without an
+explanation. They stand on their tile rather than float, since the area
+claims a frog could be right there. Every frog Check shows
 is a ghost frog, and real frogs come only from the learner's own runs.
 
 ## The narrative: intuition first, then the rules
