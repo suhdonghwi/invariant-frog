@@ -39,6 +39,7 @@ function placeEchoes(walkers: FrogSim[], t: number, from: number, depth: THREE.I
   for (const walker of walkers) {
     const trail = walker.trail!;
     const fade = ECHO_FADE * leaveFade(walker, t);
+    const color = walker.kind === 'test' ? GHOST : ECHO;
     leftTiles(walker).forEach(([x, y], i) => {
       if (n >= MAX_FROGS) return;
       const [tx, ty] = trail[i + 1] ?? [walker.hop!.tx, walker.hop!.ty];
@@ -49,7 +50,7 @@ function placeEchoes(walkers: FrogSim[], t: number, from: number, depth: THREE.I
       depth.setMatrixAt(n, dummy.matrix);
       ghosts.setMatrixAt(n, dummy.matrix);
       fades.setX(n, fade);
-      ghosts.setColorAt(n++, ECHO);
+      ghosts.setColorAt(n++, color);
     });
   }
   return n;

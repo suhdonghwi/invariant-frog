@@ -41,6 +41,7 @@ function TrailLine({ index }: { index: number }) {
       line.userData.key = key;
       setArc(line, points);
     }
+    line.material.color.set(f.kind === 'test' ? COLORS.hopLine : COLORS.trail);
     line.material.opacity = 0.9 * leaveFade(f, sceneNow());
     line.material.resolution.set(size.width, size.height);
   });

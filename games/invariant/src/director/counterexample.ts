@@ -66,7 +66,8 @@ export function playCounterexample(cex: Counterexample, opts: CounterexampleOpti
 // get there: Check can't tell, and the rules don't ask. An Initialization
 // failure is an egg off the area, so only the egg is marked. A Maintenance or
 // Exit failure is a tile of the area, so a ghost frog stands on it: the area
-// claims a frog could be there.
+// claims a frog could be there. Like a real frog, it leaves a trail when it
+// hops.
 export async function counterexample(tok: Token, cex: Counterexample, opts: CounterexampleOptions) {
   const L = currentLevel();
   useGame.setState({ failMark: null, region: null });
@@ -85,7 +86,7 @@ export async function counterexample(tok: Token, cex: Counterexample, opts: Coun
     return;
   }
   sfx.ghost();
-  const f = raiseGhost(cex.state);
+  const f = raiseGhost(cex.state, 1, { trail: true });
   await sleep(ms(GHOST_RISE + BEAT));
   if (!tok.alive) return;
   let text: string;

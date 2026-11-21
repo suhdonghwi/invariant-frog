@@ -19,9 +19,10 @@ const TURNS = 2;
 const ARC_AFTER_RISE = 0.1;
 export const PROOF_PICTURE = GHOST_RISE + ARC_AFTER_RISE + ARC_DRAW + APPEAR + BEAT;
 
-export function raiseGhost(s: State, fade = 1): FrogSim {
+export function raiseGhost(s: State, fade = 1, opts: { trail?: boolean } = {}): FrogSim {
   const L = currentLevel();
-  const f = frogWorld.add(L, 'test', s, { rise: { t0: sceneNow(), dur: GHOST_RISE, turns: TURNS }, fade });
+  const trail = opts.trail ? { trail: [tileOf(L, s)] as [number, number][] } : {};
+  const f = frogWorld.add(L, 'test', s, { rise: { t0: sceneNow(), dur: GHOST_RISE, turns: TURNS }, fade, ...trail });
   after(GHOST_RISE * 1000, () => {
     if (frogWorld.frogs.includes(f) && !running(L, f.state) && holds(L.post, f.state)) frogWorld.landOnGoal(f);
   });

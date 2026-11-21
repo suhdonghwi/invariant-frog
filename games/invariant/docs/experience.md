@@ -184,9 +184,14 @@ behind many small decisions; keep them when changing or adding UI.
   frog stood so the frog hopping away uncovers it, and a dashed green arc
   joins each to the next, the same arc a hop draws. The trail grows with
   each hop and stays after the frog stops, so where it came from can still
-  be read. One trail shows at a time: the frog the learner picked. It goes when the frog does, fading with it
-  rather than vanishing. A ghost frog is pale
-  blue and has one dark dashed arc, its single hop: it has no past. The
+  be read. One trail shows at a time: the frog the learner picked, or
+  Check's ghost frog. It goes when the frog does, fading with it
+  rather than vanishing. A ghost frog is pale blue. Check's ghost frog
+  leaves the same trail in its own colours, a pale blue copy where it stood
+  and a dark dashed arc, so a failure reads the same as a real frog's hop.
+  It starts where Check put it, so its trail never goes back to an egg. The
+  ghost frogs of Maintenance's proof picture and the hover readout draw
+  only their dark arc. The
   tutorial's ten tested frogs and the example's looping frogs leave no
   trail.
 - **Reset puts the screen back as the level opened**: frogs in their eggs,
