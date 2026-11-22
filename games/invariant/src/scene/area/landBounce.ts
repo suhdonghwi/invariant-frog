@@ -1,6 +1,6 @@
 import { landEvents, MAX_EVENTS } from '../tileEvents';
 
-const LAND = { depth: 0.05, dur: 0.5, freq: 34, decay: 9 };
+const LAND = { depth: 0.13, dur: 0.85, freq: 21, decay: 5.5 };
 export const LAND_BULGE = 0.35;
 
 export const GLSL_LAND = /* glsl */ `
