@@ -8,7 +8,7 @@ import { frogWorld } from '../frogs/frogWorld';
 import { EGG_ALONE, EGG_ASIDE, occupancy } from '../frogs/occupancy';
 import { eggGeometry } from '../models';
 import { sceneNow } from '../sceneTime';
-import { colorUniform, getBlobTexture, GLSL_COMMON, SHADOW_INK, stencilMark } from '../shaders/common';
+import { colorUniform, EGG_SHADOW_SIZE, getBlobTexture, GLSL_COMMON, GLSL_EGG_SHADOW, SHADOW_INK, stencilMark } from '../shaders/common';
 import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
 import { areaMask, EGG } from './mask';
 import { useMaskTiles } from './maskTiles';
@@ -68,8 +68,8 @@ void main() {
 const shadowFragment = /* glsl */ `
 varying vec2 vUv;
 varying float vA;
-uniform sampler2D uMap;
-void main() { gl_FragColor = vec4(${SHADOW_INK}, texture2D(uMap, vUv).a * 0.7 * vA); }
+${GLSL_EGG_SHADOW}
+void main() { gl_FragColor = vec4(${SHADOW_INK}, eggShadow(vUv) * vA); }
 `;
 
 interface SlotAnim {
@@ -128,7 +128,7 @@ const AT_REST: SlotAnim = { fx: EGG_ALONE.dx, fy: EGG_ALONE.dy, fs: EGG_ALONE.sc
 const settled = (a: SlotAnim, now: number) => !a.hidden && a.tx === EGG_ALONE.dx && a.ty === EGG_ALONE.dy && a.ts === EGG_ALONE.scale && now - a.t0 >= SLOT_DUR;
 
 function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.BufferGeometry }) {
-  const shadowBase = useMemo(() => new THREE.PlaneGeometry(0.66, 0.66).rotateX(-Math.PI / 2), []);
+  const shadowBase = useMemo(() => new THREE.PlaneGeometry(EGG_SHADOW_SIZE, EGG_SHADOW_SIZE).rotateX(-Math.PI / 2), []);
   const slots = useRef(new Map<string, SlotAnim>());
   const touched = useRef<number[]>([]);
   const synced = useRef({ geom: null as THREE.BufferGeometry | null, hatch: -1, occ: -1 });

@@ -271,8 +271,11 @@ backend agree. `pnpm validate` and the tests are the safety net.
   assets are the bundled fonts and sound clips). Frogs, eggs and slabs share
   one blob texture (only its alpha is read) and one shadow colour
   (`SHADOW_INK`), so a frog's shadow reads like an egg's on every ground.
-  A slab adds a contact shadow at its base, a rounded box's distance, so a
-  slab sits on the floor and the gaps between slabs darken evenly.
+  A slab adds a light contact shadow at its base, a near-square box's
+  distance, so a slab sits on the floor and the gaps between slabs darken
+  evenly. An egg's shadow adds a contact ring just outside its footprint,
+  so an egg on a slab sits on it; the home screen's eggs use the same
+  shadow.
 - Frogs and eggs mark the **stencil** buffer, and goal columns skip marked
   pixels, so a column's glow never washes out a frog or egg standing in its
   pool.

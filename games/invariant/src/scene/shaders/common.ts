@@ -73,6 +73,39 @@ export function blobShadowMaterial(strength: number): THREE.ShaderMaterial {
   });
 }
 
+export const EGG_SHADOW_SIZE = 0.66;
+const EGG_CONTACT = { strength: 0.42, from: 0.12, to: 0.26 };
+
+export const GLSL_EGG_SHADOW = /* glsl */ `
+uniform sampler2D uMap;
+float eggShadow(vec2 uv) {
+  float blob = texture2D(uMap, uv).a * 0.7;
+  float r = length(uv - 0.5) * ${EGG_SHADOW_SIZE.toFixed(2)};
+  float contact = ${EGG_CONTACT.strength.toFixed(2)} * (1.0 - smoothstep(${EGG_CONTACT.from.toFixed(2)}, ${EGG_CONTACT.to.toFixed(2)}, r));
+  return 1.0 - (1.0 - blob) * (1.0 - contact);
+}
+`;
+
+export function eggShadowMaterial(): THREE.ShaderMaterial {
+  return new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: { uMap: { value: getBlobTexture() } },
+    vertexShader: /* glsl */ `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: /* glsl */ `
+      varying vec2 vUv;
+      ${GLSL_EGG_SHADOW}
+      void main() {
+        gl_FragColor = vec4(${SHADOW_INK}, eggShadow(vUv));
+      }`,
+  });
+}
+
 export function stencilMark<M extends THREE.Material>(m: M): M {
   m.stencilWrite = true;
   m.stencilRef = STENCIL_SOLID;

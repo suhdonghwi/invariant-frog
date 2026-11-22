@@ -22,7 +22,7 @@ const ROUND = [3, 3] as const;
 const FACETED = [1, 1] as const;
 const FACETED_BELOW_PX = 30;
 const SHADOW_SIZE = 1.45;
-const CONTACT = { strength: 0.4, reach: 0.16, corner: 0.02 };
+const CONTACT = { strength: 0.2, reach: 0.12, corner: 0.02 };
 
 const slabVertex = /* glsl */ `
 ${GLSL_MASK}
