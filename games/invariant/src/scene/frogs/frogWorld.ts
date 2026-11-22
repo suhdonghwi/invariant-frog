@@ -7,7 +7,8 @@ import { BASE, ms, TICK } from '../../motion';
 import { clamp01 } from '../easing';
 import { after, sceneNow } from '../sceneTime';
 import { goalEvents, landEvents } from '../tileEvents';
-import { TOUCH } from './motion';
+import { HATCH_PRESS, TAKEOFF_PRESS } from '../area/landBounce';
+import { HATCH_GROW, TOUCH } from './motion';
 import type { Slot } from './occupancy';
 
 export type FrogKind = 'real' | 'test';
@@ -35,6 +36,7 @@ export interface FrogSim {
   face: number;
   yaw: number;
   cheerT0?: number;
+  blink?: { t0: number; twice: boolean };
   turn?: { t0: number; from: number; delta: number };
   lastT?: number;
   slot?: Slot;
@@ -93,6 +95,7 @@ class FrogWorld {
       ...opts,
     };
     this.frogs.push(f);
+    if (kind === 'real' && f.hatchT0 !== undefined) landEvents.push(x, y, f.plane, f.hatchT0 + HATCH_GROW, HATCH_PRESS);
     return f;
   }
 
@@ -110,7 +113,10 @@ class FrogWorld {
     const [tx, ty] = tileOf(level, next);
     if (tx !== f.x || ty !== f.y) f.face = yawToward(f.x, f.y, tx, ty);
     f.hop = { fx: f.x, fy: f.y, tx, ty, t0: sceneNow(), dur };
-    if (f.kind === 'real') landEvents.push(tx, ty, f.plane, f.hop.t0 + dur * TOUCH);
+    if (f.kind === 'real') {
+      landEvents.push(f.x, f.y, f.plane, f.hop.t0, TAKEOFF_PRESS);
+      landEvents.push(tx, ty, f.plane, f.hop.t0 + dur * TOUCH);
+    }
     return new Promise((res) =>
       after(dur * 1000, () => {
         f.x = tx;

@@ -5,6 +5,8 @@ import { COLORS } from './constants';
 const PART = { body: 0, torso: 1, sclera: 2, pupil: 3 } as const;
 
 const FROG_SCALE = 1.15;
+const EYE = [0.105, 0.405, 0.09] as const;
+const BLINK_SHUT = 0.12;
 const TORSO = { r: 0.15, stretch: 1.3, lean: -0.42, at: [0, 0.18, -0.03] } as const;
 // The belly: an oval of directions from the torso's centre, painted on it (smooth across facets, as a normal is).
 const BELLY = { pitch: -0.777, wide: 0.6, tall: 0.29 };
@@ -27,7 +29,7 @@ export function frogGeometry({ fine = false }: { fine?: boolean } = {}): THREE.B
   add(lp(0.14, 10, 7).scale(1.2, 0.72, 1.0).translate(0, 0.32, 0.06), PART.body);
   for (const s of [-1, 1]) {
     add(lp(0.062, 8, 6).translate(s * 0.1, 0.39, 0.06), PART.body);
-    add(lp(0.052, 10, 8).translate(s * 0.105, 0.405, 0.09), PART.sclera);
+    add(lp(0.052, 10, 8).translate(s * EYE[0], EYE[1], EYE[2]), PART.sclera);
     add(lp(0.028, 8, 6).scale(1, 1.15, 0.7).translate(s * 0.11, 0.41, 0.133), PART.pupil);
     add(lp(0.1, 8, 6).scale(0.5, 0.75, 1.25).translate(s * 0.135, 0.09, -0.06), PART.body);
     add(lp(0.06, 8, 4).scale(0.95, 0.3, 1.55).translate(s * 0.15, 0.016, 0.05), PART.body);
@@ -50,7 +52,8 @@ export function ghostDepthMaterial(): THREE.MeshBasicMaterial {
 const CLEAR = { middle: 0.5, edge: 1, power: 1.5 };
 
 // `fade` adds per-instance opacity (aFade) and a per-instance see-through flag (aClear).
-export function frogMaterial(opts: { ghost?: boolean; fade?: boolean } = {}): THREE.MeshStandardMaterial {
+// `blink` adds a per-instance eye closure (aBlink, 0 open to 1 shut).
+export function frogMaterial(opts: { ghost?: boolean; fade?: boolean; blink?: boolean } = {}): THREE.MeshStandardMaterial {
   const m = new THREE.MeshStandardMaterial({
     vertexColors: true,
     roughness: 0.45,
@@ -64,7 +67,7 @@ export function frogMaterial(opts: { ghost?: boolean; fade?: boolean } = {}): TH
     const f = (x: number) => x.toFixed(4);
     const [ax, ay, az] = TORSO.at.map(f);
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', `#include <common>\nattribute float aPart;\nuniform vec3 uTint;\nvarying vec3 vTorsoDir;\nvarying float vTorso;${opts.fade ? '\nattribute float aFade;\nattribute float aClear;\nvarying float vFade;\nvarying float vClear;' : ''}`)
+      .replace('#include <common>', `#include <common>\nattribute float aPart;\nuniform vec3 uTint;\nvarying vec3 vTorsoDir;\nvarying float vTorso;${opts.fade ? '\nattribute float aFade;\nattribute float aClear;\nvarying float vFade;\nvarying float vClear;' : ''}${opts.blink ? '\nattribute float aBlink;' : ''}`)
       .replace(
         '#include <color_vertex>',
         /* glsl */ `
@@ -83,6 +86,15 @@ export function frogMaterial(opts: { ghost?: boolean; fade?: boolean } = {}): TH
         vColor = vec4(c, 1.0);
         ${opts.fade ? 'vFade = aFade;\n        vClear = aClear;' : ''}
         `,
+      );
+    if (opts.blink)
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <begin_vertex>',
+        /* glsl */ `#include <begin_vertex>
+        if (aPart > 1.5) {
+          float eyeY = ${f(EYE[1] * FROG_SCALE)};
+          transformed.y = eyeY + (transformed.y - eyeY) * (1.0 - ${f(1 - BLINK_SHUT)} * aBlink);
+        }`,
       );
     const c = Math.cos(BELLY.pitch);
     const s = Math.sin(BELLY.pitch);
@@ -107,7 +119,7 @@ export function frogMaterial(opts: { ghost?: boolean; fade?: boolean } = {}): TH
         #include <opaque_fragment>`,
       );
   };
-  m.customProgramCacheKey = () => (opts.fade ? 'frog-fade' : 'frog');
+  m.customProgramCacheKey = () => `frog${opts.fade ? '-fade' : ''}${opts.blink ? '-blink' : ''}`;
   return m;
 }
 

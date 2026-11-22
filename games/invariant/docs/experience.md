@@ -83,7 +83,10 @@ behind many small decisions; keep them when changing or adding UI.
 - **Visible, not loud.** A goal landing should be noticed (a ripple, a flash,
   the pool's light column brightening) without becoming a splash.
   A real frog landing on a slab presses it down about 9% and lets it spring
-  back and wobble once more; see-through frogs weigh nothing.
+  back and wobble once more; pushing off presses it a little, and so does
+  landing from the jump out of its egg. See-through frogs weigh nothing.
+- **Small signs of life.** Frogs breathe, and blink at uneven gaps of two to
+  six seconds, now and then twice in a row, so no frog ticks like a clock.
 - **Changing an input switches the board at once**, with the slabs' sound;
   animating the board itself (a wave across it, or boards sliding past)
   read worse than a clean switch. What makes a switch the game does not
