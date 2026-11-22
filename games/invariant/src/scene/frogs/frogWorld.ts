@@ -5,8 +5,9 @@ import { hop, running, type CompiledLevel } from '../../levels/level';
 import { tileOf } from '../../levels/tiles';
 import { BASE, ms, TICK } from '../../motion';
 import { clamp01 } from '../easing';
-import { goalEvents } from '../goalEvents';
 import { after, sceneNow } from '../sceneTime';
+import { goalEvents, landEvents } from '../tileEvents';
+import { TOUCH } from './motion';
 import type { Slot } from './occupancy';
 
 export type FrogKind = 'real' | 'test';
@@ -109,6 +110,7 @@ class FrogWorld {
     const [tx, ty] = tileOf(level, next);
     if (tx !== f.x || ty !== f.y) f.face = yawToward(f.x, f.y, tx, ty);
     f.hop = { fx: f.x, fy: f.y, tx, ty, t0: sceneNow(), dur };
+    if (f.kind === 'real') landEvents.push(tx, ty, f.plane, f.hop.t0 + dur * TOUCH);
     return new Promise((res) =>
       after(dur * 1000, () => {
         f.x = tx;

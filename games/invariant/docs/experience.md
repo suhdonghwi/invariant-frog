@@ -80,6 +80,8 @@ behind many small decisions; keep them when changing or adding UI.
   it stops, and drops to cover the `ensures` lines when the loop ends.
 - **Visible, not loud.** A goal landing should be noticed (a ripple, a flash,
   the pool's light column brightening) without becoming a splash.
+  A real frog landing on a slab presses it down about 3% and lets it spring
+  back once; see-through frogs weigh nothing.
 - **Changing an input switches the board at once**, with the slabs' sound;
   animating the board itself (a wave across it, or boards sliding past)
   read worse than a clean switch. What makes a switch the game does not

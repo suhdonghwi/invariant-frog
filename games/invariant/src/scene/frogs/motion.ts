@@ -23,7 +23,7 @@ const angleDelta = (a: number, b: number) => {
 };
 
 const TAKEOFF = 0.16;
-const TOUCH = 0.86;
+export const TOUCH = 0.86;
 const LANDING = 1 - TOUCH;
 
 function keyed(u: number, keys: readonly (readonly [number, number])[]) {

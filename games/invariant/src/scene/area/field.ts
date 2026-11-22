@@ -6,6 +6,7 @@ import { BASE } from '../../motion';
 import { SLAB_H } from '../constants';
 import { clamp01, smoothstep } from '../easing';
 import { sceneNow } from '../sceneTime';
+import { landSquash } from './landBounce';
 
 const RISE_DUR = BASE;
 
@@ -57,7 +58,7 @@ class AreaField {
   }
 
   groundAt(x: number, y: number): number {
-    return this.heightAt(x, y) * SLAB_H;
+    return this.heightAt(x, y) * SLAB_H * (1 - landSquash(Math.round(x), Math.round(y), sceneNow()));
   }
 
   movedNear(near: TileWindow): { rising: number; sinking: number } {

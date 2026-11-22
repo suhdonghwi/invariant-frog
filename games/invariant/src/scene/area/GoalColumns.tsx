@@ -2,16 +2,18 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import { COLORS, SLAB_H } from '../constants';
-import { goalEvents } from '../goalEvents';
 import { sceneNow } from '../sceneTime';
+import { goalEvents } from '../tileEvents';
 import { stencilSkip } from '../shaders/common';
 import { GLSL_GOAL_PULSE } from '../shaders/goal';
 import { areaMask, GOAL } from './mask';
 import { useMaskTiles } from './maskTiles';
 import { GLSL_HEIGHT, instanced } from './glsl';
+import { GLSL_LAND, landUniforms } from './landBounce';
 
 const vertex = /* glsl */ `
 ${GLSL_HEIGHT}
+${GLSL_LAND}
 ${GLSL_GOAL_PULSE}
 varying float vV;
 varying float vBurst;
@@ -22,7 +24,7 @@ void main() {
   float burst = tilePulse(aTile, 1.0, 0.06, 1.6);
   vBurst = burst;
   vec3 pos = position * vec3(1.0 + 0.25 * burst, 1.0 + 2.2 * burst, 1.0 + 0.25 * burst);
-  vec4 w = modelMatrix * vec4(pos + vec3(aTile.x, heightNow() * ${SLAB_H.toFixed(3)} + 0.004, -aTile.y), 1.0);
+  vec4 w = modelMatrix * vec4(pos + vec3(aTile.x, heightNow() * ${SLAB_H.toFixed(3)} * (1.0 - landSquash(aTile)) + 0.004, -aTile.y), 1.0);
   vWorld = w.xyz;
   vN = normalize(mat3(modelMatrix) * normal);
   gl_Position = projectionMatrix * viewMatrix * w;
@@ -75,8 +77,9 @@ export function GoalColumns() {
             uTime: { value: 0 },
             uColor: { value: new THREE.Color(COLORS.goal) },
             uAppearT0: { value: sceneNow() },
-            uEvents: goalEvents.uniforms.uEvents,
+            uEvents: goalEvents.at,
             ...areaMask.uniforms,
+            ...landUniforms(),
           },
         }),
       ),

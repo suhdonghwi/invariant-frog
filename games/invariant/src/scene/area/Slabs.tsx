@@ -13,6 +13,7 @@ import { colorUniform, getBlobTexture, GLSL_COMMON, SHADOW_INK } from '../shader
 import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
 import { GLSL_GOAL, goalUniforms } from '../shaders/goal';
 import { GLSL_MASK, instanced } from './glsl';
+import { GLSL_LAND, LAND_BULGE, landUniforms } from './landBounce';
 import { areaMask, MASK_REACH } from './mask';
 import { VisibleCells } from './visibleCells';
 
@@ -26,6 +27,8 @@ const CONTACT = { strength: 0.2, reach: 0.12, corner: 0.02 };
 
 const slabVertex = /* glsl */ `
 ${GLSL_MASK}
+uniform float uTime;
+${GLSL_LAND}
 attribute vec2 aOffset;
 uniform vec2 uGrid;
 varying vec3 vN;
@@ -41,8 +44,10 @@ void main() {
     gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
     return;
   }
+  float s = landSquash(tile) * h;
   vec3 p = position;
-  p.y += (h - 1.0) * ${SLAB_H.toFixed(3)} - (1.0 - h) * 0.04;
+  p.xz *= 1.0 + s * ${LAND_BULGE.toFixed(2)};
+  p.y = p.y * (1.0 - s) + (h - 1.0) * ${SLAB_H.toFixed(3)} - (1.0 - h) * 0.04;
   vec4 w = modelMatrix * vec4(p + vec3(tile.x, 0.0, -tile.y), 1.0);
   vWorld = w.xyz;
   vN = normalize(mat3(modelMatrix) * normal);
@@ -225,6 +230,7 @@ export function Slabs({ level, dim, showStop, showGoal }: { level: CompiledLevel
           ...axisNameUniforms(),
           ...fadeUniforms(),
           ...areaMask.uniforms,
+          ...landUniforms(),
           uGrid: { value: new THREE.Vector2() },
         },
       }),
