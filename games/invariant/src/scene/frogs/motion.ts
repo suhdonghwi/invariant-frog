@@ -90,11 +90,15 @@ const HATCH_SMALL = 0.5;
 const HATCH_JUMP = 0.3;
 export const hopHeight = (dist: number) => 0.24 + 0.12 * dist;
 const RISE_DEPTH = 0.85;
-const BLINK = { every: 3.2, spread: 2.6, dur: 0.17 };
+const BLINK = { dur: 0.17, shortest: 2, longest: 6, twice: 0.2, between: 0.1 };
 
 function blinkAt(f: FrogSim, t: number) {
-  const period = BLINK.every + (f.phase % 1) * BLINK.spread;
-  return bump(((t + f.phase) % period) / BLINK.dur);
+  const b = (f.blink ??= { t0: t + (f.phase % 1) * BLINK.longest, twice: false });
+  if (t - b.t0 >= BLINK.dur) {
+    b.twice = !b.twice && Math.random() < BLINK.twice;
+    b.t0 = t + (b.twice ? BLINK.between : BLINK.shortest + Math.random() * (BLINK.longest - BLINK.shortest));
+  }
+  return bump((t - b.t0) / BLINK.dur);
 }
 
 export function pose(f: FrogSim, t: number): Pose {

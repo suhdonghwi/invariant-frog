@@ -36,6 +36,7 @@ export interface FrogSim {
   face: number;
   yaw: number;
   cheerT0?: number;
+  blink?: { t0: number; twice: boolean };
   turn?: { t0: number; from: number; delta: number };
   lastT?: number;
   slot?: Slot;
