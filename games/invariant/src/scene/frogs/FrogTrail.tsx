@@ -6,7 +6,7 @@ import { COLORS } from '../constants';
 import { clamp01 } from '../easing';
 import { sceneNow } from '../sceneTime';
 import { leaveFade, trailFrogs, type FrogSim } from './frogWorld';
-import { arcPoints, setArc, useArcLine, type ArcEnd } from './hopArc';
+import { arcPoints, fitArcLine, setArc, useArcLine, type ArcEnd } from './hopArc';
 
 const TRAILS = 4;
 const SEGMENTS = 16;
@@ -42,7 +42,7 @@ function TrailLine({ index }: { index: number }) {
       setArc(line, points);
     }
     line.material.opacity = 0.9 * leaveFade(f, sceneNow());
-    line.material.resolution.set(size.width, size.height);
+    fitArcLine(line, size);
   });
 
   return <primitive object={line} />;

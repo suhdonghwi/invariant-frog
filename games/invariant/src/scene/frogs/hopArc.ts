@@ -3,11 +3,13 @@ import * as THREE from 'three';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
+import { cameraRig } from '../cameraRig';
 import { hopHeight } from './motion';
 
 const LIFT = 0.22;
 const DASH = 0.1;
 const GAP = 0.07;
+const WIDTH = { px: 2.5, at: 16, follow: 0.6, least: 1.4 };
 const curve = new THREE.QuadraticBezierCurve3();
 
 export type ArcEnd = readonly [x: number, y: number, ground: number];
@@ -54,7 +56,7 @@ export function useArcLine(color: string): LineSegments2 {
   const line = useMemo(() => {
     const material = new LineMaterial({
       color: new THREE.Color(color),
-      linewidth: 2.5,
+      linewidth: WIDTH.px,
       // dashed only for its square ends: each segment is one whole dash
       dashed: true,
       dashSize: 1e6,
@@ -76,4 +78,9 @@ export function useArcLine(color: string): LineSegments2 {
     [line],
   );
   return line;
+}
+
+export function fitArcLine(line: LineSegments2, size: { width: number; height: number }) {
+  line.material.resolution.set(size.width, size.height);
+  line.material.linewidth = Math.max(WIDTH.least, WIDTH.px * (WIDTH.at / cameraRig.distance()) ** WIDTH.follow);
 }

@@ -1,6 +1,6 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { COLORS } from '../constants';
-import { arcPoints, setArc, useArcLine, type ArcEnd } from './hopArc';
+import { arcPoints, fitArcLine, setArc, useArcLine, type ArcEnd } from './hopArc';
 
 const SEGMENTS = 24;
 
@@ -26,7 +26,7 @@ export function HopLine({ path }: { path: () => HopPath | null }) {
       setArc(line, arcPoints(p.from, p.to, SEGMENTS, count));
     }
     line.material.opacity = 0.9 * p.opacity;
-    line.material.resolution.set(size.width, size.height);
+    fitArcLine(line, size);
   });
 
   return <primitive object={line} />;

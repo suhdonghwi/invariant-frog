@@ -198,6 +198,9 @@ behind many small decisions; keep them when changing or adding UI.
   readout draw only a dark dashed arc to where the hop would land. The
   tutorial's ten tested frogs and the example's looping frogs leave no
   trail.
+  These dashed lines thicken a little up close and thin out from far away,
+  so they keep about the same weight against the tiles at every zoom
+  without vanishing when zoomed out.
 - **Reset puts the screen back as the level opened**: frogs in their eggs,
   the starting inputs and view, the intro in the caption. The area and its
   verdicts stay, since those are the learner's work.
