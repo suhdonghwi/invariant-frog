@@ -276,7 +276,11 @@ backend agree. `pnpm validate` and the tests are the safety net.
   evenly. An egg's shadow adds a contact ring just outside its footprint,
   so an egg on a slab sits on it; the home screen's eggs and the hatching
   shells use the same shadow, which shrinks with the bottom shell while the
-  frog's own shadow grows in.
+  frog's own shadow grows in. A frog's shadow is computed rather than read
+  from the texture: it stays flat out to a third of its radius before it
+  fades, because a frog covers most of its shadow when it sits, and a
+  shadow that faded from the centre showed only while the frog was in the
+  air.
 - Frogs and eggs mark the **stencil** buffer, and goal columns skip marked
   pixels, so a column's glow never washes out a frog or egg standing in its
   pool.

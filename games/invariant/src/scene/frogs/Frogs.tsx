@@ -16,6 +16,7 @@ import { byTile, leftTiles, MAX_SHOWN, occupancy, slotFor, tileKey, type Slot } 
 
 const MAX_FROGS = 400;
 const BADGES = 24;
+const FROG_SHADOW_SIZE = 0.9;
 
 const dummy = new THREE.Object3D();
 const GHOST = new THREE.Color(COLORS.ghostFrog);
@@ -76,8 +77,8 @@ export function Frogs() {
     m.opacity = 1;
     return m;
   }, []);
-  const shadowGeom = useMemo(() => new THREE.PlaneGeometry(0.62, 0.62).rotateX(-Math.PI / 2), []);
-  const shadowMat = useMemo(() => blobShadowMaterial(0.45), []);
+  const shadowGeom = useMemo(() => new THREE.PlaneGeometry(FROG_SHADOW_SIZE, FROG_SHADOW_SIZE).rotateX(-Math.PI / 2), []);
+  const shadowMat = useMemo(() => blobShadowMaterial(0.45, 0.35), []);
   useEffect(() => () => (geom.dispose(), ghostGeom.dispose(), shadowGeom.dispose()), [geom, ghostGeom, shadowGeom]);
   useEffect(
     () => () => [mat, ghostDepthMat, ghostMat, shadowMat].forEach((m) => m.dispose()),

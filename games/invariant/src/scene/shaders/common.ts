@@ -48,11 +48,10 @@ export function getBlobTexture(): THREE.Texture {
   return blobTexture;
 }
 
-export function blobShadowMaterial(strength: number): THREE.ShaderMaterial {
+export function blobShadowMaterial(strength: number, plateau = 0): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
-    uniforms: { uMap: { value: getBlobTexture() } },
     vertexShader: /* glsl */ `
       varying vec2 vUv;
       void main() {
@@ -66,16 +65,17 @@ export function blobShadowMaterial(strength: number): THREE.ShaderMaterial {
       }`,
     fragmentShader: /* glsl */ `
       varying vec2 vUv;
-      uniform sampler2D uMap;
       void main() {
-        gl_FragColor = vec4(${SHADOW_INK}, texture2D(uMap, vUv).a * ${strength.toFixed(2)});
+        float r = length(vUv - 0.5) * 2.0;
+        float a = ${BLOB_CORE.toFixed(2)} * (1.0 - smoothstep(${plateau.toFixed(2)}, 1.0, r));
+        gl_FragColor = vec4(${SHADOW_INK}, a * ${strength.toFixed(2)});
       }`,
   });
 }
 
 export const EGG_SHADOW_SIZE = 0.66;
-const EGG_CONTACT = { strength: 0.25, from: 0.12, to: 0.26 };
-const EGG_BLOB = 0.5;
+const EGG_CONTACT = { strength: 0.15, from: 0.12, to: 0.26 };
+const EGG_BLOB = 0.36;
 
 export const GLSL_EGG_SHADOW = /* glsl */ `
 uniform sampler2D uMap;
