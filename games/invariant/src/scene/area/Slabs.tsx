@@ -78,6 +78,7 @@ vec3 topColor(float stopFlag, float goalFlag, float hatch, float fwr) {
 }
 void main() {
   vec2 fw = fwidth(vF);
+  vec4 df = vec4(dFdx(vF), dFdy(vF));
   float hatchV = (vF.x - vF.y) * STOP_HATCH_FREQ;
   float hatch = stopHatch(hatchV, fwidth(hatchV));
   float fwr = fwidth(length(vF));
@@ -90,7 +91,7 @@ void main() {
     col = topColor(vFlags.x, vFlags.y, hatch, fwr);
     if (uGoalAmt > 0.002) col = mix(col, SPLASH, splashAt(vTile + vF) * 0.45 * uGoalAmt);
     ivec2 t = ivec2(int(floor(vTile.x + 0.5)), int(floor(vTile.y + 0.5)));
-    col = drawAxisLabel(col, vF, t, uLabel, uLabelHalo, 0.9, 1.0);
+    col = drawAxisLabel(col, vF, df, t, uLabel, uLabelHalo, 0.9, 1.0);
     if (uHoverOn > 0.5 && t.x == int(uHover.x) && t.y == int(uHover.y)) {
       col = mix(col, vec3(1.0), (1.0 - smoothstep(-fwRing, fwRing, ringD)) * 0.95);
     }

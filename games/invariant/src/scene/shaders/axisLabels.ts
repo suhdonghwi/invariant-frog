@@ -10,6 +10,13 @@ const LABEL_SIZE = 0.84;
  * The tags on the axes' tiles (`i=3`, `n=0`). The glyph texture holds each
  * glyph in red and the glyph grown by a halo in green, so a tag stays
  * legible over stripes, pools and slabs.
+ *
+ * The texture is mipmapped so that a zoomed-out tag is filtered rather than
+ * aliased. A glyph is sampled inside per-pixel branches, and the texture
+ * coordinate jumps from one glyph's cell to the next, so the GPU's own
+ * derivatives would be wrong there. The caller takes the tile coordinate's
+ * screen derivatives up front (`dfx`, `dfy`) and the glyph lookup scales
+ * them by the tag's size into texture derivatives for `textureGrad`.
  */
 export const GLSL_AXIS_LABELS = /* glsl */ `
 uniform sampler2D uDigits;
@@ -20,19 +27,23 @@ uniform float uNameXW, uNameYW;
 uniform float uDigitW;
 int nameGlyph(ivec3 name, int k) { return k == 0 ? name.x : (k == 1 ? name.y : name.z); }
 float pick(vec4 v, int k) { return k == 0 ? v.x : (k == 1 ? v.y : (k == 2 ? v.z : v.w)); }
-vec2 glyphMask(int glyph, float dx, float vy) {
+// d: the tag coordinate's screen derivatives (dq/dx, dq/dy)
+vec2 glyphMask(int glyph, float dx, float vy, vec4 d) {
   float u = 0.5 + dx / ${CELL.toFixed(2)};
   if (u < 0.0 || u > 1.0) return vec2(0.0);
-  return texture2D(uDigits, vec2((float(glyph) + u) / ${GLYPHS.length.toFixed(1)}, vy)).rg;
+  vec2 k = vec2(1.0 / (${CELL.toFixed(2)} * ${GLYPHS.length.toFixed(1)}), 1.0 / 0.23);
+  return textureGrad(uDigits, vec2((float(glyph) + u) / ${GLYPHS.length.toFixed(1)}, vy), d.xy * k, d.zw * k).rg;
 }
 // x: glyph, y: halo
-vec2 labelMask(vec2 f, ivec3 name, int nameLen, vec4 mid, float nameW, int v, float row) {
+vec2 labelMask(vec2 f, vec4 df, ivec3 name, int nameLen, vec4 mid, float nameW, int v, float row) {
   int a = v < 0 ? -v : v;
   int digits = a >= 100 ? 3 : (a >= 10 ? 2 : 1);
   int numLen = digits + (v < 0 ? 1 : 0);
   float pw = nameLen > 0 ? nameW : 0.0;
   float w = pw + uDigitW * float(numLen);
-  vec2 q = (f - vec2(-0.41, -0.42 + row * ${(0.26 * LABEL_SIZE).toFixed(3)})) / min(${LABEL_SIZE.toFixed(2)}, 0.82 / w);
+  float s = min(${LABEL_SIZE.toFixed(2)}, 0.82 / w);
+  vec2 q = (f - vec2(-0.41, -0.42 + row * ${(0.26 * LABEL_SIZE).toFixed(3)})) / s;
+  vec4 d = df / s;
   if (q.y < 0.0 || q.y > 0.23 || q.x < -0.03 || q.x >= w + 0.03) return vec2(0.0);
   float vy = q.y / 0.23;
   if (q.x < pw) {
@@ -40,7 +51,7 @@ vec2 labelMask(vec2 f, ivec3 name, int nameLen, vec4 mid, float nameW, int v, fl
     for (int i = 1; i < 4; i++) {
       if (i <= nameLen && abs(q.x - pick(mid, i)) < abs(q.x - pick(mid, k))) k = i;
     }
-    return glyphMask(k < nameLen ? nameGlyph(name, k) : 11, q.x - pick(mid, k), vy);
+    return glyphMask(k < nameLen ? nameGlyph(name, k) : 11, q.x - pick(mid, k), vy, d);
   }
   float x = (q.x - pw) / uDigitW;
   int j = int(clamp(floor(x), 0.0, float(numLen - 1)));
@@ -50,17 +61,18 @@ vec2 labelMask(vec2 f, ivec3 name, int nameLen, vec4 mid, float nameW, int v, fl
     int p10 = pos == 0 ? 1 : (pos == 1 ? 10 : 100);
     glyph = a / p10 - (a / (p10 * 10)) * 10;
   }
-  return glyphMask(glyph, (x - float(j) - 0.5) * uDigitW, vy);
+  return glyphMask(glyph, (x - float(j) - 0.5) * uDigitW, vy, d);
 }
-vec2 axisLabelMask(vec2 f, ivec2 t) {
+vec2 axisLabelMask(vec2 f, vec4 df, ivec2 t) {
   vec2 m = vec2(0.0);
-  if (t.y == 0) m = labelMask(f, uNameX, uNameXLen, uNameXMid, uNameXW, t.x, 0.0);
-  if (t.x == 0 && (t.y != 0 || uNameYLen > 0)) m = max(m, labelMask(f, uNameY, uNameYLen, uNameYMid, uNameYW, t.y, t.y == 0 ? 1.0 : 0.0));
+  if (t.y == 0) m = labelMask(f, df, uNameX, uNameXLen, uNameXMid, uNameXW, t.x, 0.0);
+  if (t.x == 0 && (t.y != 0 || uNameYLen > 0)) m = max(m, labelMask(f, df, uNameY, uNameYLen, uNameYMid, uNameYW, t.y, t.y == 0 ? 1.0 : 0.0));
   return m;
 }
-vec3 drawAxisLabel(vec3 col, vec2 f, ivec2 t, vec3 ink, vec3 halo, float haloA, float amt) {
+// df: vec4(dFdx(f), dFdy(f)), taken in uniform control flow
+vec3 drawAxisLabel(vec3 col, vec2 f, vec4 df, ivec2 t, vec3 ink, vec3 halo, float haloA, float amt) {
   if (t.x != 0 && t.y != 0) return col;
-  vec2 m = axisLabelMask(f, t) * amt;
+  vec2 m = axisLabelMask(f, df, t) * amt;
   col = mix(col, halo, m.y * haloA);
   return mix(col, ink, m.x);
 }
@@ -134,8 +146,10 @@ export function getDigitTexture(): THREE.CanvasTexture {
   canvas.width = cw * GLYPHS.length;
   canvas.height = chh;
   const tex = new THREE.CanvasTexture(canvas);
-  tex.generateMipmaps = false;
-  tex.minFilter = THREE.LinearFilter;
+  tex.generateMipmaps = true;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  // the floor is seen at a slant, so a tag shrinks more across than along
+  tex.anisotropy = 8;
   tex.colorSpace = THREE.NoColorSpace;
   const g = canvas.getContext('2d')!;
   g.fillStyle = '#000000';
