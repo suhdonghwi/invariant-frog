@@ -58,7 +58,11 @@ Each idea has one channel, and the channels stack without changing each
 other. The area is height and blue, the same blue on every tile. The stop
 region is a surface pattern: a light tint and stripes on the floor, the same
 stripes, a shade darker than the slab, on a slab's top. A goal is its amber
-pool, on the floor or on a slab. So a stop on the area that is not a goal is
+pool, on the floor or on a slab. The goal is the one channel drawn only
+on another: the postcondition is shown only in the stop region, because Exit
+reads it only there. Drawn everywhere, it would fill the running region in
+levels like Parity or Transfer and invite the learner to copy the
+postcondition as the area. So a stop on the area that is not a goal is
 a striped blue slab with no pool, as heavy as any other slab. Nothing is
 drawn as a line: the stop region has no outline, and the axes are only their
 labels.
@@ -333,7 +337,7 @@ or not, is too weak.
 | `requires` | the **precondition** | 사전 조건 |
 | States a frog can start from | **eggs** | 알 |
 | `ensures` | the **postcondition** | 사후 조건 |
-| Tiles where the postcondition holds | **goals** | 목표 |
+| Stop tiles where the postcondition holds | **goals** | 목표 |
 | Loop guard false | the loop **stops** here | 멈춘다 (빗금 친 칸) |
 | The learner's formula | the **area** (**invariant area**); it is the **loop invariant** | 영역 (불변식 영역), 루프 불변식 |
 | Raised tiles | **slabs** | 블록 |

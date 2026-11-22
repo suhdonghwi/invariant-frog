@@ -201,7 +201,7 @@ export const en = {
     eggs: 'Where can a frog start? The **precondition** is what we assume about the input. Here, the precondition `requires n >= 0` lets `n` be any number from `0` up.\n\nEach **egg** is one place a frog can start.',
     eggsTag: 'starts at i = 0, n = 2',
     goals:
-      'The **postcondition**, `ensures i == n`, is the condition that must hold once the loop ends. The tiles where it holds are the **goals**, the amber pools.\n\nThe frog you stepped stopped on one, at `i = 3, n = 3`.',
+      'The **postcondition**, `ensures i == n`, is the condition that must hold once the loop ends. The striped tiles where it holds are the **goals**, the amber pools.\n\nThe frog you stepped stopped on one, at `i = 3, n = 3`.',
     goalsTag: 'stopped on a goal',
     bug: 'Not every place to stop is a goal. A frog that stopped here, at `i = 3, n = 1`, would leave the loop with `i ≠ n`: the program would be wrong.\n\nFor the program to be correct, **every frog must stop on a goal**.',
     bugTag: 'stops, but i ≠ n',
