@@ -36,6 +36,8 @@ function Controls() {
       c.mouseButtons.left = CameraControlsImpl.ACTION.SCREEN_PAN;
       c.mouseButtons.right = CameraControlsImpl.ACTION.ROTATE;
       c.touches.one = CameraControlsImpl.ACTION.TOUCH_SCREEN_PAN;
+      // camera-controls handles this action but leaves it out of the touches.two type
+      c.touches.two = CameraControlsImpl.ACTION.TOUCH_DOLLY_SCREEN_PAN as typeof c.touches.two;
     }
     return () => cameraRig.attach(null);
   }, []);
