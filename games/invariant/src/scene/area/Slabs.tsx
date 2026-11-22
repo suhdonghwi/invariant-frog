@@ -24,7 +24,7 @@ const FACETED = [1, 1] as const;
 const FACETED_BELOW_PX = 30;
 const SHADOW_SIZE = 1.45;
 const CONTACT = { strength: 0.2, reach: 0.12, corner: 0.02 };
-const FLOOR_LOOK_BELOW = 0.12;
+const FLOOR_LOOK_BELOW = 0.5;
 const FLOOR_CORNER = 0.1;
 
 const slabVertex = /* glsl */ `
@@ -38,12 +38,12 @@ varying vec3 vWorld;
 varying vec2 vF;
 varying vec2 vFlags;
 varying vec2 vTile;
-varying float vH;
+varying float vRise;
 void main() {
   vec2 tile = uGrid + aOffset;
   vec4 m = maskAt(tile);
   float h = heightOf(m);
-  if (h < 0.002) {
+  if (riseOf(m) < 0.002) {
     gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
     return;
   }
@@ -57,7 +57,7 @@ void main() {
   vF = vec2(position.x, -position.z);
   vFlags = vec2(m.b, mod(floor(m.a * 3.0 + 0.5), 2.0));
   vTile = tile;
-  vH = h;
+  vRise = riseOf(m);
   gl_Position = projectionMatrix * viewMatrix * w;
 }
 `;
@@ -70,7 +70,7 @@ varying vec3 vWorld;
 varying vec2 vF;
 varying vec2 vFlags;
 varying vec2 vTile;
-varying float vH;
+varying float vRise;
 uniform vec3 uTop, uSide, uHatch, uLabel, uLabelHalo;
 uniform vec3 uFloorTile, uFloorGap, uFloorStop, uFloorHatch, uFloorLabel, uFloorLabelHalo;
 uniform vec2 uHover;
@@ -123,7 +123,7 @@ void main() {
   }
   col = shadeLit(col, n);
   col = mix(col, vec3(0.86, 0.88, 0.92), uDim);
-  float floorAmt = 1.0 - smoothstep(0.0, ${FLOOR_LOOK_BELOW.toFixed(2)}, vH);
+  float floorAmt = 1.0 - clamp(vRise / ${FLOOR_LOOK_BELOW.toFixed(2)}, 0.0, 1.0);
   if (floorAmt > 0.0) col = mix(col, floorLook(vFlags.x, vFlags.y, hatch, fwr, df, t, inside), floorAmt);
   col = applyFade(col, vWorld);
   gl_FragColor = vec4(col, 1.0);

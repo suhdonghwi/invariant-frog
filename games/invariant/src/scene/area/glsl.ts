@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { SHORT } from '../../motion';
 import { MASK_SIZE } from './mask';
 
+export const SETTLE_POWER = 2.5;
+
 export const GLSL_MASK = /* glsl */ `
 uniform highp sampler2D uMask;
 uniform vec2 uMaskOrigin;
@@ -11,8 +13,11 @@ vec4 maskAt(vec2 tile) {
   if (at.x < 0 || at.y < 0 || at.x >= ${MASK_SIZE} || at.y >= ${MASK_SIZE}) return vec4(0.0);
   return texelFetch(uMask, at, 0);
 }
-float heightOf(vec4 m) {
+float riseOf(vec4 m) {
   return mix(m.g, m.r, uRise);
+}
+float heightOf(vec4 m) {
+  return pow(riseOf(m), ${SETTLE_POWER.toFixed(1)});
 }
 `;
 
