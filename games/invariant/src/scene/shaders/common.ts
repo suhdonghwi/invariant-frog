@@ -74,12 +74,13 @@ export function blobShadowMaterial(strength: number): THREE.ShaderMaterial {
 }
 
 export const EGG_SHADOW_SIZE = 0.66;
-const EGG_CONTACT = { strength: 0.42, from: 0.12, to: 0.26 };
+const EGG_CONTACT = { strength: 0.25, from: 0.12, to: 0.26 };
+const EGG_BLOB = 0.5;
 
 export const GLSL_EGG_SHADOW = /* glsl */ `
 uniform sampler2D uMap;
 float eggShadow(vec2 uv) {
-  float blob = texture2D(uMap, uv).a * 0.7;
+  float blob = texture2D(uMap, uv).a * ${EGG_BLOB.toFixed(2)};
   float r = length(uv - 0.5) * ${EGG_SHADOW_SIZE.toFixed(2)};
   float contact = ${EGG_CONTACT.strength.toFixed(2)} * (1.0 - smoothstep(${EGG_CONTACT.from.toFixed(2)}, ${EGG_CONTACT.to.toFixed(2)}, r));
   return 1.0 - (1.0 - blob) * (1.0 - contact);

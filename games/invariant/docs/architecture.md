@@ -274,8 +274,9 @@ backend agree. `pnpm validate` and the tests are the safety net.
   A slab adds a light contact shadow at its base, a near-square box's
   distance, so a slab sits on the floor and the gaps between slabs darken
   evenly. An egg's shadow adds a contact ring just outside its footprint,
-  so an egg on a slab sits on it; the home screen's eggs use the same
-  shadow.
+  so an egg on a slab sits on it; the home screen's eggs and the hatching
+  shells use the same shadow, which shrinks with the bottom shell while the
+  frog's own shadow grows in.
 - Frogs and eggs mark the **stencil** buffer, and goal columns skip marked
   pixels, so a column's glow never washes out a frog or egg standing in its
   pool.

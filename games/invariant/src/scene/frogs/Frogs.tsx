@@ -77,7 +77,7 @@ export function Frogs() {
     return m;
   }, []);
   const shadowGeom = useMemo(() => new THREE.PlaneGeometry(0.62, 0.62).rotateX(-Math.PI / 2), []);
-  const shadowMat = useMemo(() => blobShadowMaterial(0.7), []);
+  const shadowMat = useMemo(() => blobShadowMaterial(0.45), []);
   useEffect(() => () => (geom.dispose(), ghostGeom.dispose(), shadowGeom.dispose()), [geom, ghostGeom, shadowGeom]);
   useEffect(
     () => () => [mat, ghostDepthMat, ghostMat, shadowMat].forEach((m) => m.dispose()),
