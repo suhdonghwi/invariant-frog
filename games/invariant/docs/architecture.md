@@ -277,7 +277,7 @@ backend agree. `pnpm validate` and the tests are the safety net.
   so an egg on a slab sits on it; the home screen's eggs and the hatching
   shells use the same shadow, which shrinks with the bottom shell while the
   frog's own shadow grows in. A frog's shadow is computed rather than read
-  from the texture: it stays flat out to a third of its radius before it
+  from the texture: it stays flat out to half its radius before it
   fades, because a frog covers most of its shadow when it sits, and a
   shadow that faded from the centre showed only while the frog was in the
   air.
