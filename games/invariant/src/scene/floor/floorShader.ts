@@ -47,6 +47,7 @@ void main() {
 
   // derivatives up front, outside branches (they need uniform control flow)
   vec2 fw = fwidth(p);
+  vec4 df = vec4(dFdx(p), dFdy(p)); // of p, not f, which jumps at tile edges
   float fwr = fwidth(length(f));
   float ringD = abs(sdRoundBox(f, vec2(0.47), 0.13)) - 0.035;
   float fwRing = fwidth(ringD);
@@ -66,7 +67,7 @@ void main() {
     }
     if (onCross) tcol = mix(tcol, uCross * 0.96, st ? 0.45 : 0.9);
     if (st && uShowGoal > 0.002 && L_goal(t)) tcol = mix(tcol, drawGoal(tcol, f, fwr, tc), uShowGoal);
-    if (uShowAxes > 0.002) tcol = drawAxisLabel(tcol, f, t.xy, uLabel, uLabelHalo, 1.0, uShowAxes);
+    if (uShowAxes > 0.002) tcol = drawAxisLabel(tcol, f, df, t.xy, uLabel, uLabelHalo, 1.0, uShowAxes);
     col = mix(uGap, tcol, inside);
     if (uShowGoal > 0.002) col = mix(col, SPLASH, splashAt(p) * 0.45 * uShowGoal);
   } else {
