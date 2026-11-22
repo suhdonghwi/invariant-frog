@@ -4,7 +4,7 @@ import { sfx } from '../../audio/sfx';
 import { planeKey, type Inputs } from '../../levels/inputs';
 import type { CompiledLevel, Formula } from '../../levels/level';
 import { cameraRig } from '../cameraRig';
-import { eggPokes, goalEvents, landEvents } from '../tileEvents';
+import { goalEvents, landEvents } from '../tileEvents';
 import { Eggs } from './Eggs';
 import { field } from './field';
 import { GoalColumns } from './GoalColumns';
@@ -54,7 +54,6 @@ function useArea(level: CompiledLevel, inputs: Inputs, area: Formula | null) {
     }
     goalEvents.sync(planeKey(inputs));
     landEvents.sync(planeKey(inputs));
-    eggPokes.sync(planeKey(inputs));
     areaMask.draw(gl, t.x, -t.z, inputs, field.risen());
   }, -1);
 }

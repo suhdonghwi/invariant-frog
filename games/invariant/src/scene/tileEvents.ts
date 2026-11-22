@@ -53,4 +53,3 @@ export class TileEvents {
 
 export const goalEvents = new TileEvents(MAX_EVENTS);
 export const landEvents = new TileEvents(2 * MAX_EVENTS);
-export const eggPokes = new TileEvents(MAX_EVENTS);

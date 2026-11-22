@@ -97,8 +97,8 @@ backend agree. `pnpm validate` and the tests are the safety net.
   the hovered tile (`useHover`).
 - **Per-frame scene data lives outside the store**, in plain module objects
   read in `useFrame`: the frogs (`frogWorld`), slab heights (`field`),
-  hatching shells, tile occupancy, goal ripples, landing bounces and egg
-  wiggles (`tileEvents`). Never put
+  hatching shells, tile occupancy, goal ripples and landing bounces
+  (`tileEvents`). Never put
   per-frame data in zustand.
 - **Slab height has one source: the area's formula.** Nothing lists the
   tiles of the area. On the GPU, `areaMask` (`scene/area/mask.ts`) evaluates
@@ -117,10 +117,6 @@ backend agree. `pnpm validate` and the tests are the safety net.
   (`area/landBounce.ts`), and `field.groundAt` lowers the ground by the same
   amount, so whatever stands on it (frogs, eggs, goal columns, tags) rides
   along. Eggs and goal columns apply it in their own shaders.
-- **An egg that can be picked wiggles when the pointer comes onto it.** The
-  floor, which already decides the pointer cursor, records the tile in
-  `eggPokes`, and the egg's vertex shader rocks it about its base, sideways
-  as the camera sees it.
 
 ## Time
 
