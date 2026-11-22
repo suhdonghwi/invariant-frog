@@ -63,7 +63,9 @@ behind many small decisions; keep them when changing or adding UI.
   flies and lands without any jerk, and the frog's squash on landing eases
   out after the hop is over;
   frogs sharing a tile glide into their slots and arrive exactly on landing;
-  slabs rise and sink rather than appear. Prefer curves that are smooth in
+  slabs rise and sink rather than appear, easing slowly into and out of
+  the floor while they take on the floor tile's look, so a flat top never
+  pops in or out as it reaches the floor. Prefer curves that are smooth in
   both position and speed.
 - **Quick where nothing is being shown.** A hop is the loop body running, so
   it takes long enough to follow, and every hop takes the same 0.34 s

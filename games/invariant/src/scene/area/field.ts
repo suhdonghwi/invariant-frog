@@ -6,6 +6,7 @@ import { BASE } from '../../motion';
 import { SLAB_H } from '../constants';
 import { clamp01, smoothstep } from '../easing';
 import { sceneNow } from '../sceneTime';
+import { SETTLE_POWER } from './glsl';
 import { landSquash } from './landBounce';
 
 const RISE_DUR = BASE;
@@ -45,7 +46,7 @@ class AreaField {
     const risen = this.risen();
     if (risen >= 1) return to;
     const from = covers(this.before?.fast);
-    return from + (to - from) * risen;
+    return (from + (to - from) * risen) ** SETTLE_POWER;
   }
 
   planeMovedNear(near: TileWindow, before: Inputs): { rising: number; sinking: number } {
