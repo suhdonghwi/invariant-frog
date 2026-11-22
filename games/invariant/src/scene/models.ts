@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { mergeGeometries, mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { COLORS } from './constants';
 
-const PART = { body: 0, torso: 1, sclera: 2, pupil: 3, shine: 4, mouth: 5, cheek: 6 } as const;
+const PART = { body: 0, torso: 1, sclera: 2, pupil: 3 } as const;
 
 const FROG_SCALE = 1.15;
 const TORSO = { r: 0.15, stretch: 1.3, lean: -0.42, at: [0, 0.18, -0.03] } as const;
@@ -79,10 +79,7 @@ export function frogMaterial(opts: { ghost?: boolean; fade?: boolean } = {}): TH
         vec3 c;
         if (aPart < 1.5) c = tint;
         else if (aPart < 2.5) c = vec3(1.0);
-        else if (aPart < 3.5) c = vec3(0.07, 0.08, 0.11);
-        else if (aPart < 4.5) c = vec3(1.4);
-        else if (aPart < 5.5) c = tint * 0.28;
-        else c = vec3(1.0, 0.5, 0.56);
+        else c = vec3(0.07, 0.08, 0.11);
         vColor = vec4(c, 1.0);
         ${opts.fade ? 'vFade = aFade;\n        vClear = aClear;' : ''}
         `,

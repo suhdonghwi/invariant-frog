@@ -7,6 +7,7 @@ import { popIn } from '../easing';
 import { uploadInstances } from '../instances';
 import { eggGeometry } from '../models';
 import { sceneNow } from '../sceneTime';
+import { EGG_SHADOW_SIZE, eggShadowMaterial } from '../shaders/common';
 
 export interface StartEgg {
   x: number;
@@ -25,19 +26,36 @@ export function StartEggs({ eggs }: { eggs: React.RefObject<StartEgg[]> }) {
     m.count = 0;
     return m;
   }, []);
-  useEffect(() => () => (mesh.geometry.dispose(), mesh.material.dispose()), [mesh]);
+  const shadow = useMemo(() => {
+    const m = new THREE.InstancedMesh(new THREE.PlaneGeometry(EGG_SHADOW_SIZE, EGG_SHADOW_SIZE).rotateX(-Math.PI / 2), eggShadowMaterial(), MAX);
+    m.frustumCulled = false;
+    m.count = 0;
+    m.renderOrder = 2;
+    return m;
+  }, []);
+  useEffect(() => () => [mesh, shadow].forEach((m) => (m.geometry.dispose(), m.material.dispose())), [mesh, shadow]);
   useFrame(() => {
     const t = sceneNow();
     let n = 0;
     for (const e of eggs.current) {
       if (t < e.appear || t >= e.hatch || n >= MAX) continue;
-      dummy.position.set(e.x, field.groundAt(e.x, e.y), -e.y);
+      const ground = field.groundAt(e.x, e.y);
+      dummy.position.set(e.x, ground, -e.y);
       dummy.scale.setScalar(popIn((t - e.appear) / 0.32));
       dummy.updateMatrix();
-      mesh.setMatrixAt(n++, dummy.matrix);
+      mesh.setMatrixAt(n, dummy.matrix);
+      dummy.position.y = ground + 0.006;
+      dummy.updateMatrix();
+      shadow.setMatrixAt(n++, dummy.matrix);
     }
-    mesh.count = n;
+    mesh.count = shadow.count = n;
     uploadInstances(n, mesh.instanceMatrix);
+    uploadInstances(n, shadow.instanceMatrix);
   });
-  return <primitive object={mesh} />;
+  return (
+    <>
+      <primitive object={shadow} />
+      <primitive object={mesh} />
+    </>
+  );
 }

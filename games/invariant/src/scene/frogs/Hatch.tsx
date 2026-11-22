@@ -7,7 +7,7 @@ import { field } from '../area/field';
 import { uploadInstances } from '../instances';
 import { eggGeometry } from '../models';
 import { sceneNow } from '../sceneTime';
-import { colorUniform, GLSL_COMMON } from '../shaders/common';
+import { colorUniform, EGG_SHADOW_SIZE, eggShadowMaterial, GLSL_COMMON } from '../shaders/common';
 import { clamp01, smoothstep } from '../easing';
 import { HATCH_CLEAR, HATCH_GROW } from './motion';
 
@@ -104,16 +104,22 @@ export function HatchShells() {
     [],
   );
   useEffect(() => () => (cupMat.dispose(), capMat.dispose()), [cupMat, capMat]);
+  const shadowGeom = useMemo(() => new THREE.PlaneGeometry(EGG_SHADOW_SIZE, EGG_SHADOW_SIZE).rotateX(-Math.PI / 2), []);
+  const shadowMat = useMemo(() => eggShadowMaterial(), []);
+  useEffect(() => () => (shadowGeom.dispose(), shadowMat.dispose()), [shadowGeom, shadowMat]);
+  const shadow = useRef<THREE.InstancedMesh>(null);
   const plane = useGame((s) => planeKey(s.inputs));
 
   useFrame(() => {
     const a = cup.current;
     const b = cap.current;
-    if (!a || !b) return;
+    const sh = shadow.current;
+    if (!a || !b || !sh) return;
     const t = sceneNow();
     while (active.length && t - active[0].t0 > HATCH_WOBBLE + Math.max(CAP_LIFE, CUP_LIFE)) active.shift();
     let na = 0;
     let nb = 0;
+    let ns = 0;
     for (const fx of active) {
       if (fx.plane !== plane) continue;
       const u = t - fx.t0;
@@ -127,6 +133,8 @@ export function HatchShells() {
         m.compose(pos.set(bx, base, bz), q, scl.setScalar(fx.s));
         a.setMatrixAt(na++, m);
         b.setMatrixAt(nb++, m);
+        m.compose(pos.set(bx, base + 0.006, bz), NO_ROT, scl.setScalar(fx.s));
+        sh.setMatrixAt(ns++, m);
         continue;
       }
       const v = u - HATCH_WOBBLE;
@@ -135,6 +143,8 @@ export function HatchShells() {
         q.identity();
         m.compose(pos.set(bx, base, bz), q, scl.setScalar(fx.s * k));
         a.setMatrixAt(na++, m);
+        m.compose(pos.set(bx, base + 0.006, bz), q, scl.setScalar(fx.s * k));
+        sh.setMatrixAt(ns++, m);
       }
       if (v < CAP_LIFE) {
         const k = 1 - smoothstep(clamp01((v - CAP_HOLD) / (CAP_LIFE - CAP_HOLD)));
@@ -152,12 +162,15 @@ export function HatchShells() {
     }
     a.count = na;
     b.count = nb;
+    sh.count = ns;
     uploadInstances(na, a.instanceMatrix);
     uploadInstances(nb, b.instanceMatrix);
+    uploadInstances(ns, sh.instanceMatrix);
   });
 
   return (
     <>
+      <instancedMesh ref={shadow} args={[shadowGeom, shadowMat, MAX]} frustumCulled={false} count={0} renderOrder={2} />
       <instancedMesh ref={cup} args={[geom, cupMat, MAX]} frustumCulled={false} count={0} />
       <instancedMesh ref={cap} args={[geom, capMat, MAX]} frustumCulled={false} count={0} />
     </>

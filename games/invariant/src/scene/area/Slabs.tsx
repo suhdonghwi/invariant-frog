@@ -9,7 +9,7 @@ import { Toward } from '../easing';
 import { hover } from '../hover';
 import { sceneNow } from '../sceneTime';
 import { axisNameUniforms, getDigitTexture, GLSL_AXIS_LABELS, setAxisNames } from '../shaders/axisLabels';
-import { colorUniform, getBlobTexture, GLSL_COMMON } from '../shaders/common';
+import { colorUniform, getBlobTexture, GLSL_COMMON, SHADOW_INK } from '../shaders/common';
 import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
 import { GLSL_GOAL, goalUniforms } from '../shaders/goal';
 import { GLSL_MASK, instanced } from './glsl';
@@ -21,6 +21,8 @@ const BEVEL = 0.07;
 const ROUND = [3, 3] as const;
 const FACETED = [1, 1] as const;
 const FACETED_BELOW_PX = 30;
+const SHADOW_SIZE = 1.45;
+const CONTACT = { strength: 0.2, reach: 0.12, corner: 0.02 };
 
 const slabVertex = /* glsl */ `
 ${GLSL_MASK}
@@ -125,12 +127,16 @@ void main() {
 }
 `;
 const shadowFragment = /* glsl */ `
+${GLSL_COMMON}
 varying vec2 vUv;
 varying float vH;
 uniform sampler2D uMap;
 void main() {
-  vec4 c = texture2D(uMap, vUv);
-  gl_FragColor = vec4(c.rgb, c.a * vH * 0.75);
+  float blob = texture2D(uMap, vUv).a * 0.75;
+  float d = sdRoundBox((vUv - 0.5) * ${SHADOW_SIZE.toFixed(2)}, vec2(${(TILE / 2).toFixed(3)}), ${CONTACT.corner.toFixed(2)});
+  float contact = ${CONTACT.strength.toFixed(2)} * (1.0 - smoothstep(0.0, ${CONTACT.reach.toFixed(2)}, d));
+  float a = 1.0 - (1.0 - blob) * (1.0 - contact);
+  gl_FragColor = vec4(${SHADOW_INK}, a * vH);
 }
 `;
 
@@ -184,7 +190,7 @@ export function Slabs({ level, dim, showStop, showGoal }: { level: CompiledLevel
   const canvas = useThree((three) => three.gl.domElement);
   const cells = useMemo(() => new VisibleCells(), []);
   const geoms = useMemo(() => {
-    const shadow = new THREE.PlaneGeometry(1.45, 1.45).rotateX(-Math.PI / 2);
+    const shadow = new THREE.PlaneGeometry(SHADOW_SIZE, SHADOW_SIZE).rotateX(-Math.PI / 2);
     const at = (base: THREE.BufferGeometry, offsets: THREE.InstancedBufferAttribute) => {
       const g = instanced(base, 0, {});
       g.setAttribute('aOffset', offsets);

@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { COLORS, SLAB_H } from '../constants';
 import { goalEvents } from '../goalEvents';
 import { sceneNow } from '../sceneTime';
+import { stencilSkip } from '../shaders/common';
 import { GLSL_GOAL_PULSE } from '../shaders/goal';
 import { areaMask, GOAL } from './mask';
 import { useMaskTiles } from './maskTiles';
@@ -63,20 +64,22 @@ export function GoalColumns() {
 
   const material = useMemo(
     () =>
-      new THREE.ShaderMaterial({
-        vertexShader: vertex,
-        fragmentShader: fragment,
-        transparent: true,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-        uniforms: {
-          uTime: { value: 0 },
-          uColor: { value: new THREE.Color(COLORS.goal) },
-          uAppearT0: { value: sceneNow() },
-          uEvents: goalEvents.uniforms.uEvents,
-          ...areaMask.uniforms,
-        },
-      }),
+      stencilSkip(
+        new THREE.ShaderMaterial({
+          vertexShader: vertex,
+          fragmentShader: fragment,
+          transparent: true,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+          uniforms: {
+            uTime: { value: 0 },
+            uColor: { value: new THREE.Color(COLORS.goal) },
+            uAppearT0: { value: sceneNow() },
+            uEvents: goalEvents.uniforms.uEvents,
+            ...areaMask.uniforms,
+          },
+        }),
+      ),
     [],
   );
   useEffect(() => () => (base.dispose(), material.dispose()), [base, material]);
