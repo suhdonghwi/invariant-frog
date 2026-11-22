@@ -24,17 +24,9 @@ const FACETED = [1, 1] as const;
 const FACETED_BELOW_PX = 30;
 const SHADOW_SIZE = 1.45;
 const CONTACT = { strength: 0.2, reach: 0.12, corner: 0.02 };
-const SHRINK_BELOW = 0.35;
-
-const GLSL_FOOTPRINT = /* glsl */ `
-float footprint(float h) {
-  return smoothstep(0.0, ${SHRINK_BELOW.toFixed(2)}, h);
-}
-`;
 
 const slabVertex = /* glsl */ `
 ${GLSL_MASK}
-${GLSL_FOOTPRINT}
 uniform float uTime;
 ${GLSL_LAND}
 attribute vec2 aOffset;
@@ -54,8 +46,8 @@ void main() {
   }
   float s = landSquash(tile) * h;
   vec3 p = position;
-  p.xz *= footprint(h) * (1.0 + s * ${LAND_BULGE.toFixed(2)});
-  p.y = p.y * (1.0 - s) + (h - 1.0) * ${SLAB_H.toFixed(3)};
+  p.xz *= 1.0 + s * ${LAND_BULGE.toFixed(2)};
+  p.y = p.y * (1.0 - s) + (h - 1.0) * ${SLAB_H.toFixed(3)} - (1.0 - h) * 0.04;
   vec4 w = modelMatrix * vec4(p + vec3(tile.x, 0.0, -tile.y), 1.0);
   vWorld = w.xyz;
   vN = normalize(mat3(modelMatrix) * normal);
@@ -123,7 +115,6 @@ void main() {
 
 const shadowVertex = /* glsl */ `
 ${GLSL_MASK}
-${GLSL_FOOTPRINT}
 attribute vec2 aOffset;
 uniform vec2 uGrid;
 varying vec2 vUv;
@@ -136,7 +127,7 @@ void main() {
     gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
     return;
   }
-  vec4 w = modelMatrix * vec4(position * footprint(vH) + vec3(tile.x, 0.003, -tile.y), 1.0);
+  vec4 w = modelMatrix * vec4(position + vec3(tile.x, 0.003, -tile.y), 1.0);
   gl_Position = projectionMatrix * viewMatrix * w;
 }
 `;
