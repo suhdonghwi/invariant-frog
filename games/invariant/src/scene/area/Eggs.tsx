@@ -8,6 +8,7 @@ import { frogWorld } from '../frogs/frogWorld';
 import { EGG_ALONE, EGG_ASIDE, occupancy } from '../frogs/occupancy';
 import { eggGeometry } from '../models';
 import { sceneNow } from '../sceneTime';
+import { eggPokes } from '../tileEvents';
 import { colorUniform, EGG_SHADOW_SIZE, getBlobTexture, GLSL_COMMON, GLSL_EGG_SHADOW, SHADOW_INK, stencilMark } from '../shaders/common';
 import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
 import { areaMask, EGG } from './mask';
@@ -15,9 +16,32 @@ import { useMaskTiles } from './maskTiles';
 import { EGG_REGROW, GLSL_APPEAR, GLSL_BACK, GLSL_HEIGHT, GLSL_SLOT, instanced, SLOT_DUR } from './glsl';
 import { GLSL_LAND, landUniforms } from './landBounce';
 
+const POKE = { tilt: 0.16, dur: 0.75, freq: 19, decay: 6 };
+
+const GLSL_POKE = /* glsl */ `
+uniform vec4 uPokes[${eggPokes.size}];
+uniform float uLastPoke;
+float pokeTilt(vec2 tile) {
+  if (uTime - uLastPoke > ${POKE.dur.toFixed(2)}) return 0.0;
+  float a = 0.0;
+  for (int i = 0; i < ${eggPokes.size}; i++) {
+    vec4 e = uPokes[i];
+    float age = uTime - e.z;
+    if (age < 0.0 || age > ${POKE.dur.toFixed(2)}) continue;
+    if (abs(e.x - tile.x) > 0.5 || abs(e.y - tile.y) > 0.5) continue;
+    a += ${POKE.tilt.toFixed(2)} * sin(age * ${POKE.freq.toFixed(1)}) * exp(-age * ${POKE.decay.toFixed(1)});
+  }
+  return a;
+}
+vec3 rock(vec3 v, vec3 k, float a) {
+  return v * cos(a) + cross(k, v) * sin(a) + k * dot(k, v) * (1.0 - cos(a));
+}
+`;
+
 const eggVertex = /* glsl */ `
 ${GLSL_HEIGHT}
 ${GLSL_LAND}
+${GLSL_POKE}
 ${GLSL_SLOT}
 ${GLSL_APPEAR}
 ${GLSL_BACK}
@@ -28,10 +52,14 @@ void main() {
   float h = heightNow();
   vec3 sl = slotNow();
   float s = (1.0 - aHide) * backNow() * sl.z * appearNow();
-  vec3 p = position * s;
-  vec4 w = modelMatrix * vec4(p + vec3(aTile.x + sl.x, h * ${SLAB_H.toFixed(3)} * (1.0 - landSquash(aTile)), -aTile.y - sl.y), 1.0);
+  vec3 base = vec3(aTile.x + sl.x, h * ${SLAB_H.toFixed(3)} * (1.0 - landSquash(aTile)), -aTile.y - sl.y);
+  float tilt = pokeTilt(aTile);
+  vec3 toEye = cameraPosition - base;
+  vec3 axis = normalize(vec3(toEye.x, 0.0, toEye.z) + vec3(1e-4, 0.0, 0.0));
+  vec3 p = rock(position * s, axis, tilt);
+  vec4 w = modelMatrix * vec4(p + base, 1.0);
   vWorld = w.xyz;
-  vN = normalize(mat3(modelMatrix) * normal);
+  vN = normalize(mat3(modelMatrix) * rock(normal, axis, tilt));
   gl_Position = projectionMatrix * viewMatrix * w;
 }
 `;
@@ -223,6 +251,8 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
             ...fadeUniforms(),
             ...areaMask.uniforms,
             ...landUniforms(),
+            uPokes: eggPokes.at,
+            uLastPoke: eggPokes.last,
           },
         }),
       ),

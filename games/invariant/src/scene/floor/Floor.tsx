@@ -1,7 +1,7 @@
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { planeExists, type Inputs } from '../../levels/inputs';
+import { planeExists, planeKey, type Inputs } from '../../levels/inputs';
 import type { CompiledLevel } from '../../levels/level';
 import { field } from '../area/field';
 import { figureClip } from '../figureClip';
@@ -9,6 +9,7 @@ import { cameraRig } from '../cameraRig';
 import { SLAB_H } from '../constants';
 import { hover } from '../hover';
 import { sceneNow } from '../sceneTime';
+import { eggPokes } from '../tileEvents';
 import { axisNameUniforms, getDigitTexture, setAxisNames } from '../shaders/axisLabels';
 import { colorUniform } from '../shaders/common';
 import { fadeUniforms, updateFade } from '../shaders/fade';
@@ -47,6 +48,7 @@ interface FloorProps {
 
 export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true, showGoal = true, showAxes = true, onTile, clickable }: FloorProps) {
   const mesh = useRef<THREE.Mesh>(null);
+  const poked = useRef<string | null>(null);
   const canvas = useThree((s) => s.gl.domElement);
   const material = useMemo(() => {
     const m = new THREE.ShaderMaterial({
@@ -114,8 +116,14 @@ export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true,
       u.uHoverOn.value = 1;
     } else u.uHoverOn.value = 0;
     if (interactive) {
-      const cursor = hover.tile && clickable?.(hover.tile[0], hover.tile[1]) ? 'pointer' : '';
+      const pickable = hover.tile && clickable?.(hover.tile[0], hover.tile[1]) ? hover.tile : null;
+      const cursor = pickable ? 'pointer' : '';
       if (canvas.style.cursor !== cursor) canvas.style.cursor = cursor;
+      const key = pickable && `${pickable[0]},${pickable[1]}`;
+      if (key !== poked.current) {
+        poked.current = key;
+        if (pickable) eggPokes.push(pickable[0], pickable[1], planeKey(inputs), now);
+      }
     }
     m.visible = u.uOpacity.value > 0.004;
   });
