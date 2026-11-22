@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { COLORS } from '../constants';
-import { goalEvents, MAX_EVENTS } from '../goalEvents';
+import { goalEvents, MAX_EVENTS } from '../tileEvents';
 
 export const GLSL_GOAL_PULSE = /* glsl */ `
 uniform vec3 uEvents[${MAX_EVENTS}];
@@ -92,6 +92,7 @@ export function goalUniforms(): Record<string, THREE.IUniform> {
     uGoal: { value: new THREE.Color(COLORS.goal) },
     uPoolLight: { value: new THREE.Color(COLORS.poolLight) },
     uPoolDeep: { value: new THREE.Color(COLORS.poolDeep) },
-    ...goalEvents.uniforms,
+    uEvents: goalEvents.at,
+    uLastEvent: goalEvents.last,
   };
 }

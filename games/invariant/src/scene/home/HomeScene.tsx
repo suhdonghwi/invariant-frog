@@ -6,8 +6,8 @@ import { Floor } from '../floor/Floor';
 import { Frogs } from '../frogs/Frogs';
 import { frogWorld, yawToward } from '../frogs/frogWorld';
 import { HATCH_EMERGE, HatchShells, hatchFx } from '../frogs/Hatch';
-import { goalEvents } from '../goalEvents';
 import { after, sceneNow } from '../sceneTime';
+import { goalEvents, landEvents } from '../tileEvents';
 import { StartEggs, type StartEgg } from './StartEggs';
 import { useHomeCamera } from './useHomeCamera';
 
@@ -89,6 +89,7 @@ export function HomeScene() {
       hatchFx.clear();
       frogs.forEach((f) => frogWorld.remove(f));
       goalEvents.clear();
+      landEvents.clear();
     };
   }, []);
 

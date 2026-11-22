@@ -13,9 +13,11 @@ import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
 import { areaMask, EGG } from './mask';
 import { useMaskTiles } from './maskTiles';
 import { EGG_REGROW, GLSL_APPEAR, GLSL_BACK, GLSL_HEIGHT, GLSL_SLOT, instanced, SLOT_DUR } from './glsl';
+import { GLSL_LAND, landUniforms } from './landBounce';
 
 const eggVertex = /* glsl */ `
 ${GLSL_HEIGHT}
+${GLSL_LAND}
 ${GLSL_SLOT}
 ${GLSL_APPEAR}
 ${GLSL_BACK}
@@ -27,7 +29,7 @@ void main() {
   vec3 sl = slotNow();
   float s = (1.0 - aHide) * backNow() * sl.z * appearNow();
   vec3 p = position * s;
-  vec4 w = modelMatrix * vec4(p + vec3(aTile.x + sl.x, h * ${SLAB_H.toFixed(3)}, -aTile.y - sl.y), 1.0);
+  vec4 w = modelMatrix * vec4(p + vec3(aTile.x + sl.x, h * ${SLAB_H.toFixed(3)} * (1.0 - landSquash(aTile)), -aTile.y - sl.y), 1.0);
   vWorld = w.xyz;
   vN = normalize(mat3(modelMatrix) * normal);
   gl_Position = projectionMatrix * viewMatrix * w;
@@ -51,6 +53,7 @@ void main() {
 `;
 const shadowVertex = /* glsl */ `
 ${GLSL_HEIGHT}
+${GLSL_LAND}
 ${GLSL_SLOT}
 ${GLSL_APPEAR}
 ${GLSL_BACK}
@@ -61,7 +64,7 @@ void main() {
   vUv = uv;
   vec3 sl = slotNow();
   vA = (1.0 - aHide) * backNow() * sl.z * clamp(appearNow(), 0.0, 1.0);
-  vec4 w = modelMatrix * vec4(position * sl.z + vec3(aTile.x + sl.x, heightNow() * ${SLAB_H.toFixed(3)} + 0.006, -aTile.y - sl.y), 1.0);
+  vec4 w = modelMatrix * vec4(position * sl.z + vec3(aTile.x + sl.x, heightNow() * ${SLAB_H.toFixed(3)} * (1.0 - landSquash(aTile)) + 0.006, -aTile.y - sl.y), 1.0);
   gl_Position = projectionMatrix * viewMatrix * w;
 }
 `;
@@ -219,6 +222,7 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
             uAppearCenter: { value: new THREE.Vector2(cameraRig.target().x, -cameraRig.target().z) },
             ...fadeUniforms(),
             ...areaMask.uniforms,
+            ...landUniforms(),
           },
         }),
       ),
@@ -231,7 +235,7 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
         fragmentShader: shadowFragment,
         transparent: true,
         depthWrite: false,
-        uniforms: { ...areaMask.uniforms, uTime: material.uniforms.uTime, uMap: { value: getBlobTexture() }, uAppearT0: material.uniforms.uAppearT0, uAppearCenter: material.uniforms.uAppearCenter },
+        uniforms: { ...areaMask.uniforms, ...landUniforms(), uTime: material.uniforms.uTime, uMap: { value: getBlobTexture() }, uAppearT0: material.uniforms.uAppearT0, uAppearCenter: material.uniforms.uAppearCenter },
       }),
     [material],
   );
