@@ -8,7 +8,7 @@ import { frogWorld } from '../frogs/frogWorld';
 import { EGG_ALONE, EGG_ASIDE, occupancy } from '../frogs/occupancy';
 import { eggGeometry } from '../models';
 import { sceneNow } from '../sceneTime';
-import { colorUniform, getBlobTexture, GLSL_COMMON } from '../shaders/common';
+import { colorUniform, getBlobTexture, GLSL_COMMON, SHADOW_INK, stencilMark } from '../shaders/common';
 import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
 import { areaMask, EGG } from './mask';
 import { useMaskTiles } from './maskTiles';
@@ -22,7 +22,6 @@ ${GLSL_BACK}
 attribute float aHide;
 varying vec3 vN;
 varying vec3 vWorld;
-varying vec3 vLocal;
 void main() {
   float h = heightNow();
   vec3 sl = slotNow();
@@ -30,7 +29,6 @@ void main() {
   vec3 p = position * s;
   vec4 w = modelMatrix * vec4(p + vec3(aTile.x + sl.x, h * ${SLAB_H.toFixed(3)}, -aTile.y - sl.y), 1.0);
   vWorld = w.xyz;
-  vLocal = position;
   vN = normalize(mat3(modelMatrix) * normal);
   gl_Position = projectionMatrix * viewMatrix * w;
 }
@@ -39,17 +37,12 @@ const eggFragment = /* glsl */ `
 precision highp float;
 varying vec3 vN;
 varying vec3 vWorld;
-varying vec3 vLocal;
 uniform vec3 uEgg;
 ${GLSL_COMMON}
 ${GLSL_FADE}
-float hash(vec3 p) { return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
 void main() {
   vec3 n = normalize(vN);
-  vec3 cell = floor(vLocal * 60.0);
-  float speck = step(0.93, hash(cell)) * 0.12;
-  vec3 col = uEgg * (1.0 - speck);
-  col = shadeLit(col, n);
+  vec3 col = shadeLit(uEgg, n);
   col += pow(1.0 - max(n.y, 0.0), 3.0) * 0.04;
   col = applyFade(col, vWorld);
   gl_FragColor = vec4(col, 1.0);
@@ -76,7 +69,7 @@ const shadowFragment = /* glsl */ `
 varying vec2 vUv;
 varying float vA;
 uniform sampler2D uMap;
-void main() { vec4 c = texture2D(uMap, vUv); gl_FragColor = vec4(c.rgb, c.a * 0.7 * vA); }
+void main() { gl_FragColor = vec4(${SHADOW_INK}, texture2D(uMap, vUv).a * 0.7 * vA); }
 `;
 
 interface SlotAnim {
@@ -215,18 +208,20 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
 
   const material = useMemo(
     () =>
-      new THREE.ShaderMaterial({
-        vertexShader: eggVertex,
-        fragmentShader: eggFragment,
-        uniforms: {
-          uTime: { value: 0 },
-          uEgg: colorUniform('egg'),
-          uAppearT0: { value: sceneNow() },
-          uAppearCenter: { value: new THREE.Vector2(cameraRig.target().x, -cameraRig.target().z) },
-          ...fadeUniforms(),
-          ...areaMask.uniforms,
-        },
-      }),
+      stencilMark(
+        new THREE.ShaderMaterial({
+          vertexShader: eggVertex,
+          fragmentShader: eggFragment,
+          uniforms: {
+            uTime: { value: 0 },
+            uEgg: colorUniform('egg'),
+            uAppearT0: { value: sceneNow() },
+            uAppearCenter: { value: new THREE.Vector2(cameraRig.target().x, -cameraRig.target().z) },
+            ...fadeUniforms(),
+            ...areaMask.uniforms,
+          },
+        }),
+      ),
     [],
   );
   const shadowMat = useMemo(

@@ -268,7 +268,14 @@ backend agree. `pnpm validate` and the tests are the safety net.
   the error boundary around the game (`ui/ErrorBoundary.tsx`) and the 3D
   title's own boundary fall back to `ui/Trouble.tsx` or plain text.
 - Shadows are soft blobs, not shadow maps. Models are procedural (the only
-  assets are the bundled fonts and sound clips).
+  assets are the bundled fonts and sound clips). Frogs, eggs and slabs share
+  one blob texture (only its alpha is read) and one shadow colour
+  (`SHADOW_INK`), so a frog's shadow reads like an egg's on every ground.
+  A slab adds a contact shadow at its base, a rounded box's distance, so a
+  slab sits on the floor and the gaps between slabs darken evenly.
+- Frogs and eggs mark the **stencil** buffer, and goal columns skip marked
+  pixels, so a column's glow never washes out a frog or egg standing in its
+  pool.
 
 ## Styling
 

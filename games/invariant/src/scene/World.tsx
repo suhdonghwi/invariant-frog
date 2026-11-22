@@ -93,7 +93,7 @@ export function World() {
       flat
       dpr={dpr}
       camera={{ position: [3, 10, 12], fov: FOV, near: 0.1, far: 500 }}
-      gl={{ antialias: true, alpha: true }}
+      gl={{ antialias: true, alpha: true, stencil: true }}
     >
       <PerformanceMonitor
         factor={1}

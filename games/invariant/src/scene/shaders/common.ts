@@ -22,20 +22,70 @@ vec3 shadeLit(vec3 base, vec3 n) {
 }
 `;
 
+const BLOB_SIZE = 128;
+const STENCIL_SOLID = 1;
+const BLOB_CORE = 0.55;
+const SHADOW_RGB = [40, 50, 70];
+export const SHADOW_INK = `vec3(${SHADOW_RGB.map((c) => (c / 255).toFixed(3)).join(', ')})`;
+
 let blobTexture: THREE.Texture | null = null;
 export function getBlobTexture(): THREE.Texture {
   if (blobTexture) return blobTexture;
   const c = document.createElement('canvas');
-  c.width = c.height = 128;
+  c.width = c.height = BLOB_SIZE;
   const g = c.getContext('2d')!;
-  const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-  grad.addColorStop(0, 'rgba(40,50,70,0.55)');
-  grad.addColorStop(0.45, 'rgba(40,50,70,0.32)');
-  grad.addColorStop(1, 'rgba(40,50,70,0)');
-  g.fillStyle = grad;
-  g.fillRect(0, 0, 128, 128);
+  const img = g.createImageData(BLOB_SIZE, BLOB_SIZE);
+  const half = BLOB_SIZE / 2;
+  for (let y = 0; y < BLOB_SIZE; y++) {
+    for (let x = 0; x < BLOB_SIZE; x++) {
+      const r = Math.min(1, Math.hypot(x + 0.5 - half, y + 0.5 - half) / half);
+      const i = (y * BLOB_SIZE + x) * 4;
+      img.data.set([...SHADOW_RGB, Math.round(255 * BLOB_CORE * (1 - r * r * (3 - 2 * r)))], i);
+    }
+  }
+  g.putImageData(img, 0, 0);
   blobTexture = new THREE.CanvasTexture(c);
   return blobTexture;
+}
+
+export function blobShadowMaterial(strength: number): THREE.ShaderMaterial {
+  return new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: { uMap: { value: getBlobTexture() } },
+    vertexShader: /* glsl */ `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        #ifdef USE_INSTANCING
+          vec4 w = modelMatrix * instanceMatrix * vec4(position, 1.0);
+        #else
+          vec4 w = modelMatrix * vec4(position, 1.0);
+        #endif
+        gl_Position = projectionMatrix * viewMatrix * w;
+      }`,
+    fragmentShader: /* glsl */ `
+      varying vec2 vUv;
+      uniform sampler2D uMap;
+      void main() {
+        gl_FragColor = vec4(${SHADOW_INK}, texture2D(uMap, vUv).a * ${strength.toFixed(2)});
+      }`,
+  });
+}
+
+export function stencilMark<M extends THREE.Material>(m: M): M {
+  m.stencilWrite = true;
+  m.stencilRef = STENCIL_SOLID;
+  m.stencilFunc = THREE.AlwaysStencilFunc;
+  m.stencilZPass = THREE.ReplaceStencilOp;
+  return m;
+}
+
+export function stencilSkip<M extends THREE.Material>(m: M): M {
+  m.stencilWrite = true;
+  m.stencilRef = STENCIL_SOLID;
+  m.stencilFunc = THREE.NotEqualStencilFunc;
+  return m;
 }
 
 export const colorUniform = (c: keyof typeof COLORS) => ({ value: new THREE.Color(COLORS[c]) });

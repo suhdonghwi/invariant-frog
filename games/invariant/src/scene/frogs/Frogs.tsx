@@ -8,7 +8,7 @@ import { COLORS } from '../constants';
 import { uploadInstances } from '../instances';
 import { frogGeometry, frogMaterial, ghostDepthMaterial } from '../models';
 import { sceneNow } from '../sceneTime';
-import { getBlobTexture } from '../shaders/common';
+import { blobShadowMaterial, stencilMark } from '../shaders/common';
 import { placeBadge } from './badges';
 import { frogWorld, leaveFade, trailFrogs, yawToward, type FrogSim } from './frogWorld';
 import { pose } from './motion';
@@ -69,18 +69,15 @@ export function Frogs() {
     g.setAttribute('aClear', r);
     return { ghostGeom: g, fades: a, clears: r };
   }, [geom]);
-  const mat = useMemo(() => frogMaterial(), []);
-  const ghostDepthMat = useMemo(() => ghostDepthMaterial(), []);
+  const mat = useMemo(() => stencilMark(frogMaterial()), []);
+  const ghostDepthMat = useMemo(() => stencilMark(ghostDepthMaterial()), []);
   const ghostMat = useMemo(() => {
     const m = frogMaterial({ ghost: true, fade: true });
     m.opacity = 1;
     return m;
   }, []);
   const shadowGeom = useMemo(() => new THREE.PlaneGeometry(0.62, 0.62).rotateX(-Math.PI / 2), []);
-  const shadowMat = useMemo(
-    () => new THREE.MeshBasicMaterial({ map: getBlobTexture(), transparent: true, depthWrite: false }),
-    [],
-  );
+  const shadowMat = useMemo(() => blobShadowMaterial(0.7), []);
   useEffect(() => () => (geom.dispose(), ghostGeom.dispose(), shadowGeom.dispose()), [geom, ghostGeom, shadowGeom]);
   useEffect(
     () => () => [mat, ghostDepthMat, ghostMat, shadowMat].forEach((m) => m.dispose()),
