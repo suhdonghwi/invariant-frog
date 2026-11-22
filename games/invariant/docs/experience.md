@@ -85,7 +85,8 @@ behind many small decisions; keep them when changing or adding UI.
   A real frog landing on a slab presses it down about 9% and lets it spring
   back and wobble once more; pushing off presses it a little, and so does
   landing from the jump out of its egg. See-through frogs weigh nothing.
-- **Small signs of life.** An egg that can be picked rocks once when the pointer comes
+- **Small signs of life.** Frogs breathe and blink now and then, each on its
+  own rhythm. An egg that can be picked rocks once when the pointer comes
   onto it, so it reads as something to click.
 - **Changing an input switches the board at once**, with the slabs' sound;
   animating the board itself (a wave across it, or boards sliding past)

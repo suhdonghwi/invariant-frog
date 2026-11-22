@@ -61,7 +61,12 @@ export function Frogs() {
   const ghosts = useRef<THREE.InstancedMesh>(null);
   const ghostDepth = useRef<THREE.InstancedMesh>(null);
   const shadows = useRef<THREE.InstancedMesh>(null);
-  const geom = useMemo(() => frogGeometry(), []);
+  const { geom, blinks } = useMemo(() => {
+    const g = frogGeometry();
+    const b = new THREE.InstancedBufferAttribute(new Float32Array(MAX_FROGS), 1);
+    g.setAttribute('aBlink', b);
+    return { geom: g, blinks: b };
+  }, []);
   const { ghostGeom, fades, clears } = useMemo(() => {
     const g = geom.clone();
     const a = new THREE.InstancedBufferAttribute(new Float32Array(MAX_FROGS).fill(1), 1);
@@ -70,7 +75,7 @@ export function Frogs() {
     g.setAttribute('aClear', r);
     return { ghostGeom: g, fades: a, clears: r };
   }, [geom]);
-  const mat = useMemo(() => stencilMark(frogMaterial()), []);
+  const mat = useMemo(() => stencilMark(frogMaterial({ blink: true })), []);
   const ghostDepthMat = useMemo(() => stencilMark(ghostDepthMaterial()), []);
   const ghostMat = useMemo(() => {
     const m = frogMaterial({ ghost: true, fade: true });
@@ -136,7 +141,10 @@ export function Frogs() {
         fades.setX(nGhost, (f.fade ?? 1) * leaveFade(f, t));
         clears.setX(nGhost, 1);
         gh.setColorAt(nGhost++, GHOST);
-      } else b.setMatrixAt(nReal++, dummy.matrix);
+      } else {
+        blinks.setX(nReal, p.blink);
+        b.setMatrixAt(nReal++, dummy.matrix);
+      }
       const air = Math.max(0, py - p.ground);
       const ss = p.sx <= 0 ? 0 : Math.max(0.35, 1 - air * 0.5) * Math.min(p.sx, 1.2) * os * p.emerged * (f.fade ?? 1);
       dummy.position.set(px, p.ground + 0.008, pz);
@@ -154,7 +162,7 @@ export function Frogs() {
     b.count = nReal;
     gh.count = gd.count = nGhost;
     sh.count = n;
-    uploadInstances(nReal, b.instanceMatrix);
+    uploadInstances(nReal, b.instanceMatrix, blinks);
     uploadInstances(nGhost, gh.instanceMatrix, gd.instanceMatrix, gh.instanceColor, fades, clears);
     uploadInstances(n, sh.instanceMatrix);
   });

@@ -13,6 +13,7 @@ interface Pose {
   yaw: number;
   pitch: number;
   emerged: number;
+  blink: number;
 }
 
 const angleDelta = (a: number, b: number) => {
@@ -89,6 +90,12 @@ const HATCH_SMALL = 0.5;
 const HATCH_JUMP = 0.3;
 export const hopHeight = (dist: number) => 0.24 + 0.12 * dist;
 const RISE_DEPTH = 0.85;
+const BLINK = { every: 3.2, spread: 2.6, dur: 0.17 };
+
+function blinkAt(f: FrogSim, t: number) {
+  const period = BLINK.every + (f.phase % 1) * BLINK.spread;
+  return bump(((t + f.phase) % period) / BLINK.dur);
+}
 
 export function pose(f: FrogSim, t: number): Pose {
   const dt = f.lastT === undefined ? 0 : Math.min(0.1, t - f.lastT);
@@ -176,5 +183,5 @@ export function pose(f: FrogSim, t: number): Pose {
   }
   const sy = (1 + squash + breath) * s;
   const sx = (1 - squash * 0.45 - breath * 0.5) * s;
-  return { x, y: h, z: -ty, ground, sx, sy, yaw: f.yaw, pitch, emerged };
+  return { x, y: h, z: -ty, ground, sx, sy, yaw: f.yaw, pitch, emerged, blink: blinkAt(f, t) };
 }
