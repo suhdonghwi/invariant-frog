@@ -3,11 +3,11 @@ import { COLORS } from '../constants';
 import { goalEvents, MAX_EVENTS } from '../tileEvents';
 
 export const GLSL_GOAL_PULSE = /* glsl */ `
-uniform vec3 uEvents[${MAX_EVENTS}];
+uniform vec4 uEvents[${MAX_EVENTS}];
 float tilePulse(vec2 tile, float dur, float rise, float fall) {
   float acc = 0.0;
   for (int i = 0; i < ${MAX_EVENTS}; i++) {
-    vec3 e = uEvents[i];
+    vec4 e = uEvents[i];
     float age = uTime - e.z;
     if (age < 0.0 || age > dur) continue;
     if (abs(e.x - tile.x) > 0.5 || abs(e.y - tile.y) > 0.5) continue;
@@ -33,7 +33,7 @@ float sq(float x) {
 float rippleAt(vec2 p) {
   float acc = 0.0;
   for (int i = 0; i < ${MAX_EVENTS}; i++) {
-    vec3 e = uEvents[i];
+    vec4 e = uEvents[i];
     float age = uTime - e.z;
     if (age < 0.0 || age > 1.6) continue;
     float d = length(p - e.xy);
@@ -52,7 +52,7 @@ float splashAt(vec2 p) {
   if (uTime - uLastEvent > 0.8) return 0.0;
   float acc = 0.0;
   for (int i = 0; i < ${MAX_EVENTS}; i++) {
-    vec3 e = uEvents[i];
+    vec4 e = uEvents[i];
     float a = uTime - e.z;
     if (a < 0.0 || a > 0.8) continue;
     float d = length(p - e.xy);

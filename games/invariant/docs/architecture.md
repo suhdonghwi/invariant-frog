@@ -110,8 +110,10 @@ backend agree. `pnpm validate` and the tests are the safety net.
   CPU, `field.heightAt` evaluates the same two formulas for whatever else
   stands on the floor (frogs, tags, trails, picking).
 - **A landing presses its slab.** When a real frog takes off, `hopTo` records
-  the moment its feet will touch down in `landEvents`. For under a second the
-  slab's vertex shader squashes that tile by a damped sine
+  in `landEvents` a light press on the tile it leaves and a full one at the
+  moment its feet will touch down; a frog that hatches records one for when
+  it lands from its jump out of the egg. Each event carries its weight. For
+  under a second the slab's vertex shader squashes that tile by a damped sine
   (`area/landBounce.ts`), and `field.groundAt` lowers the ground by the same
   amount, so whatever stands on it (frogs, eggs, goal columns, tags) rides
   along. Eggs and goal columns apply it in their own shaders.
