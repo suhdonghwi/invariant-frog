@@ -229,7 +229,7 @@ export const en = {
     askMaintenance: 'Now change your area so **no hop leads off it**. **Check** tests rules 1 and 2 together.',
     nudgeMaintenance: 'Every frog starts at `i = 0`, and a hop only ever increases `i`.',
     ghostMaintenance:
-      'The see-through frog didn’t hatch from an egg: Check put it on your area, because your area says a frog could be here. Check never runs real frogs, and it doesn’t try tiles one by one: it reasons about your formula, which covers every tile of your area at once. Its hop would land off your area, and that counts, whether or not a real frog ever gets here.',
+      'Check put this see-through frog on your area, because your area says a frog could be here. Check never runs real frogs, and it doesn’t try tiles one by one: it reasons about your formula, which covers every tile of your area at once. Its hop would land off your area, and that counts, whether or not a real frog ever gets here.',
     passedMaintenance:
       'Correct! No hop leads off your area: **Maintenance** holds.\n\nThe see-through frogs are just a few examples Check put on your area. Check never runs real frogs and doesn’t try tiles one by one: it reasons about your formula, like solving an equation, so it covers every tile of your area at once. From any tile on your area, a hop lands on your area.',
     questionMaintenance: 'Does every hop from the area land on the area?',
