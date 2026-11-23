@@ -10,7 +10,6 @@ const isolation = {
   'Cross-Origin-Embedder-Policy': 'require-corp',
 };
 
-const BASE = process.env.BASE_PATH ?? '/';
 const SITE_URL = process.env.SITE_URL ?? 'https://invariant.donghwi.me/';
 const siteUrl = { name: 'site-url', transformIndexHtml: (html: string) => html.replaceAll('%SITE_URL%', SITE_URL) };
 
@@ -23,14 +22,13 @@ const preloadFonts: Plugin = {
     handler: (_, { bundle }) =>
       Object.keys(bundle ?? {})
         .filter((file) => FIRST_SCREEN_FONTS.some((re) => re.test(file)))
-        .map((file) => ({ tag: 'link', attrs: { rel: 'preload', as: 'font', type: 'font/woff2', href: BASE + file, crossorigin: '' }, injectTo: 'head' })),
+        .map((file) => ({ tag: 'link', attrs: { rel: 'preload', as: 'font', type: 'font/woff2', href: '/' + file, crossorigin: '' }, injectTo: 'head' })),
   },
 };
 
 const VENDOR = /[\\/]node_modules[\\/](three|@react-three[\\/][^\\/]+|camera-controls|react|react-dom|scheduler)[\\/]/;
 
 export default defineConfig({
-  base: BASE,
   plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss(), titleGlyphs(), siteUrl, preloadFonts],
   build: { rolldownOptions: { output: { codeSplitting: { groups: [{ name: 'vendor', test: VENDOR }] } } } },
   server: { headers: isolation },
