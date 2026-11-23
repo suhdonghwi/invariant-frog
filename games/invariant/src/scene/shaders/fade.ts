@@ -21,7 +21,7 @@ export function fadeUniforms(): Record<string, THREE.IUniform> {
   };
 }
 
-export const fadeRadius = () => Math.max(26, cameraRig.distance() * 2.6) * Math.max(0.02, cameraRig.clarity());
+export const fadeRadius = () => Math.max(26, cameraRig.distance() * 2.6);
 
 const VIEW_MARGIN = 3;
 const corner = new THREE.Vector3();
