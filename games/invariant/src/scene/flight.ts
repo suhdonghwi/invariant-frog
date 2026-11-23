@@ -19,9 +19,10 @@ const LIFT_FROM = 1.2;
 const VIEWS_AT_PEAK = 2.5;
 export const HIGHEST = 60;
 const CUT_FROM = 40;
-const CUT_VIEWS = 5;
-const VEILED = 0.06;
-const CLEARED = 0.7;
+const CUT_VIEWS = 2;
+const CUT_DUR = 0.9;
+const VEILED = 0.04;
+const CLEARED = 0.5;
 
 export interface Flight {
   from: Pose;
@@ -44,11 +45,11 @@ export function travel(from: Pose, to: Pose): number {
 export function plan(from: Pose, to: Pose, v0: Pose = STILL, reduced = false): Flight {
   const target = { ...to, az: from.az + wrap(to.az - from.az) };
   const w = travel(from, target);
-  const dur = Math.min(FLIGHT_MAX, FLIGHT_MIN + PER_DOUBLING * Math.log2(1 + w));
   const span = Math.hypot(target.x - from.x, target.y - from.y);
   const low = Math.max(1e-3, from.d, target.d);
   const shown = CUT_VIEWS * low;
   const cut = span / low > CUT_FROM ? { dx: ((target.x - from.x) / span) * shown, dy: ((target.y - from.y) / span) * shown } : null;
+  const dur = cut ? CUT_DUR : Math.min(FLIGHT_MAX, FLIGHT_MIN + PER_DOUBLING * Math.log2(1 + w));
   return { from, to: target, v0, dur, lift: reduced ? 0 : liftFor(from, target, cut ? shown : span), cut };
 }
 
