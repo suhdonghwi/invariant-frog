@@ -5,6 +5,17 @@
   "outputDirectory": "dist",
   "redirects": [
     {
+      "source": "/invariant/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "jammy.fun"
+        }
+      ],
+      "destination": "https://invariant.donghwi.me/:path*",
+      "permanent": true
+    },
+    {
       "source": "/invariant",
       "destination": "/invariant/",
       "permanent": true
@@ -45,6 +56,26 @@
         }
       ],
       "destination": "/invariant/og.png"
+    },
+    {
+      "source": "/assets/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "invariant.donghwi.me"
+        }
+      ],
+      "destination": "/invariant/assets/:path*"
+    },
+    {
+      "source": "/z3/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "invariant.donghwi.me"
+        }
+      ],
+      "destination": "/invariant/z3/:path*"
     },
     {
       "source": "/ribbit/:path*",

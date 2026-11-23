@@ -342,7 +342,8 @@ jammy.fun is one Vercel project built from the repository root: the root
 `pnpm build` builds the game with `BASE_PATH=/invariant/` into
 `dist/invariant/`, beside the hub's pages. The root `vercel.json` sends the
 solver's headers under `/invariant/`, caches `assets/` and `z3/` forever,
-and redirects every other path to the hub. Analytics report through
+and serves the game at the root of invariant.donghwi.me. The old
+jammy.fun/invariant links redirect to the game domain. Analytics report through
 `/ribbit/`, rewritten to Vercel's insights endpoint, because ad blockers
 list the default path.
 
