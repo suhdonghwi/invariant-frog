@@ -372,13 +372,7 @@ export const STEPS: Step[] = [
   {
     scene: { reveal: AWAKE_ALL, formula: 'learner', focus: BOARD },
     run: (gen) =>
-      beat(gen, T().twoWays, {
-        spot: 'lights',
-        callouts: [
-          { x: 0, y: 2, text: T().notProvedTag, tone: 'info' },
-          { x: 3, y: 2, text: T().tooWeakTag, tone: 'info' },
-        ],
-      }),
+      beat(gen, T().twoWays, { spot: 'lights' }),
   },
   {
     scene: { reveal: AWAKE_ALL, formula: 'learner', focus: BOARD },
