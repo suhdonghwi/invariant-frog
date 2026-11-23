@@ -7,34 +7,19 @@ import { cameraRig, type Tile } from '../../scene/cameraRig';
 import { figureClip, type ClipBox } from '../../scene/figureClip';
 import { sceneStarted, sleep } from '../../scene/sceneTime';
 
-/**
- * Development only (`?figure=<name>`): a few tiles of a level as a figure for
- * the paper, on a transparent page with no HUD. scripts/make-figure.ts
- * screenshots it once `__figureReady` is set. Each figure is one of
- * FIGURES; the figures of one group share a box, so their boards line up.
- */
 interface FigureDef {
   level: LevelDef;
   box: ClipBox;
-  /** The tile whose egg hatches, and how many hops its frog makes. */
   frog?: { tile: Tile; hops: number };
-  /** The area. Bounds that keep its slabs inside the box leave it the same there. */
   area?: string;
-  /** Hide the eggs, the stop region and the goals. */
   bare?: boolean;
 }
 
 const overshoot = levels.find((l) => l.id === 'overshoot')!;
 
-// The tutorial's twelve states (i from 0 to 3, n from 0 to 2), built up in
-// three steps: a, the tiles and one frog's run along n = 2; b, a with eggs,
-// the stop region and goals; c, b with the area of `i <= n`.
 const STATES: ClipBox = { x0: 0, y0: 0, x1: 3, y1: 2 };
 const IN_STATES = 'i >= 0 && n <= 2';
 
-// Overshoot's states (i from 0 to 5, n from 0 to 2), one guess after another:
-// `i == n` fails Initialization, `i <= n` Maintenance (the frog from the egg
-// at n = 2 hops to i = 3), `i <= n + 3` Exit, and `i <= n + 2` passes.
 const OVERSHOOT: ClipBox = { x0: 0, y0: 0, x1: 5, y1: 2 };
 const IN_OVERSHOOT = 'i >= 0 && i <= 5 && n <= 2';
 

@@ -1,8 +1,7 @@
 import type { Z3LowLevel } from 'z3-solver';
 
-// z3-solver frees objects from finalizers on the main thread, but Z3's reference
-// counts aren't thread-safe and solver.check() runs on a worker: a finalizer firing
-// mid-check corrupts the heap. So dec_refs are queued while a check runs.
+// z3-solver's finalizers dec_ref on the main thread while solver.check() runs on a worker,
+// and Z3's reference counts aren't thread-safe, so dec_refs wait until the check ends.
 type LowLevel = Z3LowLevel['Z3'];
 
 let solving = 0;

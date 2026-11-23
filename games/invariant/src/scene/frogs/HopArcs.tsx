@@ -25,7 +25,6 @@ interface Arc {
   plane: string;
   t0: number;
   fade: number;
-  /** Ring the landing tile green: the hop lands on the area. */
   ring?: boolean;
 }
 

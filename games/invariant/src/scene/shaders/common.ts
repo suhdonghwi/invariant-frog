@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { COLORS } from '../constants';
 
 export const GLSL_COMMON = /* glsl */ `
-// The stop region's stripes: one pattern for the floor and for slab tops.
 const float STOP_HATCH_FREQ = 3.0;
 float stopHatch(float v, float fw) {
   float s = fract(v);

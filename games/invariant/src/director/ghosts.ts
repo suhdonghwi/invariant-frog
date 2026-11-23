@@ -28,8 +28,6 @@ export function raiseGhost(s: State, fade = 1): FrogSim {
   return f;
 }
 
-// A see-through frog never hops: it stands on its tile and draws the hop it
-// would make, so Check asks the question without running the frog.
 export function previewHop(s: State, fade = 1, to: State = hop(currentLevel(), s), ring = true): FrogSim {
   const L = currentLevel();
   const f = raiseGhost(s, fade);

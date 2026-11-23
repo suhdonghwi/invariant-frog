@@ -57,7 +57,7 @@ function toZ3(ctx: Ctx, e: Expr, env: Env): Z {
         case '+': return A(e.left).add(A(e.right));
         case '-': return A(e.left).sub(A(e.right));
         case '*': return A(e.left).mul(A(e.right));
-        // SMT-LIB's div/mod are Euclidean: for a positive divisor, our floor division and mod
+        // SMT-LIB's div/mod are Euclidean, which match our floor division and mod for a positive divisor
         case '/': return A(e.left).div(A(e.right));
         case '%': return A(e.left).mod(A(e.right));
         case '<': return A(e.left).lt(A(e.right));

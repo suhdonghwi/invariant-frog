@@ -21,7 +21,6 @@ const FROG_SHADOW_SIZE = 0.66;
 const dummy = new THREE.Object3D();
 const GHOST = new THREE.Color(COLORS.ghostFrog);
 const ECHO = new THREE.Color(COLORS.frog);
-// A real frog's trail: faded green copies where it stood.
 const ECHO_FADE = 0.48;
 
 function easeSlot(f: FrogSim, target: Slot, t: number, dt: number, k: number): Slot {

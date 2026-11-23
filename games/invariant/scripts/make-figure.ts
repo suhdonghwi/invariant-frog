@@ -1,6 +1,3 @@
-// Renders the paper's figures (ui/dev/Figure.tsx): one transparent PNG per
-// figure, and the figures of one group cropped to the same box, so the board
-// lines up across them. pnpm figure <out-dir> [group]
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { chromium, type Page } from 'playwright-core';
@@ -12,7 +9,6 @@ const OUT = resolve(process.env.INIT_CWD ?? process.cwd(), dir);
 const VIEW = { width: 900, height: 620 };
 const SCALE = 6;
 const PAD = 6 * SCALE;
-// Each group: the `?figure=` names, and the file each is written to.
 const GROUPS: Record<string, [string, string][]> = {
   states: [
     ['a', 'states-a'],
@@ -26,7 +22,6 @@ if (only && !GROUPS[only]) throw new Error(`no group ${only}; groups: ${Object.k
 
 type Box = [number, number, number, number];
 
-// The box of what a PNG draws (alpha > 0); runs in the page.
 async function drawn(png: string): Promise<Box> {
   const img = new Image();
   img.src = `data:image/png;base64,${png}`;
@@ -49,7 +44,6 @@ async function drawn(png: string): Promise<Box> {
   return [x0, y0, x1, y1];
 }
 
-// A PNG cropped to a box; runs in the page.
 async function crop([png, [x0, y0, x1, y1]]: [string, Box]): Promise<string> {
   const img = new Image();
   img.src = `data:image/png;base64,${png}`;
