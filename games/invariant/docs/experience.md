@@ -140,9 +140,8 @@ behind many small decisions; keep them when changing or adding UI.
 - **The board changes only when the learner asks.** If the failing case is
   on another board, nothing moves: the rule's light turns red and the
   caption says nothing breaks near this board, but something does at the
-  other inputs (`n = 5`), with a button to show it. (A cursor that changed
-  the input, and the boards stacked as floors, were both tried and read as
-  busy.) The button switches the board at once with the slabs' sound, and
+  other inputs (`n = 5`), with a button to show it. (A cursor that changes
+  the input, or boards stacked as floors, would read as busy.) The button switches the board at once with the slabs' sound, and
   the camera holds still on it for a beat; then, if it is off
   screen, the camera flies to it and the failure starts playing just
   before it lands; if it is on screen the camera stays put. The light turns red as the caption arrives.
