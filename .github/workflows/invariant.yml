@@ -1,15 +1,8 @@
 name: Invariant Frog
-on:
-  push:
-    paths: [games/invariant/**, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, .github/workflows/invariant.yml]
-  pull_request:
-    paths: [games/invariant/**, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, .github/workflows/invariant.yml]
+on: [push, pull_request]
 jobs:
   check:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: games/invariant
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

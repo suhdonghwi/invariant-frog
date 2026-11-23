@@ -338,14 +338,10 @@ tutorial, never on the home screen alone.
 
 ## Deployment
 
-jammy.fun is one Vercel project built from the repository root: the root
-`pnpm build` builds the game with `BASE_PATH=/invariant/` into
-`dist/invariant/`, beside the hub's pages. The root `vercel.json` sends the
-solver's headers under `/invariant/`, caches `assets/` and `z3/` forever,
-and serves the game at the root of invariant.donghwi.me. The old
-jammy.fun/invariant links redirect to the game domain. Analytics report through
-`/ribbit/`, rewritten to Vercel's insights endpoint, because ad blockers
-list the default path.
+Vercel builds the game from the repository root with Vite and serves it at
+https://invariant.donghwi.me/. The deployment sends the cross-origin isolation
+headers required by Z3 and caches versioned assets. Analytics use the
+`/ribbit/` proxy.
 
 ## Conventions
 

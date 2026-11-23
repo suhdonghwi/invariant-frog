@@ -1,107 +1,19 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "buildCommand": "pnpm build",
-  "outputDirectory": "dist",
-  "redirects": [
-    {
-      "source": "/invariant/",
-      "has": [
-        {
-          "type": "host",
-          "value": "jammy.fun"
-        }
-      ],
-      "destination": "https://invariant.donghwi.me/",
-      "permanent": true
-    },
-    {
-      "source": "/invariant/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "jammy.fun"
-        }
-      ],
-      "destination": "https://invariant.donghwi.me/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/invariant",
-      "destination": "/invariant/",
-      "permanent": true
-    },
-    {
-      "source": "/((?!invariant(?:/|$)|ribbit/).+)",
-      "destination": "/",
-      "permanent": false,
-      "missing": [
-        {
-          "type": "host",
-          "value": "invariant.donghwi.me"
-        }
-      ]
-    }
-  ],
+  "framework": "vite",
   "rewrites": [
     {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "invariant.donghwi.me"
-        }
-      ],
-      "destination": "/invariant/index.html"
-    },
-    {
-      "source": "/",
-      "destination": "/hub.html"
-    },
-    {
-      "source": "/og.png",
-      "has": [
-        {
-          "type": "host",
-          "value": "invariant.donghwi.me"
-        }
-      ],
-      "destination": "/invariant/og.png"
-    },
-    {
-      "source": "/assets/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "invariant.donghwi.me"
-        }
-      ],
-      "destination": "/invariant/assets/:path*"
-    },
-    {
-      "source": "/z3/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "invariant.donghwi.me"
-        }
-      ],
-      "destination": "/invariant/z3/:path*"
+      "source": "/invariant/:path*",
+      "destination": "/:path*"
     },
     {
       "source": "/ribbit/:path*",
-      "destination": "https://jammy.fun/_vercel/insights/:path*"
+      "destination": "https://invariant.donghwi.me/_vercel/insights/:path*"
     }
   ],
   "headers": [
     {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "invariant.donghwi.me"
-        }
-      ],
+      "source": "/(.*)",
       "headers": [
         {
           "key": "Cross-Origin-Opener-Policy",
@@ -114,20 +26,7 @@
       ]
     },
     {
-      "source": "/invariant(/.*)?",
-      "headers": [
-        {
-          "key": "Cross-Origin-Opener-Policy",
-          "value": "same-origin"
-        },
-        {
-          "key": "Cross-Origin-Embedder-Policy",
-          "value": "require-corp"
-        }
-      ]
-    },
-    {
-      "source": "/invariant/(assets|z3)/(.*)",
+      "source": "/(assets|z3)/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
