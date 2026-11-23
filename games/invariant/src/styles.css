@@ -75,13 +75,15 @@
   --color-warn: #d98b0b;
   --color-warn-soft: #fdf2dc;
   --color-slab: #5c9df5;
-  --color-slab-side: #3a78d8;
+  --color-slab-edge: #4687e6;
+  --color-slab-side: #336ac1;
   --color-tag: #2b3445;
   --color-tag-good: #2f9e44;
   --color-tag-fail: #f04f55;
 
   --shadow-card: 0 10px 30px rgb(32 44 70 / 0.08), 0 2px 6px rgb(32 44 70 / 0.05);
   --shadow-float: 0 24px 70px rgb(32 44 70 / 0.18);
+  --shadow-slab: inset 0 -0.6px 0 var(--color-slab-edge), 0.75px 2px 0 var(--color-slab-side), 1px 3px 2.5px rgb(40 50 70 / 0.32);
   --shadow-toy: 0 4px 0 #d5dbe5, 0 8px 18px rgb(32 44 70 / 0.1);
   --shadow-toy-pressed: 0 1px 0 #d5dbe5, 0 3px 8px rgb(32 44 70 / 0.1);
   --shadow-toy-brand: 0 4px 0 var(--color-brand-deep), 0 8px 18px rgb(59 130 246 / 0.3);
