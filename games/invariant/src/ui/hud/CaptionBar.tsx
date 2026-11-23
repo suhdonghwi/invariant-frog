@@ -39,7 +39,7 @@ export function CaptionBar() {
         <Markdown text={caption.text} />
       </div>
       {(caption.action || caption.replay || caption.choices || back) && (
-        <div className="flex min-h-8.5 flex-wrap items-center justify-end gap-1.5">
+        <div className="-mr-1.5 flex min-h-8.5 flex-wrap items-center justify-end gap-1.5 compact:-mr-1">
           {back && (
             <button className={button('quiet', 'sm')} onClick={back}>
               <ArrowLeft size={15} strokeWidth={2.4} /> {tr.caption.back}

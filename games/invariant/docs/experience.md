@@ -172,6 +172,10 @@ behind many small decisions; keep them when changing or adding UI.
   clearly visible. On cramped screens glass buttons may keep only their icon.
 - **Quiet buttons keep their pill at rest**, so their edges line up with
   what's around them; bare text looks misaligned until hovered.
+- **Buttons at a panel's right edge share one inset.** The caption's ✕ and
+  its buttons and Check in the area box all sit 12 px (10 px on short
+  screens) inside their panel's right border, so the stacked panels' buttons
+  form one column.
 - **Consistent labels.** The same action has the same short label everywhere
   (e.g. always "Next"); change the caption, not the button. The exceptions
   say where the button goes ("Next: <title>", "Back to levels"). One icon
