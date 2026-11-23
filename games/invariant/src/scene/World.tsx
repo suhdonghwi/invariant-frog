@@ -21,13 +21,25 @@ function Lights() {
   );
 }
 
+const WHEEL_SPEED = 0.6;
+const PINCH_SPEED = 1.2;
+
 function Controls() {
   const ref = useRef<CameraControls>(null);
   const interactive = useGame((s) => s.mode !== 'menu');
   const canvas = useThree((s) => s.gl.domElement);
   useLayoutEffect(() => {
+    const pickSpeed = (e: PointerEvent | WheelEvent) => {
+      if (ref.current) ref.current.dollySpeed = e instanceof PointerEvent && e.pointerType === 'touch' ? PINCH_SPEED : WHEEL_SPEED;
+    };
     canvas.addEventListener('wheel', cameraRig.userMoved, { passive: true });
-    return () => canvas.removeEventListener('wheel', cameraRig.userMoved);
+    canvas.addEventListener('wheel', pickSpeed, { passive: true, capture: true });
+    canvas.addEventListener('pointerdown', pickSpeed, { capture: true });
+    return () => {
+      canvas.removeEventListener('wheel', cameraRig.userMoved);
+      canvas.removeEventListener('wheel', pickSpeed, { capture: true });
+      canvas.removeEventListener('pointerdown', pickSpeed, { capture: true });
+    };
   }, [canvas]);
   useLayoutEffect(() => {
     cameraRig.attach(ref.current);
@@ -50,7 +62,7 @@ function Controls() {
       maxDistance={MAX_DISTANCE}
       minPolarAngle={0.25}
       maxPolarAngle={1.15}
-      dollySpeed={0.6}
+      dollySpeed={WHEEL_SPEED}
       smoothTime={0.42}
       draggingSmoothTime={0.1}
     />
