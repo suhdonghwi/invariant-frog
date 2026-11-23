@@ -6,7 +6,7 @@ import { caption } from '../director/sequence';
 import { checkAndPlay } from '../director/verification';
 import { t } from '../i18n/i18n';
 import { levels, tutorialLevel } from '../levels/catalog';
-import { startInputs } from '../levels/inputs';
+import { planeKey, startInputs, type Inputs } from '../levels/inputs';
 import type { LevelDef } from '../levels/level';
 import { localizeLevel } from '../levels/localize';
 import { cameraRig } from '../scene/cameraRig';
@@ -54,6 +54,16 @@ export function resetScreen() {
   resetFrogs();
   useGame.setState({ inputs: startInputs(level), caption: openingCaption(level), callouts: [], region: null });
   cameraRig.opening(level, true);
+}
+
+export function changeInputs(next: Inputs) {
+  const { busy, inputs } = useGame.getState();
+  if (busy) return;
+  if (planeKey(next) !== planeKey(inputs)) {
+    resetFrogs();
+    useGame.setState({ callouts: [], region: null });
+  }
+  useGame.setState({ inputs: next });
 }
 
 export function showLevelHint() {
