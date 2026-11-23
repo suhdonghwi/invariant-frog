@@ -53,7 +53,7 @@ export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true,
       vertexShader: floorVertex,
       fragmentShader: floorFragment(level),
       transparent: true,
-      depthWrite: true,
+      depthWrite: false,
       uniforms: {
         ...inputUniforms(level),
         uHover: { value: new THREE.Vector2() },
