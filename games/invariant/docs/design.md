@@ -74,8 +74,8 @@ solid at the silhouette, rising out of the slab of their tile. They stand on
 their tile rather than float, since the area claims a frog could be right
 there, and they never hop: a see-through frog draws the hop it would make,
 as a dashed arc, since Check asks where a frog here would go rather than
-running one. So they leave no trail either. They used to be called "ghost
-frogs", which read as "no frog can get here"; a frog that looked like a
+running one. So they leave no trail either. They are not called "ghost
+frogs", which would read as "no frog can get here"; a frog that looked like a
 real one would read as "a frog gets here", and Check says neither. The
 captions make the area the subject ("Your area says a frog could be at
 …"). Every frog Check shows is a see-through frog, and real frogs come only
@@ -121,11 +121,10 @@ and it looks the same either way. Check can't tell in general: knowing which
 tiles no frog reaches takes an invariant, the very thing the learner is
 looking for, and searching runs only finds the tiles some frog does reach.
 The rules don't ask either, since they are about every tile of the area.
-(Earlier versions acted out a failure on a real frog's path with that real
-frog, hopping from its egg, and raised a see-through "ghost frog"
-otherwise. Since the search was bounded, "ghost" only meant "not found on a
-run", but the contrast read as "no frog can get here".) What the learner can see is the
-eggs: a see-through frog standing on an egg is on a tile a real frog does start
+So Check never acts out a failure with a real frog, even when it lies on a
+run: searching runs is bounded, and a real frog in one case and a
+see-through frog in another would read as "no frog can get here". What the
+learner can see is the eggs: a see-through frog standing on an egg is on a tile a real frog does start
 from, and that frog can be run to check.
 
 Nothing else stages the scene: tags, outlines, the spotlight, lit code lines
@@ -137,8 +136,7 @@ Inputs are a direction frogs never hop in, so the state space is a set of
 **independent planes**, one per choice of inputs, and the rules hold for every
 input exactly when they hold in every plane. So showing one plane at a time
 loses nothing. The **inputs** at the foot of the code card list every input
-not on an axis; changing one switches the plane at once. (They used to be
-"ponds" stacked in 3D, then a vertical slider; plain controls are what a
+not on an axis; changing one switches the plane at once. (Plain controls are what a
 programmer expects, and have room for arrays.)
 
 - An integer input is a number with − and + (or the arrow keys; up to nine
