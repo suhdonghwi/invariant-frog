@@ -7,7 +7,6 @@ export const COLORS = {
   stopHatch: '#d8dde6',
   hover: '#2f6fe0',
   hopLine: '#1f2f6b',
-  cross: '#eceef1',
   slabTop: '#5c9df5',
   slabSide: '#3a78d8',
   slabHatch: '#3f7ddd',
