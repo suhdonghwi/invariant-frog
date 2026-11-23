@@ -20,7 +20,7 @@ const VIEWS_AT_PEAK = 2.5;
 export const HIGHEST = 60;
 const CUT_FROM = 40;
 const CUT_VIEWS = 2;
-const CUT_DUR = 0.9;
+const CUT_DUR = 1.4;
 const VEILED = 0.04;
 const CLEARED = 0.5;
 
