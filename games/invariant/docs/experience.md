@@ -55,6 +55,10 @@ behind many small decisions; keep them when changing or adding UI.
   way, further the further it goes, so the ground never streaks past. A
   target behind the view is reached like any other. A new target mid-move
   bends the path instead of kinking it.
+- **A very long trip is a cut, not a flight.** Past about 40 views the
+  camera drifts two views toward the target while the whole scene fades out,
+  cuts while it is hidden, and arrives from two views back as the scene fades
+  in (1.4 s in all). Flying ten million tiles in a second would only blur.
 - **Reduced motion is respected**: the camera doesn't pull back.
 
 ## Motion in the scene
