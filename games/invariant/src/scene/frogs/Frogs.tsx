@@ -8,7 +8,7 @@ import { COLORS } from '../constants';
 import { AtOrigin } from '../AtOrigin';
 import { uploadInstances } from '../instances';
 import { origin } from '../origin';
-import { frogGeometry, frogMaterial, ghostDepthMaterial } from '../models';
+import { clipBelowFloor, frogGeometry, frogMaterial, ghostDepthMaterial } from '../models';
 import { sceneNow } from '../sceneTime';
 import { blobShadowMaterial, stencilMark } from '../shaders/common';
 import { placeBadge } from './badges';
@@ -77,9 +77,9 @@ export function Frogs() {
     return { ghostGeom: g, fades: a, clears: r };
   }, [geom]);
   const mat = useMemo(() => stencilMark(frogMaterial({ blink: true })), []);
-  const ghostDepthMat = useMemo(() => stencilMark(ghostDepthMaterial()), []);
+  const ghostDepthMat = useMemo(() => stencilMark(clipBelowFloor(ghostDepthMaterial())), []);
   const ghostMat = useMemo(() => {
-    const m = frogMaterial({ ghost: true, fade: true });
+    const m = clipBelowFloor(frogMaterial({ ghost: true, fade: true }));
     m.opacity = 1;
     return m;
   }, []);
