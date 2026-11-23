@@ -8,7 +8,6 @@ const FROG_SCALE = 1.15;
 const EYE = [0.105, 0.405, 0.09] as const;
 const BLINK_SHUT = 0.12;
 const TORSO = { r: 0.15, stretch: 1.3, lean: -0.42, at: [0, 0.18, -0.03] } as const;
-// The belly: an oval of directions from the torso's centre, painted on it (smooth across facets, as a normal is).
 const BELLY = { pitch: -0.777, wide: 0.6, tall: 0.29 };
 
 function tag(g: THREE.BufferGeometry, part: number): THREE.BufferGeometry {
@@ -47,12 +46,8 @@ export function ghostDepthMaterial(): THREE.MeshBasicMaterial {
   return new THREE.MeshBasicMaterial({ colorWrite: false, transparent: true, depthWrite: true });
 }
 
-// Check's see-through frogs: clear in the middle, solid at the silhouette,
-// so they read as see-through without fading away on the slabs.
 const CLEAR = { middle: 0.5, edge: 1, power: 1.5 };
 
-// `fade` adds per-instance opacity (aFade) and a per-instance see-through flag (aClear).
-// `blink` adds a per-instance eye closure (aBlink, 0 open to 1 shut).
 export function frogMaterial(opts: { ghost?: boolean; fade?: boolean; blink?: boolean } = {}): THREE.MeshStandardMaterial {
   const m = new THREE.MeshStandardMaterial({
     vertexColors: true,

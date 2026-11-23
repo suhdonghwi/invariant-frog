@@ -81,7 +81,6 @@ void main() {
     col = mix(col, uHoverCol, a);
   }
 
-  // the figure page draws only the tiles in uClip (scene/figureClip.ts)
   if (uClipOn > 0.5 && (p.x < uClip.x - 0.5 || p.x > uClip.z + 0.5 || p.y < uClip.y - 0.5 || p.y > uClip.w + 0.5)) discard;
 
   float r = length(vWorld.xz - uCenter);

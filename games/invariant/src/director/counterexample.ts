@@ -20,7 +20,6 @@ export interface CounterexampleOptions {
   area?: string;
   tone?: CaptionTone;
   extra?: string;
-  /** Said after a see-through frog's caption: a Maintenance or Exit failure. */
   ghostExtra?: string;
   action?: () => Caption['action'];
 }
@@ -64,12 +63,6 @@ export function playCounterexample(cex: Counterexample, opts: CounterexampleOpti
   return busyWhile((tok) => counterexample(tok, cex, opts));
 }
 
-// Every counterexample is shown the same way, whether or not a real frog can
-// get there: Check can't tell, and the rules don't ask. An Initialization
-// failure is an egg off the area, so only the egg is marked. A Maintenance or
-// Exit failure is a tile of the area, so a see-through frog stands on it: the
-// area claims a frog could be there. It never hops; a Maintenance failure
-// draws the hop it would make, as the proof picture does.
 export async function counterexample(tok: Token, cex: Counterexample, opts: CounterexampleOptions) {
   const L = currentLevel();
   useGame.setState({ failMark: null, region: null });

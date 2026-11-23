@@ -1,9 +1,3 @@
-/**
- * Development only: the figure page (`?figure`, ui/dev/Figure.tsx) draws
- * the board as a figure for print, so only the tiles in this box are drawn:
- * the floor outside it is left out, and so are eggs and goal columns. Null
- * everywhere else, where nothing changes.
- */
 export interface ClipBox {
   x0: number;
   y0: number;
@@ -13,7 +7,6 @@ export interface ClipBox {
 
 export const figureClip: { box: ClipBox | null } = { box: null };
 
-/** The figure page renders at the page's full pixel ratio, past MAX_DPR. */
 export const figurePage = import.meta.env.DEV && new URLSearchParams(location.search).has('figure');
 
 export function inFigureClip(x: number, y: number): boolean {

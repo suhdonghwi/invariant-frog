@@ -34,9 +34,6 @@ function tiles(level: CompiledLevel, plane: State): State[] {
   return smallestFirst(level, ranging([level.view.x, level.view.y], plane));
 }
 
-// Only picks which Maintenance counterexample to show: one on the run of an
-// egg in view comes first. The counterexample says nothing about runs, and
-// Check shows it like any other (design.md, *The checker*).
 export function failureOnARun(level: CompiledLevel, inv: Formula, inputs: Inputs): Counterexample | undefined {
   const maintenance = ruleQuery(level, inv.expr, 'maintenance');
   for (const egg of eggs(level, toBig(inputs))) {

@@ -6,11 +6,6 @@ const CELL = 0.14;
 const advance: number[] = [...GLYPHS].map(() => CELL * 0.8);
 const LABEL_SIZE = 0.84;
 
-/**
- * The tags on the axes' tiles (`i=3`, `n=0`). The glyph texture holds each
- * glyph in red and the glyph grown by a halo in green, so a tag stays
- * legible over stripes, pools and slabs.
- */
 export const GLSL_AXIS_LABELS = /* glsl */ `
 uniform sampler2D uDigits;
 uniform ivec3 uNameX, uNameY;
@@ -26,7 +21,6 @@ vec2 glyphMask(int glyph, float dx, float vy, vec4 d) {
   vec2 k = vec2(1.0 / (${CELL.toFixed(2)} * ${GLYPHS.length.toFixed(1)}), 1.0 / 0.23);
   return textureGrad(uDigits, vec2((float(glyph) + u) / ${GLYPHS.length.toFixed(1)}, vy), d.xy * k, d.zw * k).rg;
 }
-// x: glyph, y: halo
 vec2 labelMask(vec2 f, vec4 df, ivec3 name, int nameLen, vec4 mid, float nameW, int v, float row) {
   int a = v < 0 ? -v : v;
   int digits = a >= 100 ? 3 : (a >= 10 ? 2 : 1);

@@ -128,7 +128,6 @@
   }
 }
 
-/* entrances wait for the page to start: scene/sceneTime.ts, startScene */
 html:not([data-started]) *,
 html:not([data-started]) *::before,
 html:not([data-started]) *::after {

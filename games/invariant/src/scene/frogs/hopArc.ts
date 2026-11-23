@@ -22,12 +22,7 @@ export function arcPoints([fx, fy, h0]: ArcEnd, [tx, ty, h1]: ArcEnd, segments: 
   return Array.from({ length: count + 1 }, (_, k) => curve.getPoint(k / segments)).flatMap((v) => [v.x, v.y, v.z]);
 }
 
-/**
- * Cuts a polyline into its dashes, each one straight segment, as segment
- * pairs. A dash is short enough that its chord is its arc. LineMaterial's own
- * dashes are cut from a polyline whose joints have no caps, so they show
- * hairline gaps at every bend.
- */
+// LineMaterial's own dashes show hairline gaps at every bend, so each dash is its own segment.
 export function dashes(points: number[]): number[] {
   const n = points.length / 3;
   const along = [0];
@@ -45,7 +40,6 @@ export function dashes(points: number[]): number[] {
   return out;
 }
 
-/** Puts a polyline's dashes on an arc line. */
 export function setArc(line: LineSegments2, points: number[]) {
   line.geometry.dispose();
   line.geometry = new LineSegmentsGeometry().setPositions(dashes(points));
