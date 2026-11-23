@@ -116,8 +116,9 @@ behind many small decisions; keep them when changing or adding UI.
   rings the eggs in view in one sweep along their line, with rising ticks,
   the last tick on the last ring; Maintenance raises see-through frogs together,
   spread apart and fading with distance, each drawing its dashed hop and
-  ringing its landing tile; Exit sweeps every stop on the area like
-  the eggs. Then the light turns, the picture clears, and a short pause
+  ringing the tile it hops from; Exit sweeps every stop on the area like
+  the eggs. Each rule rings the states it checks, passing or failing: eggs,
+  the tiles hops start from, stops. Then the light turns, the picture clears, and a short pause
   separates it from the next rule. A rule that holds gets a green tag on
   the one of its tiles (an egg, a hop inside the area, an ending) nearest
   the middle of the view, as a failure gets its red one. The camera stays
