@@ -7,7 +7,7 @@ import { field } from '../area/field';
 import { yawToward } from '../frogs/frogWorld';
 import { occupancy } from '../frogs/occupancy';
 import { HopLine } from '../frogs/HopLine';
-import { useHover } from '../hover';
+import { hoverHop, useHover } from '../hover';
 import { frogGeometry, frogMaterial, ghostDepthMaterial } from '../models';
 
 export function HoverPreview() {
@@ -31,6 +31,13 @@ export function HoverPreview() {
     const to = hopFrom(level, s);
     return to && { from: tile, to };
   }, [tile, level, inputs]);
+
+  useEffect(() => {
+    hoverHop.current = idle ? hop : null;
+    return () => {
+      hoverHop.current = null;
+    };
+  }, [idle, hop]);
 
   useFrame(() => {
     const g = ghost.current;

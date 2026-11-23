@@ -231,7 +231,8 @@ behind many small decisions; keep them when changing or adding UI.
   hatching, the ghost tiles). A see-through green frog shows the hop, on the
   same dashed line Check's see-through frogs draw.
   Where a frog or a trail's echo already stands on the landing tile, only
-  the line is drawn, so two see-through frogs never share a spot.
+  the line is drawn, so two see-through frogs never share a spot; where a
+  trail already draws that hop, the hover line takes its place.
 - **Errors wait for Check.** A formula is never marked wrong while it is
   typed. Check (or Enter) on an invalid one shakes the box and underlines the
   fault, with the message inside the box, until the next edit.

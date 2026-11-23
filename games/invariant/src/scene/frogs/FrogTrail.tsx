@@ -2,6 +2,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useGame } from '../../game/store';
 import { planeKey } from '../../levels/inputs';
 import { field } from '../area/field';
+import { hoverHop } from '../hover';
 import { COLORS } from '../constants';
 import { clamp01 } from '../easing';
 import { sceneNow } from '../sceneTime';
@@ -19,11 +20,21 @@ function arc(from: Tile, to: Tile, upTo = 1): number[] {
   return arcPoints(onGround(from), onGround(to), SEGMENTS, Math.round(SEGMENTS * clamp01(upTo)));
 }
 
-function pathOf(f: FrogSim): number[] {
+const same = (a: Tile, b: Tile) => a[0] === b[0] && a[1] === b[1];
+
+function pathOf(f: FrogSim): { points: number[]; omit?: [number, number] } {
   const trail = f.trail!;
-  const points = trail.slice(1).flatMap((to, k) => arc(trail[k], to));
-  if (f.hop) points.push(...arc([f.hop.fx, f.hop.fy], [f.hop.tx, f.hop.ty], (sceneNow() - f.hop.t0) / f.hop.dur));
-  return points;
+  const skip = hoverHop.current;
+  const points: number[] = [];
+  let omit: [number, number] | undefined;
+  const add = (from: Tile, to: Tile, upTo = 1) => {
+    const start = points.length / 3;
+    points.push(...arc(from, to, upTo));
+    if (skip && same(from, skip.from) && same(to, skip.to)) omit = [start, points.length / 3 - 1];
+  };
+  trail.slice(1).forEach((to, k) => add(trail[k], to));
+  if (f.hop) add([f.hop.fx, f.hop.fy], [f.hop.tx, f.hop.ty], (sceneNow() - f.hop.t0) / f.hop.dur);
+  return { points, omit };
 }
 
 function TrailLine({ index }: { index: number }) {
@@ -33,13 +44,13 @@ function TrailLine({ index }: { index: number }) {
 
   useFrame(() => {
     const f = trailFrogs(plane)[index];
-    const points = f ? pathOf(f) : [];
-    line.visible = !!f && points.length >= 6;
+    const path = f ? pathOf(f) : { points: [] };
+    line.visible = !!f && path.points.length >= 6;
     if (!f || !line.visible) return;
-    const key = points.join();
+    const key = `${path.points.join()}|${path.omit}`;
     if (key !== line.userData.key) {
       line.userData.key = key;
-      setArc(line, points);
+      setArc(line, path.points, path.omit);
     }
     line.material.opacity = 0.9 * leaveFade(f, sceneNow());
     fitArcLine(line, size);
