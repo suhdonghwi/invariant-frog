@@ -12,3 +12,7 @@ export const hover = {
     useHover.setState({ tile: t });
   },
 };
+
+type Tile = readonly [number, number];
+
+export const hoverHop: { current: { from: Tile; to: Tile } | null } = { current: null };

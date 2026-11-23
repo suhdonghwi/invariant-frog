@@ -40,10 +40,10 @@ export function dashes(points: number[]): number[] {
   return out;
 }
 
-export function setArc(line: LineSegments2, points: number[]) {
-  const ax = Math.round(points[0]);
-  const az = Math.round(points[2]);
-  const local = dashes(points).map((v, i) => (i % 3 === 0 ? v - ax : i % 3 === 2 ? v - az : v));
+export function setArc(line: LineSegments2, ...pieces: number[][]) {
+  const ax = Math.round(pieces[0][0]);
+  const az = Math.round(pieces[0][2]);
+  const local = pieces.flatMap(dashes).map((v, i) => (i % 3 === 0 ? v - ax : i % 3 === 2 ? v - az : v));
   line.position.set(ax, 0, az);
   line.geometry.dispose();
   line.geometry = new LineSegmentsGeometry().setPositions(local);
