@@ -33,6 +33,10 @@
       "destination": "/invariant/index.html"
     },
     {
+      "source": "/",
+      "destination": "/hub.html"
+    },
+    {
       "source": "/og.png",
       "has": [
         {
