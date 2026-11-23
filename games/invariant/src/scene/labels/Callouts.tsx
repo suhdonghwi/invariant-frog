@@ -3,6 +3,7 @@ import { useGame, type Game } from '../../game/store';
 import { useLingering, usePresentList } from '../../hooks/presence';
 import { frogWorld, type FrogSim } from '../frogs/frogWorld';
 import { SceneTag } from './SceneTag';
+import { FailRings } from './FailRings';
 import { TileTag, TONE_PREFIX } from './TileTag';
 
 type Callout = Game['callouts'][number];
@@ -35,5 +36,23 @@ export function Callouts() {
 export function FailMarker() {
   const { value: mark, leaving } = useLingering(useGame((s) => s.failMark));
   if (!mark) return null;
-  return <TileTag key={`${mark.x},${mark.y},${mark.t0}`} x={mark.x} y={mark.y} label={mark.label} tone="fail" pulse wash leaving={leaving} />;
+  const frog = mark.frog === undefined ? undefined : frogWorld.frogs.find((f) => f.id === mark.frog);
+  const key = `${mark.x},${mark.y},${mark.t0}`;
+  const level = useGame.getState().level;
+  return (
+    <>
+      {mark.fail && level && <FailRings level={level} fail={mark.fail} t0={mark.t0} leaving={leaving} />}
+      {mark.frog === undefined ? (
+        <TileTag key={key} x={mark.x} y={mark.y} label={mark.label} tone="fail" pulse wash leaving={leaving} />
+      ) : (
+        frog &&
+        mark.label !== '' && (
+          <SceneTag key={key} anchor={{ frog }} tone="fail" leaving={leaving}>
+            {TONE_PREFIX.fail}
+            {mark.label}
+          </SceneTag>
+        )
+      )}
+    </>
+  );
 }

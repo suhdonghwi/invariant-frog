@@ -151,3 +151,5 @@ class AreaMask {
 }
 
 export const areaMask = new AreaMask();
+
+export const failMask = new AreaMask();

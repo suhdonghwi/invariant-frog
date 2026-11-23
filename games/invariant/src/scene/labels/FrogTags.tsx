@@ -39,7 +39,7 @@ function FrogTag({ frog, level, leaving }: { frog: FrogSim; level: CompiledLevel
     return (
       !frogTags ||
       callouts.some((c) => c.frog === frog.id || (c.frog === undefined && onTile(c.x, c.y))) ||
-      (!!failMark && onTile(failMark.x, failMark.y))
+      (!!failMark && (failMark.frog === frog.id || onTile(failMark.x, failMark.y)))
     );
   };
   return (

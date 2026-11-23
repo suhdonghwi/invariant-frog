@@ -116,8 +116,9 @@ behind many small decisions; keep them when changing or adding UI.
   rings the eggs in view in one sweep along their line, with rising ticks,
   the last tick on the last ring; Maintenance raises see-through frogs together,
   spread apart and fading with distance, each drawing its dashed hop and
-  ringing its landing tile; Exit sweeps every stop on the area like
-  the eggs. Then the light turns, the picture clears, and a short pause
+  ringing the tile it hops from; Exit sweeps every stop on the area like
+  the eggs. Each rule rings the states it checks, passing or failing: eggs,
+  the tiles hops start from, stops. Then the light turns, the picture clears, and a short pause
   separates it from the next rule. A rule that holds gets a green tag on
   the one of its tiles (an egg, a hop inside the area, an ending) nearest
   the middle of the view, as a failure gets its red one. The camera stays
@@ -129,14 +130,16 @@ behind many small decisions; keep them when changing or adding UI.
   "In view" is judged on the screen, never by a count of tiles. The first failing
   rule ends the check; an undecided one gets an amber light with a question
   mark.
-- **A failure looks the same whether or not a real frog gets there.** An
-  Initialization failure rings the egg off the area with its red tag; a
-  Maintenance failure raises a see-through frog on the tile, which stays
-  put and draws the hop it would make, off the area, as Maintenance's proof
-  picture does; an Exit failure raises one on the stop that is not a goal. Check
-  never stages a real frog's run (design.md, *See-through frogs*), so frogs on
-  the board go home and Check's frogs are always see-through frogs. The caption
-  puts the area first: "Your area says a frog could be at …".
+- **A failure looks the same whether or not a real frog gets there.** Every
+  tile where the rule breaks gets a red ring, all at once (design.md, *The
+  checker*), and the counterexample gets the red tag. An Initialization
+  failure tags its egg off the area. A Maintenance or Exit failure raises one
+  see-through frog, on the counterexample, and the tag rides it; a
+  Maintenance frog draws the hop it would make, off the area. Check never
+  stages a real frog's run (design.md, *See-through frogs*), so frogs on the
+  board go home and Check's frog is always a see-through frog. The caption
+  says what fails in general, then gives the counterexample with "For
+  example", putting the area first: "… your area says a frog could be at …".
 - **The board changes only when the learner asks.** If the failing case is
   on another board, nothing moves: the rule's light turns red and the
   caption says nothing breaks near this board, but something does at the

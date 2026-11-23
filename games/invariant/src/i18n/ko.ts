@@ -125,16 +125,18 @@ export const ko: Messages = {
     noLongerHolds: (part) => ` 여기서는 \`${part}\` 조건이 깨집니다.`,
     falseThere: (part) => ` 여기서는 \`${part}\` 조건이 거짓입니다.`,
     startsOutsideTag: (area) => `${area} 밖에서 출발`,
-    startsOutside: (state, area) => `${state}의 알이 ${area} 밖에 있습니다.`,
+    startsOutside: (state, area) => `${area} 밖에 있는 알이 있습니다. 그 알에서 나온 개구리는 ${area} 밖에서 출발합니다. 예를 들어 ${state}의 알이 그렇습니다.`,
     landsOutsideTag: (area) => `${area} 밖에 착지`,
-    landsOutside: (from, to, area) => `${area}에 따르면 ${from}에 개구리가 있을 수 있습니다. 거기서 한 번 뛰면 ${to}에 착지하는데, ${area} 밖입니다.`,
+    landsOutside: (from, to, area) =>
+      `${area}의 어떤 칸에서는 한 번 뛰면 ${area} 밖에 착지합니다. 예를 들어 ${area}에 따르면 ${from}에 개구리가 있을 수 있는데, 거기서 한 번 뛰면 ${to}에 착지합니다.`,
     offGoalTag: '멈췄지만 목표가 아님',
     holdsTag: {
       initialization: '모든 알이 영역 위에',
       maintenance: '모든 점프가 영역 위에 착지',
       exit: '영역 위에서 멈추는 곳은 모두 목표',
     },
-    offGoal: (state, area) => `${area}에 따르면 ${state}에 개구리가 있을 수 있습니다. 거기서 멈추지만, 목표가 아닙니다. 사후 조건이 성립하지 않습니다.`,
+    offGoal: (state, area) =>
+      `${area} 위에 목표가 아닌데 멈추는 칸이 있습니다. 거기서 멈춘 개구리는 사후 조건을 깨뜨립니다. 예를 들어 ${area}에 따르면 ${state}에 개구리가 있을 수 있는데, 거기서 멈춥니다.`,
   },
 
   langErrors: {
@@ -227,7 +229,7 @@ export const ko: Messages = {
     askMaintenance: '이제 **어떤 점프도 영역 밖으로 나가지 않도록** 고쳐 보세요. **검사**는 규칙 1과 2를 함께 확인합니다.',
     nudgeMaintenance: '개구리는 모두 `i = 0`에서 출발하고, 뛸 때마다 `i`는 늘어나기만 합니다.',
     ghostMaintenance:
-      '반투명 개구리는 알에서 나온 개구리가 아닙니다. 영역이 여기에 개구리가 있을 수 있다고 하니, 검사가 영역 위에 세워 본 개구리입니다. 검사는 실제 개구리를 실행하지 않고, 칸을 하나씩 확인하지도 않습니다. 식을 따져서 영역의 모든 칸을 한꺼번에 다룹니다. 이 개구리가 한 번 뛰면 영역 밖에 착지하는데, 실제 개구리가 여기에 오든 오지 않든 이 점프도 따져야 합니다.',
+      '영역이 여기에 개구리가 있을 수 있다고 하니, 검사가 반투명 개구리를 세웠습니다. 이 개구리가 뛰면 영역 밖에 착지하는데, 실제 개구리가 여기에 오든 오지 않든 따져야 합니다.',
     passedMaintenance:
       '정답입니다! 어떤 점프도 영역 밖으로 나가지 않으므로 **유지** 규칙이 성립합니다.\n\n반투명 개구리들은 검사가 영역 위에 세워 본 몇 가지 예시일 뿐입니다. 검사는 실제 개구리를 실행하지 않고 칸을 하나씩 확인하지도 않습니다. 방정식을 풀듯 식을 따져서 영역의 모든 칸을 한꺼번에 다룹니다. 영역의 어느 칸에서 뛰어도 착지하는 곳은 영역 위입니다.',
     questionMaintenance: '영역 위에서 뛰면 다시 영역 위에 착지하나요?',

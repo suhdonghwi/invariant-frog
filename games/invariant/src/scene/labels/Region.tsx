@@ -25,7 +25,7 @@ export function ringPop(a: number): { scale: number; alpha: number } {
 }
 
 const glslFloat = (v: number) => v.toFixed(2);
-const GLSL_RING_POP = /* glsl */ `
+export const GLSL_RING_POP = /* glsl */ `
 float ringPopScale(float a) {
   float s = a <= 0.0 ? ${glslFloat(RING_POP.from)} : 1.0 + ${glslFloat(RING_POP.cubic)} * (a - 1.0) * (a - 1.0) * (a - 1.0) + ${glslFloat(RING_POP.square)} * (a - 1.0) * (a - 1.0);
   return ${glslFloat(RING_POP.from)} + ${glslFloat(1 - RING_POP.from)} * s;

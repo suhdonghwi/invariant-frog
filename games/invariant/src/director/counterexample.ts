@@ -1,8 +1,9 @@
 import { sfx } from '../audio/sfx';
+import { ruleQuery } from '../checker/rules';
 import type { Counterexample } from '../checker/types';
 import { useGame, type Caption, type CaptionTone } from '../game/store';
 import { t as messages } from '../i18n/i18n';
-import type { State } from '../lang/ast';
+import { mk, type Expr, type State } from '../lang/ast';
 import { inputsOf, planeKey, showInputs } from '../levels/inputs';
 import { showState } from '../levels/level';
 import { tileOf } from '../levels/tiles';
@@ -12,6 +13,7 @@ import { ARC_DRAW } from '../scene/frogs/HopArcs';
 import { after, sceneNow, sleep } from '../scene/sceneTime';
 import { traceHop } from './codeTrace';
 import { sendFrogsHome } from './frogs';
+import type { FrogSim } from '../scene/frogs/frogWorld';
 import { ARC_AFTER_RISE, GHOST_RISE, previewHop, raiseGhost } from './ghosts';
 import { busyWhile, currentLevel, type Token } from './sequence';
 
@@ -26,8 +28,16 @@ export interface CounterexampleOptions {
 
 const fmt = (s: State) => '`' + showState(currentLevel(), s) + '`';
 
-function markFailure(x: number, y: number, label: string) {
-  useGame.setState({ failMark: { x, y, label, t0: sceneNow() } });
+function failExpr(rule: Counterexample['rule']): Expr | undefined {
+  const inv = useGame.getState().valid;
+  if (!inv) return undefined;
+  const L = currentLevel();
+  if (rule === 'initialization') return mk.andAll([L.eggAt, mk.not(inv.expr)]);
+  return mk.andAll(ruleQuery(L, inv.expr, rule).parts);
+}
+
+function markFailure(rule: Counterexample['rule'], x: number, y: number, label: string, frog?: FrogSim) {
+  useGame.setState({ failMark: { x, y, label, t0: sceneNow(), frog: frog?.id, fail: failExpr(rule) } });
   sfx.fail();
 }
 
@@ -96,23 +106,23 @@ export async function counterexample(tok: Token, cex: Counterexample, opts: Coun
   if (cex.rule === 'initialization') {
     await sleep(ms(BEAT));
     if (!tok.alive) return;
-    markFailure(x, y, say.startsOutsideTag(area));
+    markFailure(cex.rule, x, y, say.startsOutsideTag(area));
     finish(cex, opts, text);
     return;
   }
   sfx.ghost();
   if (cex.rule === 'maintenance' && cex.next) {
     const { state, next } = cex;
-    previewHop(state, 1, next, false);
+    const frog = previewHop(state, 1, next, false);
     after(ms(GHOST_RISE + ARC_AFTER_RISE), () => tok.alive && traceHop(L, state, next, ARC_DRAW));
     await sleep(ms(GHOST_RISE + ARC_AFTER_RISE + ARC_DRAW));
     if (!tok.alive) return;
-    markFailure(...tileOf(L, next), say.landsOutsideTag(area));
+    markFailure(cex.rule, x, y, say.landsOutsideTag(area), frog);
   } else {
-    raiseGhost(cex.state);
+    const frog = raiseGhost(cex.state);
     await sleep(ms(GHOST_RISE + BEAT));
     if (!tok.alive) return;
-    markFailure(x, y, say.offGoalTag);
+    markFailure(cex.rule, x, y, say.offGoalTag, frog);
   }
   finish(cex, opts, opts.ghostExtra ? `${text}\n\n${opts.ghostExtra}` : text);
 }
