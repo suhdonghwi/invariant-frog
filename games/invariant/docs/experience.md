@@ -13,7 +13,7 @@ behind many small decisions; keep them when changing or adding UI.
   (`EXIT_MS`, 150 ms), except that a caption replaced by another just gives
   way to it. Use the presence helpers in `hooks/presence.ts` rather than
   unmounting outright. In the scene, frogs leave through `dismissFrogs` (they
-  shrink away, Check's see-through frogs fade, their eggs grow back) and tags and outlines
+  shrink away, the checker's see-through frogs fade, their eggs grow back) and tags and outlines
   through `useExitFade`. Only a rebuild (Back, skipping ahead) may cut.
 - **Quick, never sluggish.** The learner should never wait on decoration.
 - **No layout shift.** Reserve space up front (the 3D title has a fixed
@@ -99,7 +99,7 @@ behind many small decisions; keep them when changing or adding UI.
   the frogs go home and the marks on the board clear, as with Reset; the
   new inputs, the view and the caption stay.
 - **Things come from somewhere.** Frogs climb out of their egg; a frog that
-  is done goes back into it, and the egg grows back. Check's see-through frogs rise
+  is done goes back into it, and the egg grows back. The checker's see-through frogs rise
   up through the slab of the tile they test, spinning as they come, to a pop
   that plays once per wave, and then stand on it like any frog: the area
   claims a frog could be right there, so they don't float.
@@ -135,9 +135,9 @@ behind many small decisions; keep them when changing or adding UI.
   checker*), and the counterexample gets the red tag. An Initialization
   failure tags its egg off the area. A Maintenance or Exit failure raises one
   see-through frog, on the counterexample, and the tag rides it; a
-  Maintenance frog draws the hop it would make, off the area. Check never
+  Maintenance frog draws the hop it would make, off the area. The checker never
   stages a real frog's run (design.md, *See-through frogs*), so frogs on the
-  board go home and Check's frog is always a see-through frog. The caption
+  board go home and the checker's frog is always a see-through frog. The caption
   says what fails in general, then gives the counterexample with "For
   example", putting the area first: "… your area says a frog could be at …".
 - **The board changes only when the learner asks.** If the failing case is
@@ -195,7 +195,7 @@ behind many small decisions; keep them when changing or adding UI.
 - **Step and Run move one frog: the one the learner picked.** Clicking an
   egg hatches its frog, which waits. Step hops it once; Run hops it until it
   stops, and turns into Pause meanwhile. In a level there is one real frog
-  at a time: picking another egg sends the last one home, and Check's
+  at a time: picking another egg sends the last one home, and the checker's
   see-through frog with it. Pressed with no
   frog, Step and Run point at an egg ("pick an egg first"), unless the
   board has only one egg (both axes start at fixed values): then there is
@@ -212,7 +212,7 @@ behind many small decisions; keep them when changing or adding UI.
   joins each to the next, the same arc a hop draws. The trail grows with
   each hop and stays after the frog stops, so where it came from can still
   be read. One trail shows at a time: the frog the learner picked. It goes
-  when the frog does, fading with it rather than vanishing. Check's
+  when the frog does, fading with it rather than vanishing. The checker's
   see-through frogs never hop, so they leave no trail: they and the hover
   readout draw only a dark dashed arc to where the hop would land. The
   tutorial's ten tested frogs and the example's looping frogs leave no
@@ -228,10 +228,10 @@ behind many small decisions; keep them when changing or adding UI.
 - **Reset puts the screen back as the level opened**: frogs in their eggs,
   the starting inputs and view, the intro in the caption. The area and its
   verdicts stay, since those are the learner's work.
-- **Hovering a tile answers Check's question.** The readout gives only the
+- **Hovering a tile answers the checker's question.** The readout gives only the
   tile's values; the board says the rest (the area's colour, the stops'
   hatching, the ghost tiles). A see-through green frog shows the hop, on the
-  same dashed line Check's see-through frogs draw.
+  same dashed line the checker's see-through frogs draw.
   Where a frog or a trail's echo already stands on the landing tile, only
   the line is drawn, so two see-through frogs never share a spot; where a
   trail already draws that hop, the hover line takes its place.

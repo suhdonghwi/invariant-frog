@@ -50,7 +50,7 @@ bound*.
 
 **Visual language.** Everything the level fixes is quiet grayscale; the
 learner's area is the only saturated surface (blue slabs, height). Other
-colours are reserved: real frogs green, Check's frogs pale blue and
+colours are reserved: real frogs green, the checker's frogs pale blue and
 see-through (clear in the middle, solid at the silhouette),
 goals amber, and **red only for failures** (and Reset's confirmation).
 
@@ -68,24 +68,24 @@ drawn as a line: the stop region has no outline, and the axes are only their
 labels.
 
 **Real frogs and see-through frogs.** Real frogs are actual runs: they hatch
-from eggs. The frogs Check places to test the area's claim are
+from eggs. The frogs the checker places to test the area's claim are
 **see-through frogs** (반투명 개구리): pale blue, clear in the middle and
 solid at the silhouette, rising out of the slab of their tile. They stand on
 their tile rather than float, since the area claims a frog could be right
 there, and they never hop: a see-through frog draws the hop it would make,
-as a dashed arc, since Check asks where a frog here would go rather than
+as a dashed arc, since the checker asks where a frog here would go rather than
 running one. So they leave no trail either. They are not called "ghost
 frogs", which would read as "no frog can get here"; a frog that looked like a
-real one would read as "a frog gets here", and Check says neither. The
+real one would read as "a frog gets here", and the checker says neither. The
 captions make the area the subject ("Your area says a frog could be at
-…"). Every frog Check shows is a see-through frog, and real frogs come only
+…"). Every frog the checker shows is a see-through frog, and real frogs come only
 from the learner's own runs.
 
 See-through means "no frog stands here now", and colour says whose frog it
 is. A real frog's trail is faded green copies (a real frog was here); a
 see-through frog is pale blue (the area claims a frog could be here). The
 hover readout's frog stays see-through green: it answers the same question,
-but it is the learner's own pointing, not Check.
+but it is the learner's own pointing, not the checker.
 
 ## The narrative: intuition first, then the rules
 
@@ -110,18 +110,18 @@ The game never leads with the rules; each is met as a picture first:
 ## See-through frogs: why unreachable frogs matter
 
 The most common objection is *"that frog could never actually be there!"* The
-answer: Check never runs real frogs, because where they go is exactly what
+answer: the checker never runs real frogs, because where they go is exactly what
 is being proved. The area claims a frog could be on any of its tiles, so
-Check asks of every tile: if a frog were here, where would it land, or where
+the checker asks of every tile: if a frog were here, where would it land, or where
 would it stop? A see-through frog acts out that question. If you don't want
 a frog there, shrink the claim — that is **strengthening**.
 
 A see-through frog says nothing about whether a real frog gets to its tile,
-and it looks the same either way. Check can't tell in general: knowing which
+and it looks the same either way. The checker can't tell in general: knowing which
 tiles no frog reaches takes an invariant, the very thing the learner is
 looking for, and searching runs only finds the tiles some frog does reach.
 The rules don't ask either, since they are about every tile of the area.
-So Check never acts out a failure with a real frog, even when it lies on a
+So the checker never acts out a failure with a real frog, even when it lies on a
 run: searching runs is bounded, and a real frog in one case and a
 see-through frog in another would read as "no frog can get here". What the
 learner can see is the eggs: a see-through frog standing on an egg is on a tile a real frog does start
@@ -145,8 +145,8 @@ programmer expects, and have room for arrays.)
   length follows the array and isn't edited.
 - **Inputs are never mutated**; programs copy them into loop variables. The
   type checker enforces this.
-- **The input-only part of `requires` decides which planes exist**, and Check
-  never uses one it rules out. A learner may still type such an input: the
+- **The input-only part of `requires` decides which planes exist**, and the
+  checker never uses one it rules out. A learner may still type such an input: the
   plane is all ghost tiles, the card says *not a possible input*, and the
   `requires` lines light up amber.
 - **Initialisation code decides where the eggs sit** in each plane.
@@ -187,7 +187,7 @@ programmer expects, and have room for arrays.)
   counterexample is the one tagged and the only one a frog shows, and the caption
   says what fails in general before giving it as an example. The proof covers
   what no ring can show.
-- **Check never says whether a real frog gets there.** An Initialization
+- **The checker never says whether a real frog gets there.** An Initialization
   failure is an egg off the area, and only eggs are marked; a Maintenance
   or Exit failure is a tile of the area, and a see-through frog stands on it (see
   *See-through frogs* above).
@@ -196,7 +196,7 @@ programmer expects, and have room for arrays.)
   see-through frog on the area); **undecided** (said in the
   caption, the level is *not* cleared). Before giving up, the checker tries
   proving the formula equivalent to a known solution. See-through frogs only show
-  where they would hop: Check asks the question, it doesn't run the frog.
+  where they would hop: the checker asks the question, it doesn't run the frog.
 - **One definition, three uses.** The same parsed program and formula drive
   the frogs, the proofs and the floor, so what the learner sees and what is
   proved can't disagree.
@@ -324,7 +324,7 @@ endless as the loop it stands in for. Both are real levels (`tutorialLevel`,
   Maintenance's fails on a see-through frog standing on an egg; Exit's (`i >= 0`)
   on a see-through frog on a tile no real frog reaches, which is where the
   objection above is answered (the caption says so: the tutorial's author
-  knows, Check doesn't).
+  knows, the checker doesn't).
 - **One hint per stage:** a sentence that names the fact that matters,
   without giving the formula.
 - **Say what things are once, then keep one name each** (below).
