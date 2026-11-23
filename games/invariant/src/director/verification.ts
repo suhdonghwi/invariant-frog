@@ -9,6 +9,7 @@ import { sweepLength } from '../scene/labels/Region';
 import { frogWorld } from '../scene/frogs/frogWorld';
 import { sleep } from '../scene/sceneTime';
 import { runChecker } from './checkRun';
+import { clearTrace } from './codeTrace';
 import { counterexample, offerOtherBoard, onOtherBoard, type CounterexampleOptions } from './counterexample';
 import { sendFrogsHome } from './frogs';
 import { proofWave } from './ghosts';
@@ -40,6 +41,7 @@ export async function checkAndPlay(rules: Rule[], onFail?: (rule: Rule) => Count
 
 function playVerification(res: CheckResult, rules: Rule[], onFail: (rule: Rule) => CounterexampleOptions = () => ({})): Promise<Outcome | null> {
   return busyWhile(async (tok) => {
+    clearTrace();
     useGame.setState({ failMark: null, region: null, callouts: [] });
     try {
       return await verifyRules(tok, res, rules, onFail);
