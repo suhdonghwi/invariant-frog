@@ -46,6 +46,31 @@ export function ghostDepthMaterial(): THREE.MeshBasicMaterial {
   return new THREE.MeshBasicMaterial({ colorWrite: false, transparent: true, depthWrite: true });
 }
 
+const BELOW_FLOOR = -0.02;
+
+// The floor doesn't write depth, so a see-through frog rising from under a slab would show through it.
+export function clipBelowFloor<M extends THREE.Material>(m: M): M {
+  const compile = m.onBeforeCompile.bind(m);
+  const key = m.customProgramCacheKey.bind(m);
+  m.onBeforeCompile = (shader, renderer) => {
+    compile(shader, renderer);
+    shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying float vFloorY;').replace(
+      '#include <project_vertex>',
+      /* glsl */ `#include <project_vertex>
+        vec4 floorPos = vec4(transformed, 1.0);
+        #ifdef USE_INSTANCING
+          floorPos = instanceMatrix * floorPos;
+        #endif
+        vFloorY = (modelMatrix * floorPos).y;`,
+    );
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying float vFloorY;')
+      .replace('void main() {', `void main() {\n  if (vFloorY < ${BELOW_FLOOR.toFixed(3)}) discard;`);
+  };
+  m.customProgramCacheKey = () => `${key()}-floor`;
+  return m;
+}
+
 const CLEAR = { middle: 0.5, edge: 1, power: 1.5 };
 
 export function frogMaterial(opts: { ghost?: boolean; fade?: boolean; blink?: boolean } = {}): THREE.MeshStandardMaterial {
