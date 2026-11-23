@@ -51,7 +51,6 @@ export function LevelScene() {
       <HatchShells />
       <HopArcs />
       {reveal.hover && <HoverPreview />}
-      {/* keyed by level, so a label cleared while the scene switches does not fade out over the next level */}
       <Fragment key={`labels:${level.id}`}>
         <FrogTags />
         <FailMarker />

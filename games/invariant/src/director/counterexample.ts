@@ -28,7 +28,6 @@ export interface CounterexampleOptions {
 
 const fmt = (s: State) => '`' + showState(currentLevel(), s) + '`';
 
-// Where `rule` breaks for the area as checked, as a condition on a tile.
 function failExpr(rule: Counterexample['rule']): Expr | undefined {
   const inv = useGame.getState().valid;
   if (!inv) return undefined;
@@ -37,8 +36,6 @@ function failExpr(rule: Counterexample['rule']): Expr | undefined {
   return mk.andAll(ruleQuery(L, inv.expr, rule).parts);
 }
 
-// Tags the failure on its tile, or on the see-through frog standing there,
-// and rings every tile where the same rule breaks.
 function markFailure(rule: Counterexample['rule'], x: number, y: number, label: string, frog?: FrogSim) {
   useGame.setState({ failMark: { x, y, label, t0: sceneNow(), frog: frog?.id, fail: failExpr(rule) } });
   sfx.fail();

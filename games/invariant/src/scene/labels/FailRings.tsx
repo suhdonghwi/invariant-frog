@@ -18,9 +18,6 @@ import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
 import { APPEAR, GLSL_RING_POP } from './Region';
 import { ringGeometry, TONE_COLORS, washGeometry } from './TileTag';
 
-// Rings on every tile where the failing condition holds, drawn like the slabs:
-// the condition is evaluated per tile on the GPU into failMask, and one
-// instance per visible cell reads it, so the rings reach as far as the slabs.
 
 const vertex = /* glsl */ `
 ${GLSL_MASK}
@@ -108,7 +105,6 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
         fragmentShader: fragment,
         transparent: true,
         depthWrite: false,
-        // the area mask gives each ring the height of its slab
         uniforms: { ...shared, ...areaMask.uniforms, uAlpha: { value: alpha } },
       });
     return { ring: make(0.85), wash: make(0.3) };
@@ -136,7 +132,6 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
     shared.uTime.value = sceneNow();
     shared.uT0.value = t0;
     shared.uOut.value = exit();
-    // every cell in reach counts as near: rings have one shape at any distance
     cells.update(camera, target, reach, Infinity);
     geoms.ring.instanceCount = geoms.wash.instanceCount = cells.nearCount;
   });

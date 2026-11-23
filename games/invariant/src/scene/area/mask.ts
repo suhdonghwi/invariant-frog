@@ -152,5 +152,4 @@ class AreaMask {
 
 export const areaMask = new AreaMask();
 
-/** The tiles where a checked rule breaks, evaluated per tile like the area: its "area" is the rule's failing condition. */
 export const failMask = new AreaMask();

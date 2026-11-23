@@ -123,7 +123,6 @@ export function HopArcs() {
       const shown = clamp01((t - a.t0 - ARC_DRAW) / APPEAR);
       if (shown <= 0) continue;
       const { scale, alpha } = ringPop(shown);
-      // the ring goes on the tile the hop starts from, the state the rule is checked at
       const h0 = field.groundAt(a.fx, a.fy);
       m.compose(pos.set(a.fx - origin.x, h0 + 0.012, origin.y - a.fy), q, scl.set(scale, 1, scale));
       const fade = alpha * a.fade * leaveFade(ghosts.get(a.frog), t);

@@ -17,9 +17,7 @@ interface FigureDef {
   box: ClipBox;
   frog?: { tile: Tile; hops: number };
   area?: string;
-  /** A formula to check as the learner would; its first failure is played on the area. */
   check?: string;
-  /** The failing tile to give as the example, in place of the solver's. */
   example?: Tile;
   bare?: boolean;
 }
@@ -37,7 +35,6 @@ export const FIGURES: Record<string, FigureDef> = {
   b: { level: tutorialLevel, box: STATES, frog: { tile: [0, 2], hops: 2 } },
   c: { level: tutorialLevel, box: STATES, frog: { tile: [0, 2], hops: 2 }, area: `i <= n && ${IN_STATES}` },
   'overshoot-init': { level: overshoot, box: OVERSHOOT, check: 'i == n', area: `i == n && ${IN_OVERSHOOT}` },
-  // the example on the slab with no egg, so both eggs under the rings show whole
   'overshoot-maint': { level: overshoot, box: OVERSHOOT, check: 'i <= n', example: [1, 2], area: `i <= n && ${IN_OVERSHOOT}` },
   'overshoot-exit': { level: overshoot, box: OVERSHOOT, check: 'i <= n + 3', area: `i <= n + 3 && ${IN_OVERSHOOT}` },
   'overshoot-pass': { level: overshoot, box: OVERSHOOT, check: 'i <= n + 2', area: `i <= n + 2 && ${IN_OVERSHOOT}` },
@@ -59,8 +56,6 @@ async function playFirstFailure(text: string, example?: Tile) {
     }
     await playCounterexample(cex);
   }
-  // Keep the ring, drop the tag's text: the paper writes its own notes, and
-  // the tag would cover the tiles behind the failing one.
   useGame.setState((g) => ({ failMark: g.failMark && { ...g.failMark, label: '' } }));
 }
 

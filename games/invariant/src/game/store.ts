@@ -93,7 +93,6 @@ export interface Game {
   inputHover: string | null;
   callouts: { x: number; y: number; frog?: number; text: string; tone: 'info' | 'good' | 'fail' }[];
   region: Region | null;
-  /** The failure shown: a tag on one tile or frog, and rings on every tile where `fail` holds. */
   failMark: { x: number; y: number; label: string; t0: number; frog?: number; fail?: Expr } | null;
 
   openLevel(def: LevelDef, mode: 'level' | 'tutorial'): void;
