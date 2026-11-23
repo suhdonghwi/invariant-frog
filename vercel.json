@@ -5,6 +5,17 @@
   "outputDirectory": "dist",
   "redirects": [
     {
+      "source": "/invariant/",
+      "has": [
+        {
+          "type": "host",
+          "value": "jammy.fun"
+        }
+      ],
+      "destination": "https://invariant.donghwi.me/",
+      "permanent": true
+    },
+    {
       "source": "/invariant/:path*",
       "has": [
         {
