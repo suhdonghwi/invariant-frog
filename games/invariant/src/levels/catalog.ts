@@ -84,7 +84,7 @@ while (i < n) {
   i = i + 3;
 }
 
-ensures n <= i && i < n + 3;`,
+ensures n <= i < n + 3;`,
         view: { x: 'i', y: 'n' },
         solutions: ['i < n + 3', 'i <= n + 2', '0 <= i < n + 3'],
         pitfalls: [
@@ -137,7 +137,7 @@ while (i < n) {
   i = i + 3;
 }
 
-ensures i % 3 == 0 && n <= i && i < n + 3;`,
+ensures i % 3 == 0 && n <= i < n + 3;`,
         view: { x: 'i', y: 'n' },
         solutions: ['i % 3 == 0 && i < n + 3', 'i % 3 == 0 && 0 <= i < n + 3'],
         pitfalls: [
@@ -297,7 +297,7 @@ while (r >= 3) {
   q = q + 1;
 }
 
-ensures a == 3 * q + r && 0 <= r && r < 3;`,
+ensures a == 3 * q + r && 0 <= r < 3;`,
         view: { x: 'q', y: 'r' },
         start: { a: 7 },
         solutions: ['a == 3 * q + r && r >= 0'],
@@ -451,7 +451,7 @@ while (a + b < n) {
   }
 }
 
-ensures a + b == n && b <= a && a <= b + 1;`,
+ensures a + b == n && b <= a <= b + 1;`,
         view: { x: 'a', y: 'b' },
         start: { n: 5 },
         solutions: ['b <= a <= b + 1 && a + b <= n', 'b <= a && a <= b + 1 && a + b <= n'],
@@ -542,7 +542,7 @@ while ((r + 1) * (r + 1) <= n) {
   r = r + 1;
 }
 
-ensures r * r <= n && n < (r + 1) * (r + 1);`,
+ensures r * r <= n < (r + 1) * (r + 1);`,
         view: { x: 'r', y: 'n' },
         solutions: ['r * r <= n', 'r >= 0 && r * r <= n'],
         pitfalls: [
