@@ -84,15 +84,6 @@ export const en = {
     impossible: 'not a possible input',
   },
 
-  hover: {
-    impossible: 'not a possible state',
-    hopsTo: (to: string) => `hops to ${to}`,
-    stopsOnGoal: 'stops · goal ✓',
-    stops: 'stops here',
-    inArea: 'in the area',
-    outsideArea: 'outside the area',
-  },
-
   rulesCard: {
     title: 'The three rules',
     intro:

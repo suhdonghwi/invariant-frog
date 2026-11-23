@@ -82,15 +82,6 @@ export const ko: Messages = {
     impossible: '불가능한 입력',
   },
 
-  hover: {
-    impossible: '불가능한 상태',
-    hopsTo: (to) => `다음 칸 ${to}`,
-    stopsOnGoal: '멈춤 · 목표 ✓',
-    stops: '여기서 멈춤',
-    inArea: '영역 안',
-    outsideArea: '영역 밖',
-  },
-
   rulesCard: {
     title: '세 가지 규칙',
     intro:
