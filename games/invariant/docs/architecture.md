@@ -181,7 +181,11 @@ backend agree. `pnpm validate` and the tests are the safety net.
   panel, or it is more than `TOO_FAR` times further out than the fit; a
   move fits into the free screen inset by `MARGIN`, so a panel that grows
   a little doesn't move it again. Tutorial steps, callouts, counterexamples,
-  Run, a level's start and the home screen all frame this way; don't call
+  Check's rules that hold, Run, a level's start and the home screen all
+  frame this way. Code that chooses which tiles to show asks the rig what
+  is on screen (`shows`, `holds`, `viewWindow`) instead of counting tiles
+  from the view's centre, which would read differently at each zoom and
+  ignore the panels. Don't call
   `moveTo`/`dollyTo` directly. The other entries are narrow: `zoomTo` (the
   proof's wide view), `resetAngle`, and `fitInto`, which the home screen
   uses each frame for its ring at its own lower angle. A move waits a few

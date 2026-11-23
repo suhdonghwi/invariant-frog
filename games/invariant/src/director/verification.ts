@@ -4,7 +4,7 @@ import { useGame, type Game, type Region, type RegionTile } from '../game/store'
 import { tilesNear, type TileWindow } from '../levels/tiles';
 import { t as messages } from '../i18n/i18n';
 import { BEAT, HOLD, ms, TICK } from '../motion';
-import { cameraRig } from '../scene/cameraRig';
+import { cameraRig, type Shot } from '../scene/cameraRig';
 import { sweepLength } from '../scene/labels/Region';
 import { frogWorld } from '../scene/frogs/frogWorld';
 import { sleep } from '../scene/sceneTime';
@@ -13,7 +13,7 @@ import { counterexample, offerOtherBoard, onOtherBoard, type CounterexampleOptio
 import { sendFrogsHome } from './frogs';
 import { proofWave } from './ghosts';
 import { eggRegion, endingsRegion } from './regions';
-import { busyWhile, type Token } from './sequence';
+import { busyWhile, currentLevel, type Token } from './sequence';
 
 
 export function revealAll(res: CheckResult) {
@@ -97,9 +97,12 @@ async function verifyRules(tok: Token, res: CheckResult, rules: Rule[], onFail: 
 type Callout = Game['callouts'][number];
 
 let shown = 0;
-const IN_VIEW = 6;
-const LOOK_AROUND = 40;
+const ON_SCREEN_CAP = 60;
+const AROUND_HOME = 40;
 const SHOWN_TOGETHER = 3;
+const TRIED = 24;
+
+type Spot = { x: number; y: number };
 
 function hopTiles(win: TileWindow): RegionTile[] {
   const { level, inputs, valid } = useGame.getState();
@@ -107,21 +110,41 @@ function hopTiles(win: TileWindow): RegionTile[] {
   return tilesNear(L, inputs, win, (s, x, y) => (L.fast.planeReq(s) === true && L.fast.guard(s) === true && valid?.fast(s) === true ? { x, y, tone: 'good' as const } : undefined));
 }
 
-async function bringIntoView(tiles: Region['tiles']) {
-  const { x: cx, y: cy } = cameraRig.viewCenter();
-  const dist = (t: { x: number; y: number }) => Math.hypot(t.x - cx, t.y - cy);
-  const found = tiles({ cx: Math.round(cx), cy: Math.round(cy), R: LOOK_AROUND }).sort((a, b) => dist(a) - dist(b));
-  if (!found.length || dist(found[0]) <= IN_VIEW) return;
-  const [first] = found;
+function nearest(tiles: RegionTile[], to: Spot): RegionTile[] {
+  const dist = (t: Spot) => Math.hypot(t.x - to.x, t.y - to.y);
+  return tiles.sort((a, b) => dist(a) - dist(b));
+}
+
+const shotAt = (t: Spot): Shot => ({ focus: [[t.x, t.y]], labels: [[t.x, t.y]] });
+
+function around(first: RegionTile, found: RegionTile[]): Shot {
   const focus = found.filter((t) => Math.hypot(t.x - first.x, t.y - first.y) <= SHOWN_TOGETHER).map((t) => [t.x, t.y] as const);
-  await cameraRig.arrive({ focus, centre: true });
+  return { focus, labels: [[first.x, first.y]] };
+}
+
+function pickShot(tiles: Region['tiles']): { shot: Shot; spot: Spot } | null {
+  const here = cameraRig.viewCenter();
+  const seen = nearest(tiles(cameraRig.viewWindow(ON_SCREEN_CAP)), here).filter((t) => cameraRig.shows([t.x, t.y]));
+  const still = seen.slice(0, TRIED).find((t) => cameraRig.holds(shotAt(t)));
+  if (still) return { shot: shotAt(still), spot: still };
+  if (seen.length) return { shot: around(seen[0], seen), spot: seen[0] };
+  const home = cameraRig.home(currentLevel());
+  const found = nearest(tiles({ cx: Math.round(home.x), cy: Math.round(home.y), R: AROUND_HOME }), home);
+  return found.length ? { shot: around(found[0], found), spot: found[0] } : null;
+}
+
+async function bringIntoView(tiles: Region['tiles']): Promise<Spot | null> {
+  const picked = pickShot(tiles);
+  if (!picked) return null;
+  await cameraRig.arrive(picked.shot);
+  return { x: picked.spot.x, y: picked.spot.y };
 }
 
 async function showHolds(rule: Rule): Promise<Callout | null> {
   const text = messages().verdicts.holdsTag[rule];
-  await bringIntoView(rule === 'maintenance' ? hopTiles : rule === 'initialization' ? eggRegion('good').tiles : endingsRegion('good').tiles);
+  const spot = await bringIntoView(rule === 'maintenance' ? hopTiles : rule === 'initialization' ? eggRegion('good').tiles : endingsRegion('good').tiles);
   if (rule === 'maintenance') {
-    const f = await proofWave();
+    const f = await proofWave(spot ?? undefined);
     return f ? { x: f.x, y: f.y, frog: f.id, text, tone: 'good' } : null;
   }
   const region = rule === 'initialization' ? eggRegion('good') : endingsRegion('good');
@@ -129,18 +152,5 @@ async function showHolds(rule: Rule): Promise<Callout | null> {
   useGame.setState({ region: { ...region, id, tick: true } });
   await sleep(ms(TICK));
   await sleep(ms(sweepLength(id) + BEAT - TICK));
-  const near = nearestTile(region);
-  return near ? { ...near, text, tone: 'good' } : null;
-}
-
-function nearestTile(region: Region): { x: number; y: number } | null {
-  const { x: cx, y: cy } = cameraRig.viewCenter();
-  const tiles = region.tiles({ cx: Math.round(cx), cy: Math.round(cy), R: 8 });
-  let best: { x: number; y: number } | null = null;
-  let bestD = Infinity;
-  for (const tile of tiles) {
-    const d = Math.hypot(tile.x - cx, tile.y - cy);
-    if (d < bestD) [best, bestD] = [{ x: tile.x, y: tile.y }, d];
-  }
-  return best;
+  return spot ? { ...spot, text, tone: 'good' } : null;
 }

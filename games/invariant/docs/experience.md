@@ -116,10 +116,15 @@ behind many small decisions; keep them when changing or adding UI.
   spread apart and fading with distance, each drawing its dashed hop and
   ringing its landing tile; Exit sweeps every stop on the area like
   the eggs. Then the light turns, the picture clears, and a short pause
-  separates it from the next rule. A rule that holds gets a green tag near
-  the middle of the view, as a failure gets its red one. If none of the
-  rule's tiles are in view (eggs, hops inside the area, endings), the
-  camera first goes to the nearest ones, so no rule is checked off screen. The first failing
+  separates it from the next rule. A rule that holds gets a green tag on
+  the one of its tiles (an egg, a hop inside the area, an ending) nearest
+  the middle of the view, as a failure gets its red one. The camera stays
+  put if such a tile is in the free screen with room for its tag; if one
+  is in view but small or crowded, it closes in on it; if none is, it goes
+  to the rule's tiles nearest the level's opening view, where
+  counterexamples are picked too,
+  so no rule is checked off screen and a failure that follows is close by.
+  "In view" is judged on the screen, never by a count of tiles. The first failing
   rule ends the check; an undecided one gets an amber light with a question
   mark.
 - **A failure looks the same whether or not a real frog gets there.** An
