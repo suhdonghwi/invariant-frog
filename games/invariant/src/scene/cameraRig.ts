@@ -8,6 +8,12 @@ import { sceneNow, sceneStarted, sleep } from './sceneTime';
 
 export type Tile = readonly [number, number];
 
+export interface Grip {
+  x: number;
+  y: number;
+  spread: number;
+}
+
 export interface Shot {
   focus?: readonly Tile[];
   labels?: readonly Tile[];
@@ -302,6 +308,20 @@ export const cameraRig = {
     return controls;
   },
   userMoved: takeOver,
+  drag(from: Grip, to: Grip) {
+    const c = controls;
+    if (!c) return;
+    const v = endView();
+    const angle = currentAngle();
+    place(v.x, v.y, v.d, angle);
+    const held = ground(from.x, from.y);
+    const d = from.spread && to.spread ? THREE.MathUtils.clamp((v.d * from.spread) / to.spread, c.minDistance, c.maxDistance) : v.d;
+    place(v.x, v.y, d, angle);
+    const under = ground(to.x, to.y);
+    if (!held || !under) return;
+    void c.moveTo(v.x + held.x - under.x, 0, -(v.y + held.y - under.y), false);
+    if (d !== v.d) void c.dollyTo(d, false);
+  },
   get flying() {
     return flight !== null;
   },

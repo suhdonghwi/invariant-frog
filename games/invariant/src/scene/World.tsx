@@ -9,6 +9,7 @@ import { HomeScene } from './home/HomeScene';
 import { LevelScene } from './level/LevelScene';
 import { figurePage } from './figureClip';
 import { Framing } from './Framing';
+import { grab } from './grab';
 import { startScene } from './sceneTime';
 
 function Lights() {
@@ -27,17 +28,21 @@ function Controls() {
   const canvas = useThree((s) => s.gl.domElement);
   useLayoutEffect(() => {
     canvas.addEventListener('wheel', cameraRig.userMoved, { passive: true });
-    return () => canvas.removeEventListener('wheel', cameraRig.userMoved);
+    const release = grab(canvas);
+    return () => {
+      canvas.removeEventListener('wheel', cameraRig.userMoved);
+      release();
+    };
   }, [canvas]);
   useLayoutEffect(() => {
     cameraRig.attach(ref.current);
     const c = ref.current;
     if (c) {
-      c.mouseButtons.left = CameraControlsImpl.ACTION.SCREEN_PAN;
+      c.mouseButtons.left = CameraControlsImpl.ACTION.NONE;
       c.mouseButtons.right = CameraControlsImpl.ACTION.ROTATE;
-      c.touches.one = CameraControlsImpl.ACTION.TOUCH_SCREEN_PAN;
-      // camera-controls handles this action but leaves it out of the touches.two type
-      c.touches.two = CameraControlsImpl.ACTION.TOUCH_DOLLY_SCREEN_PAN as typeof c.touches.two;
+      c.touches.one = CameraControlsImpl.ACTION.NONE;
+      c.touches.two = CameraControlsImpl.ACTION.NONE;
+      c.touches.three = CameraControlsImpl.ACTION.NONE;
     }
     return () => cameraRig.attach(null);
   }, []);
