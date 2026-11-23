@@ -148,7 +148,7 @@ export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true,
         onClick: (e: ThreeEvent<MouseEvent>) => {
           if (e.delta > 4) return;
           const [tx, ty] = pickTile(e);
-          if (touch.current.on) {
+          if (touch.current.on && !clickable?.(tx, ty)) {
             const was = touch.current.was;
             hover.set(was && was[0] === tx && was[1] === ty ? null : [tx, ty]);
           }
