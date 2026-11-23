@@ -1,16 +1,17 @@
 import type { CompiledLevel } from '../../levels/level';
 import { TILE } from '../constants';
+import { GLSL_ORIGIN } from '../origin';
 import { GLSL_AXIS_LABELS } from '../shaders/axisLabels';
 import { GLSL_COMMON } from '../shaders/common';
 import { GLSL_GOAL } from '../shaders/goal';
 import { levelGlsl } from './levelGlsl';
 
 export const floorVertex = /* glsl */ `
+uniform vec3 uAt;
 varying vec3 vWorld;
 void main() {
-  vec4 w = modelMatrix * vec4(position, 1.0);
-  vWorld = w.xyz;
-  gl_Position = projectionMatrix * viewMatrix * w;
+  vWorld = uAt + mat3(modelMatrix) * position;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `;
 
@@ -19,7 +20,8 @@ export function floorFragment(level: CompiledLevel) {
 precision highp float;
 precision highp int;
 varying vec3 vWorld;
-uniform vec2 uHover;
+uniform ivec2 uHover;
+${GLSL_ORIGIN}
 uniform float uHoverOn;
 uniform vec2 uCenter;
 uniform vec2 uFade;
@@ -42,7 +44,7 @@ void main() {
   vec2 p = vec2(vWorld.x, -vWorld.z);
   vec2 tc = floor(p + 0.5);
   vec2 f = p - tc;
-  ivec2 t = ivec2(int(tc.x), int(tc.y));
+  ivec2 t = ivec2(tc) + uOriginTile;
   bool ex = existsAt(t);
 
   // derivatives up front, outside branches (they need uniform control flow)
@@ -57,7 +59,7 @@ void main() {
   float hatchV = (p.x - p.y) * STOP_HATCH_FREQ;
   float hatch = stopHatch(hatchV, fwidth(hatchV));
 
-  bool onCross = uHoverOn > 0.5 && (t.x == int(uHover.x) || t.y == int(uHover.y));
+  bool onCross = uHoverOn > 0.5 && (t.x == uHover.x || t.y == uHover.y);
   vec3 col = uGap;
   if (ex) {
     bool st = stopAt(t);
@@ -76,12 +78,13 @@ void main() {
     col = mix(uVoid, ghost, inside);
   }
 
-  if (uHoverOn > 0.5 && t.x == int(uHover.x) && t.y == int(uHover.y)) {
+  if (uHoverOn > 0.5 && t == uHover) {
     float a = 1.0 - smoothstep(-fwRing, fwRing, ringD);
     col = mix(col, uHoverCol, a);
   }
 
-  if (uClipOn > 0.5 && (p.x < uClip.x - 0.5 || p.x > uClip.z + 0.5 || p.y < uClip.y - 0.5 || p.y > uClip.w + 0.5)) discard;
+  vec2 pa = p + vec2(uOriginTile);
+  if (uClipOn > 0.5 && (pa.x < uClip.x - 0.5 || pa.x > uClip.z + 0.5 || pa.y < uClip.y - 0.5 || pa.y > uClip.w + 0.5)) discard;
 
   float r = length(vWorld.xz - uCenter);
   float alpha = (1.0 - smoothstep(uFade.x, uFade.y, r)) * uOpacity;

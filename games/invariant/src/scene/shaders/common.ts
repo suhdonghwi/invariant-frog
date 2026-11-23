@@ -56,11 +56,10 @@ export function blobShadowMaterial(strength: number, plateau = 0): THREE.ShaderM
       void main() {
         vUv = uv;
         #ifdef USE_INSTANCING
-          vec4 w = modelMatrix * instanceMatrix * vec4(position, 1.0);
+          gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0);
         #else
-          vec4 w = modelMatrix * vec4(position, 1.0);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         #endif
-        gl_Position = projectionMatrix * viewMatrix * w;
       }`,
     fragmentShader: /* glsl */ `
       varying vec2 vUv;
@@ -95,7 +94,7 @@ export function eggShadowMaterial(): THREE.ShaderMaterial {
       varying vec2 vUv;
       void main() {
         vUv = uv;
-        gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * vec4(position, 1.0);
+        gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0);
       }`,
     fragmentShader: /* glsl */ `
       varying vec2 vUv;

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { cameraRig } from '../cameraRig';
+import { origin } from '../origin';
 import { colorUniform } from './common';
 
 export const GLSL_FADE = /* glsl */ `
@@ -45,7 +46,7 @@ export function viewRadius(): number {
 export function updateFade(u: Record<string, THREE.IUniform>): number {
   const t = cameraRig.target();
   const R = fadeRadius();
-  (u.uCenter.value as THREE.Vector2).set(t.x, t.z);
+  (u.uCenter.value as THREE.Vector2).set(t.x - origin.x, t.z + origin.y);
   (u.uFade.value as THREE.Vector2).set(R * 0.62, R);
   return R;
 }

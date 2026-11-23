@@ -1,7 +1,9 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
+import { AtOrigin } from '../AtOrigin';
 import { COLORS, SLAB_H } from '../constants';
+import { origin } from '../origin';
 import { sceneNow } from '../sceneTime';
 import { goalEvents } from '../tileEvents';
 import { stencilSkip } from '../shaders/common';
@@ -18,16 +20,17 @@ ${GLSL_GOAL_PULSE}
 varying float vV;
 varying float vBurst;
 varying vec3 vN;
-varying vec3 vWorld;
+varying vec3 vView;
 void main() {
   vV = uv.y;
-  float burst = tilePulse(aTile, 1.0, 0.06, 1.6);
+  vec2 tile = tileAt();
+  float burst = tilePulse(tile, 1.0, 0.06, 1.6);
   vBurst = burst;
   vec3 pos = position * vec3(1.0 + 0.25 * burst, 1.0 + 2.2 * burst, 1.0 + 0.25 * burst);
-  vec4 w = modelMatrix * vec4(pos + vec3(aTile.x, heightNow() * ${SLAB_H.toFixed(3)} * (1.0 - landSquash(aTile)) + 0.004, -aTile.y), 1.0);
-  vWorld = w.xyz;
-  vN = normalize(mat3(modelMatrix) * normal);
-  gl_Position = projectionMatrix * viewMatrix * w;
+  vec4 v = modelViewMatrix * vec4(pos + vec3(tile.x, heightNow() * ${SLAB_H.toFixed(3)} * (1.0 - landSquash(tile)) + 0.004, -tile.y), 1.0);
+  vView = v.xyz;
+  vN = normalMatrix * normal;
+  gl_Position = projectionMatrix * v;
 }
 `;
 
@@ -38,9 +41,9 @@ uniform float uAppearT0;
 varying float vV;
 varying float vBurst;
 varying vec3 vN;
-varying vec3 vWorld;
+varying vec3 vView;
 void main() {
-  vec3 V = normalize(cameraPosition - vWorld);
+  vec3 V = normalize(-vView);
   float edge = pow(1.0 - abs(dot(normalize(vN), V)), 1.4);
   float fall = pow(1.0 - vV, 1.6);
   float a = fall * (0.2 + 0.32 * edge);
@@ -59,8 +62,10 @@ export function GoalColumns() {
   const geom = useMemo(() => {
     const n = tiles.length;
     const tile = new Float32Array(n * 2);
-    tiles.forEach(([x, y], i) => tile.set([x, y], i * 2));
-    return instanced(base, n, { aTile: [tile, 2] });
+    tiles.forEach(([x, y], i) => tile.set([x - origin.x, y - origin.y], i * 2));
+    const g = instanced(base, n, { aTile: [tile, 2] });
+    g.userData.at = { x: origin.x, y: origin.y };
+    return g;
   }, [tiles, base]);
   useEffect(() => () => geom.dispose(), [geom]);
 
@@ -77,6 +82,7 @@ export function GoalColumns() {
             uTime: { value: 0 },
             uColor: { value: new THREE.Color(COLORS.goal) },
             uAppearT0: { value: sceneNow() },
+            uTileShift: { value: new THREE.Vector2() },
             uEvents: goalEvents.at,
             ...areaMask.uniforms,
             ...landUniforms(),
@@ -88,6 +94,11 @@ export function GoalColumns() {
   useEffect(() => () => (base.dispose(), material.dispose()), [base, material]);
   useFrame(() => {
     material.uniforms.uTime.value = sceneNow();
+    (material.uniforms.uTileShift.value as THREE.Vector2).set(geom.userData.at.x - origin.x, geom.userData.at.y - origin.y);
   });
-  return <mesh geometry={geom} material={material} frustumCulled={false} renderOrder={6} />;
+  return (
+    <AtOrigin>
+      <mesh geometry={geom} material={material} frustumCulled={false} renderOrder={6} />
+    </AtOrigin>
+  );
 }

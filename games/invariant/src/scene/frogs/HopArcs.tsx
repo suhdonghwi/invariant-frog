@@ -6,7 +6,9 @@ import { useGame } from '../../game/store';
 import { planeKey } from '../../levels/inputs';
 import { field } from '../area/field';
 import { clamp01 } from '../easing';
+import { AtOrigin } from '../AtOrigin';
 import { uploadInstances } from '../instances';
+import { origin } from '../origin';
 import { APPEAR, ringPop } from '../labels/Region';
 import { ringGeometry, TONE_COLORS, washGeometry } from '../labels/TileTag';
 import { sceneNow } from '../sceneTime';
@@ -122,7 +124,7 @@ export function HopArcs() {
       if (shown <= 0) continue;
       const { scale, alpha } = ringPop(shown);
       const h1 = field.groundAt(a.tx, a.ty);
-      m.compose(pos.set(a.tx, h1 + 0.012, -a.ty), q, scl.set(scale, 1, scale));
+      m.compose(pos.set(a.tx - origin.x, h1 + 0.012, origin.y - a.ty), q, scl.set(scale, 1, scale));
       const fade = alpha * a.fade * leaveFade(ghosts.get(a.frog), t);
       for (const [mesh, p, opacity] of [
         [r, parts.ring, 0.85],
@@ -148,8 +150,10 @@ export function HopArcs() {
       {list.map((a) => (
         <GhostHop key={a.frog} arc={a} plane={plane} />
       ))}
-      <instancedMesh ref={washes} args={[parts.wash.g, parts.wash.mat, MAX]} count={0} frustumCulled={false} renderOrder={8} />
-      <instancedMesh ref={rings} args={[parts.ring.g, parts.ring.mat, MAX]} count={0} frustumCulled={false} renderOrder={9} />
+      <AtOrigin>
+        <instancedMesh ref={washes} args={[parts.wash.g, parts.wash.mat, MAX]} count={0} frustumCulled={false} renderOrder={8} />
+        <instancedMesh ref={rings} args={[parts.ring.g, parts.ring.mat, MAX]} count={0} frustumCulled={false} renderOrder={9} />
+      </AtOrigin>
     </>
   );
 }

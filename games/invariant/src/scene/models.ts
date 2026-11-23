@@ -129,11 +129,10 @@ export function outlineMaterial(thickness: number, back = 0): THREE.ShaderMateri
       void main() {
         vec3 p = position + normalize(normal) * uThick;
         #ifdef USE_INSTANCING
-          vec4 w = modelMatrix * instanceMatrix * vec4(p, 1.0);
+          vec4 v = modelViewMatrix * instanceMatrix * vec4(p, 1.0);
         #else
-          vec4 w = modelMatrix * vec4(p, 1.0);
+          vec4 v = modelViewMatrix * vec4(p, 1.0);
         #endif
-        vec4 v = viewMatrix * w;
         v.xyz += normalize(v.xyz) * uBack;
         gl_Position = projectionMatrix * v;
       }`,

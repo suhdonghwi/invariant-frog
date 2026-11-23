@@ -27,10 +27,10 @@ export const landUniforms = () => ({ uLands: landEvents.at, uLastLand: landEvent
 export function landSquash(x: number, y: number, t: number): number {
   if (t - landEvents.last.value > LAND.dur) return 0;
   let s = 0;
-  for (const e of landEvents.at.value) {
-    const age = t - e.z;
+  for (const e of landEvents.live) {
+    const age = t - e.t;
     if (age < 0 || age > LAND.dur || e.x !== x || e.y !== y) continue;
-    s += e.w * LAND.depth * Math.sin(age * LAND.freq) * Math.exp(-age * LAND.decay);
+    s += e.weight * LAND.depth * Math.sin(age * LAND.freq) * Math.exp(-age * LAND.decay);
   }
   return s;
 }

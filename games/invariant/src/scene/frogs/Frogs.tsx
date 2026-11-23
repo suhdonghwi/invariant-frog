@@ -5,7 +5,9 @@ import { useGame } from '../../game/store';
 import { planeKey } from '../../levels/inputs';
 import { field } from '../area/field';
 import { COLORS } from '../constants';
+import { AtOrigin } from '../AtOrigin';
 import { uploadInstances } from '../instances';
+import { origin } from '../origin';
 import { frogGeometry, frogMaterial, ghostDepthMaterial } from '../models';
 import { sceneNow } from '../sceneTime';
 import { blobShadowMaterial, stencilMark } from '../shaders/common';
@@ -41,7 +43,7 @@ function placeEchoes(walkers: FrogSim[], t: number, from: number, depth: THREE.I
     leftTiles(walker).forEach(([x, y], i) => {
       if (n >= MAX_FROGS) return;
       const [tx, ty] = trail[i + 1] ?? [walker.hop!.tx, walker.hop!.ty];
-      dummy.position.set(x, field.groundAt(x, y), -y);
+      dummy.position.set(x - origin.x, field.groundAt(x, y), origin.y - y);
       dummy.rotation.set(0, yawToward(x, y, tx, ty), 0);
       dummy.scale.setScalar(1);
       dummy.updateMatrix();
@@ -130,7 +132,7 @@ export function Frogs() {
       f.drawn.ground = p.ground;
       f.drawn.z = pz;
       f.drawn.scale = os * Math.max(0, p.sx);
-      dummy.position.set(px, py, pz);
+      dummy.position.set(px - origin.x, py, pz + origin.y);
       dummy.rotation.set(p.pitch, p.yaw, 0, 'YXZ');
       dummy.scale.set(p.sx * os, p.sy * os, p.sx * os);
       dummy.updateMatrix();
@@ -146,7 +148,7 @@ export function Frogs() {
       }
       const air = Math.max(0, py - p.ground);
       const ss = p.sx <= 0 ? 0 : Math.max(0.35, 1 - air * 0.5) * Math.min(p.sx, 1.2) * os * p.emerged * (f.fade ?? 1);
-      dummy.position.set(px, p.ground + 0.008, pz);
+      dummy.position.set(px - origin.x, p.ground + 0.008, pz + origin.y);
       dummy.rotation.set(0, 0, 0);
       dummy.scale.set(ss, 1, ss);
       dummy.updateMatrix();
@@ -168,10 +170,12 @@ export function Frogs() {
 
   return (
     <group>
-      <instancedMesh ref={shadows} args={[shadowGeom, shadowMat, MAX_FROGS]} count={0} frustumCulled={false} renderOrder={3} />
-      <instancedMesh ref={body} args={[geom, mat, MAX_FROGS]} count={0} frustumCulled={false} onClick={(e) => e.stopPropagation()} />
-      <instancedMesh ref={ghostDepth} args={[geom, ghostDepthMat, MAX_FROGS]} count={0} frustumCulled={false} renderOrder={4} />
-      <instancedMesh ref={ghosts} args={[ghostGeom, ghostMat, MAX_FROGS]} count={0} frustumCulled={false} renderOrder={5} onClick={(e) => e.stopPropagation()} />
+      <AtOrigin>
+        <instancedMesh ref={shadows} args={[shadowGeom, shadowMat, MAX_FROGS]} count={0} frustumCulled={false} renderOrder={3} />
+        <instancedMesh ref={body} args={[geom, mat, MAX_FROGS]} count={0} frustumCulled={false} onClick={(e) => e.stopPropagation()} />
+        <instancedMesh ref={ghostDepth} args={[geom, ghostDepthMat, MAX_FROGS]} count={0} frustumCulled={false} renderOrder={4} />
+        <instancedMesh ref={ghosts} args={[ghostGeom, ghostMat, MAX_FROGS]} count={0} frustumCulled={false} renderOrder={5} onClick={(e) => e.stopPropagation()} />
+      </AtOrigin>
       {Array.from({ length: BADGES }, (_, i) => (
         <sprite key={i} ref={(el) => void (badgeRefs.current[i] = el)} visible={false} scale={[0.5, 0.3, 1]} renderOrder={10}>
           <spriteMaterial depthTest={false} transparent />
