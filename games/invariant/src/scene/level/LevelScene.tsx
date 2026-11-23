@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 import { clickTile, tileClickable } from '../../director/controls';
 import { useGame } from '../../game/store';
 import { AreaLayer } from '../area/AreaLayer';
@@ -50,11 +50,14 @@ export function LevelScene() {
       <Frogs />
       <HatchShells />
       <HopArcs />
-      <FrogTags />
       {reveal.hover && <HoverPreview />}
-      <FailMarker />
-      <OutlineRegion />
-      <Callouts />
+      {/* keyed by level, so a label cleared while the scene switches does not fade out over the next level */}
+      <Fragment key={`labels:${level.id}`}>
+        <FrogTags />
+        <FailMarker />
+        <OutlineRegion />
+        <Callouts />
+      </Fragment>
     </>
   );
 }
