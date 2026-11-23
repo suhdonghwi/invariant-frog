@@ -322,6 +322,30 @@ export const cameraRig = {
     const r = safeRect();
     return ground((r.left + r.right) / 2, (r.top + r.bottom) / 2) ?? v;
   },
+  viewWindow(cap: number): { cx: number; cy: number; R: number } {
+    const c = cameraRig.viewCenter();
+    const r = safeRect();
+    let R = 0;
+    for (const [sx, sy] of [[r.left, r.top], [r.right, r.top], [r.left, r.bottom], [r.right, r.bottom]]) {
+      const g = ground(sx, sy);
+      R = Math.max(R, g ? Math.hypot(g.x - c.x, g.y - c.y) : cap);
+    }
+    return { cx: Math.round(c.x), cy: Math.round(c.y), R: Math.min(cap, Math.ceil(R)) };
+  },
+  shows([x, y]: Tile): boolean {
+    if (!controls) return false;
+    const v = endView();
+    place(v.x, v.y, v.d, currentAngle());
+    return inside(bounds({ focus: [[x, y]] }), safeRect());
+  },
+  holds(shot: Shot): boolean {
+    if (!controls || !tilesOf(shot).length) return false;
+    return !needsMove(shot, placement(shot, currentAngle()).d);
+  },
+  home(level: CompiledLevel): { x: number; y: number } {
+    const [[x0, y0], [x1, y1]] = level.frame ?? OPENING;
+    return { x: (x0 + x1) / 2, y: (y0 + y1) / 2 };
+  },
   frame(shot: Shot, smooth = true, lead = 0): Promise<void> {
     retarget(shot);
     if (!controls) return Promise.resolve();
