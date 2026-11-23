@@ -317,9 +317,16 @@ export const cameraRig = {
     const held = ground(from.x, from.y);
     const d = from.spread && to.spread ? THREE.MathUtils.clamp((v.d * from.spread) / to.spread, c.minDistance, c.maxDistance) : v.d;
     place(v.x, v.y, d, angle);
-    const under = ground(to.x, to.y);
-    if (!held || !under) return;
-    void c.moveTo(v.x + held.x - under.x, 0, -(v.y + held.y - under.y), false);
+    const zoomed = ground(from.x, from.y);
+    if (!held || !zoomed) return;
+    const x = v.x + held.x - zoomed.x;
+    const y = v.y + held.y - zoomed.y;
+    place(x, y, d, angle);
+    const lift = Math.max(0, size.height / 2 - from.y);
+    const grip = ground(from.x, from.y + lift);
+    const under = ground(to.x, to.y + lift);
+    if (!grip || !under) return;
+    void c.moveTo(x + grip.x - under.x, 0, -(y + grip.y - under.y), false);
     if (d !== v.d) void c.dollyTo(d, false);
   },
   get flying() {
