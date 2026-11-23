@@ -204,6 +204,11 @@ behind many small decisions; keep them when changing or adding UI.
   These dashed lines thicken a little up close and thin out from far away,
   so they keep about the same weight against the tiles at every zoom
   without vanishing when zoomed out.
+- **A level's captions can be closed**, from a quiet ✕ in their corner,
+  so on a phone the board can be seen whole. Each comes back the way it
+  came: Reset brings back the intro, a red light the failure, Hint the
+  hints, Check its result. The cleared caption is the exception: its
+  Next is the way on. The tutorial's captions carry the story and have no ✕.
 - **Reset puts the screen back as the level opened**: frogs in their eggs,
   the starting inputs and view, the intro in the caption. The area and its
   verdicts stay, since those are the learner's work.
@@ -238,7 +243,7 @@ behind many small decisions; keep them when changing or adding UI.
   area; the ask is not repeated.
 - **Hints add to the caption.** In the tutorial, Hint adds its sentence under
   the stage's ask and goes. In levels it stays: it shows "Hint 1 of 3", with
-  "Another hint" and Close; pressed again later, it brings back the ones
+  "Another hint" and the ✕; pressed again later, it brings back the ones
   asked for.
 - **Predict before you see**: a yes-or-no question comes before a pitfall's
   demo, unless the learner already saw that failure on their own area.
