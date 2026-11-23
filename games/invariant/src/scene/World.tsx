@@ -9,6 +9,7 @@ import { HomeScene } from './home/HomeScene';
 import { LevelScene } from './level/LevelScene';
 import { figurePage } from './figureClip';
 import { Framing } from './Framing';
+import { grab } from './grab';
 import { startScene } from './sceneTime';
 
 function Lights() {
@@ -21,35 +22,27 @@ function Lights() {
   );
 }
 
-const WHEEL_SPEED = 0.6;
-const PINCH_SPEED = 1.2;
-
 function Controls() {
   const ref = useRef<CameraControls>(null);
   const interactive = useGame((s) => s.mode !== 'menu');
   const canvas = useThree((s) => s.gl.domElement);
   useLayoutEffect(() => {
-    const pickSpeed = (e: PointerEvent | WheelEvent) => {
-      if (ref.current) ref.current.dollySpeed = e instanceof PointerEvent && e.pointerType === 'touch' ? PINCH_SPEED : WHEEL_SPEED;
-    };
     canvas.addEventListener('wheel', cameraRig.userMoved, { passive: true });
-    canvas.addEventListener('wheel', pickSpeed, { passive: true, capture: true });
-    canvas.addEventListener('pointerdown', pickSpeed, { capture: true });
+    const release = grab(canvas);
     return () => {
       canvas.removeEventListener('wheel', cameraRig.userMoved);
-      canvas.removeEventListener('wheel', pickSpeed, { capture: true });
-      canvas.removeEventListener('pointerdown', pickSpeed, { capture: true });
+      release();
     };
   }, [canvas]);
   useLayoutEffect(() => {
     cameraRig.attach(ref.current);
     const c = ref.current;
     if (c) {
-      c.mouseButtons.left = CameraControlsImpl.ACTION.SCREEN_PAN;
+      c.mouseButtons.left = CameraControlsImpl.ACTION.NONE;
       c.mouseButtons.right = CameraControlsImpl.ACTION.ROTATE;
-      c.touches.one = CameraControlsImpl.ACTION.TOUCH_SCREEN_PAN;
-      // camera-controls handles this action but leaves it out of the touches.two type
-      c.touches.two = CameraControlsImpl.ACTION.TOUCH_DOLLY_SCREEN_PAN as typeof c.touches.two;
+      c.touches.one = CameraControlsImpl.ACTION.NONE;
+      c.touches.two = CameraControlsImpl.ACTION.NONE;
+      c.touches.three = CameraControlsImpl.ACTION.NONE;
     }
     return () => cameraRig.attach(null);
   }, []);
@@ -62,7 +55,7 @@ function Controls() {
       maxDistance={MAX_DISTANCE}
       minPolarAngle={0.25}
       maxPolarAngle={1.15}
-      dollySpeed={WHEEL_SPEED}
+      dollySpeed={0.6}
       smoothTime={0.42}
       draggingSmoothTime={0.1}
     />
