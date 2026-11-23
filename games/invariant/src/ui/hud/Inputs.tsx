@@ -1,5 +1,6 @@
 import { Dices, Minus, Plus } from 'lucide-react';
 import { useState, type KeyboardEvent, type ReactNode } from 'react';
+import { changeInputs } from '../../game/actions';
 import { useGame } from '../../game/store';
 import { useT } from '../../i18n/i18n';
 import { MAX_LEN, planeExists, planeKey, rollArray, withLengths, type Inputs } from '../../levels/inputs';
@@ -39,10 +40,6 @@ export function InputsSection({ folded }: { folded: boolean }) {
   const rows = inputRows(level);
   const exists = planeExists(level, inputs);
   if (rows.length === 0) return null;
-  const set = (next: Inputs) => {
-    if (useGame.getState().busy) return;
-    useGame.setState({ inputs: next });
-  };
   const hasArrays = Object.keys(level.arrays).length > 0;
   return (
     <div
@@ -68,13 +65,13 @@ export function InputsSection({ folded }: { folded: boolean }) {
           >
             <span className={`w-5 shrink-0 font-mono text-sm font-semibold ${TOKEN.name}`}>{name}</span>
             {level.arrays[name] ? (
-              <ArrayRow level={level} name={name} inputs={inputs} disabled={busy} onChange={set} label={tr.inputs.random(name)} />
+              <ArrayRow level={level} name={name} inputs={inputs} disabled={busy} onChange={changeInputs} label={tr.inputs.random(name)} />
             ) : (
               <IntRow
                 name={name}
                 value={inputs[name] as number}
                 disabled={busy}
-                onChange={(v) => set({ ...inputs, [name]: v })}
+                onChange={(v) => changeInputs({ ...inputs, [name]: v })}
                 labels={[tr.inputs.decrease(name), tr.inputs.increase(name)]}
               />
             )}

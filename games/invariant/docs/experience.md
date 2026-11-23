@@ -95,7 +95,9 @@ behind many small decisions; keep them when changing or adding UI.
   animating the board itself (a wave across it, or boards sliding past)
   read worse than a clean switch. What makes a switch the game does not
   sudden is the run-up: see the failure rule below. An input the game
-  changes lights up in the inputs panel.
+  changes lights up in the inputs panel. When the learner changes the board,
+  the frogs go home and the marks on the board clear, as with Reset; the
+  new inputs, the view and the caption stay.
 - **Things come from somewhere.** Frogs climb out of their egg; a frog that
   is done goes back into it, and the egg grows back. Check's see-through frogs rise
   up through the slab of the tile they test, spinning as they come, to a pop
