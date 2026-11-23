@@ -12,7 +12,6 @@ const MARK = 'underline decoration-fail decoration-wavy underline-offset-4';
 
 type Token = ReturnType<typeof tokenize>[number];
 
-// Math symbols the prose writes in inline code; the language itself spells them `!=`, `<=`, `>=`.
 const PROSE_OPS: ReadonlySet<string> = new Set(['≠', '≤', '≥']);
 
 function tokenClass(t: Token, boldNames: boolean): string {
