@@ -128,6 +128,7 @@ export const en = {
   verdicts: {
     solverFailed: (why: string) => `The solver could not start: ${why}`,
     far: 'Everything nearby looked fine — but far away: ',
+    tooFar: 'That spot is too far away to show on screen.',
     elsewhere: (here: string, there: string) => `Nothing breaks near this board (\`${here}\`), but something does at \`${there}\`.`,
     showThere: (there: string) => `Show ${there}`,
     yourArea: 'your area',
