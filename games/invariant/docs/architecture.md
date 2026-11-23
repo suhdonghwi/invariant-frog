@@ -273,6 +273,15 @@ backend agree. `pnpm validate` and the tests are the safety net.
   hatch or a slot animation, found by binary search in the list (sorted by
   row, then column), resetting the ones it touched last time.
 - Frogs and hatching shells are **instanced**.
+- **The GPU sees coordinates near a floating origin** (`scene/origin.ts`).
+  A 32-bit float has no fractions left near ten million, so the scene keeps
+  an integer origin within 512 tiles of the camera's target. Meshes sit in a
+  group at it (`AtOrigin`), instance matrices and tile attributes are
+  written relative to it, and shaders use `modelViewMatrix`, which three.js
+  builds in double precision. A tile's identity (axis labels, hover, the
+  level's formulas) is rebuilt as `ivec2` from `uOriginTile`, so it holds to
+  the int32 range the level GLSL already has. Arc lines anchor at their
+  first point instead.
 - **Errors don't take the page down**: the WebGL 2 check (`scene/webgl.ts`),
   the error boundary around the game (`ui/ErrorBoundary.tsx`) and the 3D
   title's own boundary fall back to `ui/Trouble.tsx` or plain text.

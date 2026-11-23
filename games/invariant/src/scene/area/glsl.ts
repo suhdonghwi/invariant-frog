@@ -24,9 +24,13 @@ float heightOf(vec4 m) {
 export const GLSL_HEIGHT = /* glsl */ `
 ${GLSL_MASK}
 attribute vec2 aTile;
+uniform vec2 uTileShift;
 uniform float uTime;
+vec2 tileAt() {
+  return aTile + uTileShift;
+}
 float heightNow() {
-  return heightOf(maskAt(aTile));
+  return heightOf(maskAt(tileAt()));
 }
 `;
 
@@ -59,7 +63,7 @@ float easeOutBack(float a) {
   return a <= 0.0 ? 0.0 : 1.0 + c3 * (a - 1.0) * (a - 1.0) * (a - 1.0) + c1 * (a - 1.0) * (a - 1.0);
 }
 float appearNow() {
-  float delay = min(length(aTile - uAppearCenter) * 0.035, 0.7);
+  float delay = min(length(tileAt() - uAppearCenter) * 0.035, 0.7);
   float a = clamp((uTime - uAppearT0 - delay) / 0.38, 0.0, 1.0);
   return easeOutBack(a);
 }

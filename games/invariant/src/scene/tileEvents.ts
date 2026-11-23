@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { origin } from './origin';
 import { sceneNow } from './sceneTime';
 
 export const MAX_EVENTS = 24;
@@ -15,6 +16,7 @@ interface TileEvent {
 export class TileEvents {
   private events: TileEvent[] = [];
   private synced: string | null = null;
+  live: TileEvent[] = [];
   readonly at: { value: THREE.Vector4[] };
   readonly last = { value: NONE };
 
@@ -30,23 +32,27 @@ export class TileEvents {
   }
 
   sync(plane: string) {
-    if (this.synced === plane) return;
+    const key = `${plane}@${origin.version}`;
+    if (this.synced === key) return;
     const out = this.at.value;
     let k = 0;
     let last = NONE;
+    this.live = [];
     for (let i = this.events.length - 1; i >= 0 && k < out.length; i--) {
       const e = this.events[i];
       if (e.plane !== plane) continue;
-      out[k++].set(e.x, e.y, e.t, e.weight);
+      this.live.push(e);
+      out[k++].set(e.x - origin.x, e.y - origin.y, e.t, e.weight);
       last = Math.max(last, e.t);
     }
     for (; k < out.length; k++) out[k].set(0, 0, NONE, 0);
     this.last.value = last;
-    this.synced = plane;
+    this.synced = key;
   }
 
   clear() {
     this.events.length = 0;
+    this.live = [];
     this.synced = null;
   }
 }

@@ -126,6 +126,7 @@ export const ko: Messages = {
   verdicts: {
     solverFailed: (why) => `솔버를 시작하지 못했습니다: ${why}`,
     far: '근처는 모두 괜찮았지만, 멀리 떨어진 곳에 문제가 있습니다. ',
+    tooFar: '그곳은 너무 멀어서 화면으로 보여 드릴 수 없습니다.',
     elsewhere: (here, there) => `지금 판(\`${here}\`) 근처에는 문제가 없지만, \`${there}\`에서는 깨집니다.`,
     showThere: (there) => `${there}에서 보기`,
     yourArea: '영역',

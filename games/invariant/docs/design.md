@@ -174,7 +174,9 @@ programmer expects, and have room for arrays.)
      Initialization, the nearest egg off the area);
   3. *anything Z3 finds*, with values within 8, then 64, then 1024, then
      unbounded; the camera flies to it: "everything you could see looked
-     fine" is not a proof.
+     fine" is not a proof. Beyond a billion the board cannot be drawn (tile
+     predicates are 32-bit ints on the GPU), so the camera stays put and the
+     caption says the spot is too far away to show.
 
   Steps 1 and 2 are exact evaluation, with no solver. The 8 is the same in
   all three.

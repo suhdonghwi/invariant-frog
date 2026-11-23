@@ -5,7 +5,9 @@ import { planeExists, type Inputs } from '../../levels/inputs';
 import type { CompiledLevel } from '../../levels/level';
 import { field } from '../area/field';
 import { figureClip } from '../figureClip';
+import { AtOrigin } from '../AtOrigin';
 import { cameraRig } from '../cameraRig';
+import { origin, originUniforms } from '../origin';
 import { SLAB_H } from '../constants';
 import { hover } from '../hover';
 import { sceneNow } from '../sceneTime';
@@ -57,6 +59,8 @@ export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true,
       uniforms: {
         ...inputUniforms(level),
         uHover: { value: new THREE.Vector2() },
+        uAt: { value: new THREE.Vector3() },
+        ...originUniforms(),
         uHoverOn: { value: 0 },
         ...fadeUniforms(),
         uOpacity: { value: fadeIn ? 0 : 1 },
@@ -99,7 +103,8 @@ export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true,
     setInputUniforms(u, level, inputs, planeExists(level, inputs));
     const R = updateFade(u);
     const t = cameraRig.target();
-    m.position.set(Math.round(t.x), 0, Math.round(t.z));
+    m.position.set(Math.round(t.x) - origin.x, 0, Math.round(t.z) + origin.y);
+    (u.uAt.value as THREE.Vector3).copy(m.position);
     m.scale.setScalar(R * 2.2);
     u.uTime.value = now;
     u.uShowStop.value = amounts.stop.at(showStop ? 1 : 0, now);
@@ -154,8 +159,10 @@ export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true,
     : {};
 
   return (
-    <mesh ref={mesh} material={material} rotation={[-Math.PI / 2, 0, 0]} renderOrder={-1} {...handlers}>
-      <planeGeometry args={[1, 1]} />
-    </mesh>
+    <AtOrigin>
+      <mesh ref={mesh} material={material} rotation={[-Math.PI / 2, 0, 0]} renderOrder={-1} {...handlers}>
+        <planeGeometry args={[1, 1]} />
+      </mesh>
+    </AtOrigin>
   );
 }

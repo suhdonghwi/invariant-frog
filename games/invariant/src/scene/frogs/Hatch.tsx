@@ -4,7 +4,9 @@ import * as THREE from 'three';
 import { useGame } from '../../game/store';
 import { planeKey } from '../../levels/inputs';
 import { field } from '../area/field';
+import { AtOrigin } from '../AtOrigin';
 import { uploadInstances } from '../instances';
+import { origin } from '../origin';
 import { eggGeometry } from '../models';
 import { sceneNow } from '../sceneTime';
 import { colorUniform, EGG_SHADOW_SIZE, eggShadowMaterial, GLSL_COMMON } from '../shaders/common';
@@ -49,7 +51,7 @@ varying vec3 vLocal;
 void main() {
   vLocal = position;
   vN = normalize(mat3(modelMatrix) * mat3(instanceMatrix) * normal);
-  gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * vec4(position, 1.0);
+  gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0);
 }
 `;
 
@@ -124,8 +126,8 @@ export function HatchShells() {
       if (fx.plane !== plane) continue;
       const u = t - fx.t0;
       const base = field.groundAt(fx.x, fx.y);
-      const bx = fx.x + fx.dx;
-      const bz = -fx.y - fx.dy;
+      const bx = fx.x - origin.x + fx.dx;
+      const bz = origin.y - fx.y - fx.dy;
       if (u < HATCH_WOBBLE) {
         const w = u / HATCH_WOBBLE;
         const tilt = Math.sin(w * Math.PI * 4) * 0.22 * w;
@@ -169,10 +171,10 @@ export function HatchShells() {
   });
 
   return (
-    <>
+    <AtOrigin>
       <instancedMesh ref={shadow} args={[shadowGeom, shadowMat, MAX]} frustumCulled={false} count={0} renderOrder={2} />
       <instancedMesh ref={cup} args={[geom, cupMat, MAX]} frustumCulled={false} count={0} />
       <instancedMesh ref={cap} args={[geom, capMat, MAX]} frustumCulled={false} count={0} />
-    </>
+    </AtOrigin>
   );
 }

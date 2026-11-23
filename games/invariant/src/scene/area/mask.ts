@@ -3,6 +3,7 @@ import type { Expr } from '../../lang/ast';
 import { planeExists, planeKey, type Inputs } from '../../levels/inputs';
 import type { CompiledLevel } from '../../levels/level';
 import { inputUniforms, levelGlsl, setInputUniforms } from '../floor/levelGlsl';
+import { origin } from '../origin';
 
 export const MASK_SIZE = 352;
 const SNAP = 32;
@@ -28,10 +29,10 @@ function evaluator(level: CompiledLevel, area: Expr | null, before: Expr | null)
   return /* glsl */ `
 precision highp float;
 precision highp int;
-uniform vec2 uOrigin;
+uniform ivec2 uOrigin;
 ${levelGlsl(level, { area, before })}
 void main() {
-  ivec2 t = ivec2(int(uOrigin.x), int(uOrigin.y)) + ivec2(gl_FragCoord.xy);
+  ivec2 t = uOrigin + ivec2(gl_FragCoord.xy);
   bool exists = uExists && L_exists(t);
   bool stop = exists && L_stop(t);
   gl_FragColor = vec4(
@@ -112,10 +113,10 @@ class AreaMask {
     this.uniforms.uRise.value = risen;
     const ox = Math.round(x / SNAP) * SNAP - MASK_SIZE / 2;
     const oy = Math.round(y / SNAP) * SNAP - MASK_SIZE / 2;
+    this.uniforms.uMaskOrigin.value.set(ox - origin.x, oy - origin.y);
     const key = `${this.shown}|${ox},${oy}|${this.level ? planeKey(inputs) : ''}`;
     if (key === this.drawn) return;
     this.drawn = key;
-    this.uniforms.uMaskOrigin.value.set(ox, oy);
     const u = (this.quad.material as THREE.ShaderMaterial).uniforms;
     if (this.level) {
       setInputUniforms(u, this.level, inputs, planeExists(this.level, inputs));

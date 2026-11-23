@@ -63,25 +63,44 @@ export function playCounterexample(cex: Counterexample, opts: CounterexampleOpti
   return busyWhile((tok) => counterexample(tok, cex, opts));
 }
 
+const FARTHEST = 1_000_000_000n;
+
+const withinReach = (cex: Counterexample) =>
+  [cex.state, cex.next].every((s) => !s || Object.values(s).every((v) => (Array.isArray(v) ? v : [v]).every((x) => x <= FARTHEST && x >= -FARTHEST)));
+
+function told(cex: Counterexample, area: string, broken: string): string {
+  const say = messages().verdicts;
+  if (cex.rule === 'initialization') return say.startsOutside(fmt(cex.state), area) + broken;
+  if (cex.rule === 'maintenance' && cex.next) return say.landsOutside(fmt(cex.state), fmt(cex.next), area) + broken;
+  return say.offGoal(fmt(cex.state), area);
+}
+
 export async function counterexample(tok: Token, cex: Counterexample, opts: CounterexampleOptions) {
   const L = currentLevel();
   useGame.setState({ failMark: null, region: null });
-  const [x, y] = tileOf(L, cex.state);
-  await focusOn(tok, cex, sendFrogsHome());
-  if (!tok.alive) return;
   const say = messages().verdicts;
   const prefix = opts.prefix ?? (cex.far ? say.far : '');
   const area = opts.area ?? say.yourArea;
   const broken = cex.broken ? (cex.rule === 'maintenance' ? say.noLongerHolds(cex.broken) : say.falseThere(cex.broken)) : '';
+  const text = prefix + told(cex, area, broken);
+  if (!withinReach(cex)) {
+    await sendFrogsHome();
+    if (!tok.alive) return;
+    sfx.fail();
+    finish(cex, opts, `${text}\n\n${say.tooFar}`);
+    return;
+  }
+  const [x, y] = tileOf(L, cex.state);
+  await focusOn(tok, cex, sendFrogsHome());
+  if (!tok.alive) return;
   if (cex.rule === 'initialization') {
     await sleep(ms(BEAT));
     if (!tok.alive) return;
     markFailure(x, y, say.startsOutsideTag(area));
-    finish(cex, opts, `${prefix}${say.startsOutside(fmt(cex.state), area)}${broken}`);
+    finish(cex, opts, text);
     return;
   }
   sfx.ghost();
-  let text: string;
   if (cex.rule === 'maintenance' && cex.next) {
     const { state, next } = cex;
     previewHop(state, 1, next, false);
@@ -89,16 +108,13 @@ export async function counterexample(tok: Token, cex: Counterexample, opts: Coun
     await sleep(ms(GHOST_RISE + ARC_AFTER_RISE + ARC_DRAW));
     if (!tok.alive) return;
     markFailure(...tileOf(L, next), say.landsOutsideTag(area));
-    text = `${prefix}${say.landsOutside(fmt(cex.state), fmt(cex.next), area)}${broken}`;
   } else {
     raiseGhost(cex.state);
     await sleep(ms(GHOST_RISE + BEAT));
     if (!tok.alive) return;
     markFailure(x, y, say.offGoalTag);
-    text = `${prefix}${say.offGoal(fmt(cex.state), area)}`;
   }
-  if (opts.ghostExtra) text += `\n\n${opts.ghostExtra}`;
-  finish(cex, opts, text);
+  finish(cex, opts, opts.ghostExtra ? `${text}\n\n${opts.ghostExtra}` : text);
 }
 
 function finish(cex: Counterexample, opts: CounterexampleOptions, said: string) {

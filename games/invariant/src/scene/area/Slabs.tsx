@@ -3,10 +3,12 @@ import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import type { CompiledLevel } from '../../levels/level';
 import { BASE, LONG } from '../../motion';
+import { AtOrigin } from '../AtOrigin';
 import { cameraRig } from '../cameraRig';
 import { SLAB_H, TILE } from '../constants';
 import { Toward } from '../easing';
 import { hover } from '../hover';
+import { GLSL_ORIGIN, origin, originUniforms } from '../origin';
 import { sceneNow } from '../sceneTime';
 import { axisNameUniforms, getDigitTexture, GLSL_AXIS_LABELS, setAxisNames } from '../shaders/axisLabels';
 import { colorUniform, getBlobTexture, GLSL_COMMON, SHADOW_INK } from '../shaders/common';
@@ -51,14 +53,14 @@ void main() {
   vec3 p = position;
   p.xz *= 1.0 + s * ${LAND_BULGE.toFixed(2)};
   p.y = p.y * (1.0 - s) + (h - 1.0) * ${SLAB_H.toFixed(3)};
-  vec4 w = modelMatrix * vec4(p + vec3(tile.x, 0.0, -tile.y), 1.0);
+  vec4 w = vec4(p + vec3(tile.x, 0.0, -tile.y), 1.0);
   vWorld = w.xyz;
-  vN = normalize(mat3(modelMatrix) * normal);
+  vN = normal;
   vF = vec2(position.x, -position.z);
   vFlags = vec2(m.b, mod(floor(m.a * 3.0 + 0.5), 2.0));
   vTile = tile;
   vRise = riseOf(m);
-  gl_Position = projectionMatrix * viewMatrix * w;
+  gl_Position = projectionMatrix * modelViewMatrix * w;
 }
 `;
 
@@ -73,9 +75,10 @@ varying vec2 vTile;
 varying float vRise;
 uniform vec3 uTop, uSide, uHatch, uLabel, uLabelHalo;
 uniform vec3 uFloorTile, uFloorGap, uFloorStop, uFloorHatch, uFloorLabel, uFloorLabelHalo;
-uniform vec2 uHover;
+uniform ivec2 uHover;
 uniform float uHoverOn;
 uniform float uDim;
+${GLSL_ORIGIN}
 uniform float uStopAmt;
 uniform float uGoalAmt;
 ${GLSL_COMMON}
@@ -107,7 +110,7 @@ void main() {
   float fwRing = fwidth(ringD);
   float edge = sdRoundBox(vF, vec2(${(TILE / 2).toFixed(3)}), ${FLOOR_CORNER.toFixed(2)});
   float inside = 1.0 - smoothstep(-fwidth(edge), fwidth(edge), edge);
-  ivec2 t = ivec2(int(floor(vTile.x + 0.5)), int(floor(vTile.y + 0.5)));
+  ivec2 t = ivec2(floor(vTile + 0.5)) + uOriginTile;
   vec3 n = normalize(vN);
   float top = step(0.6, n.y);
   vec3 col;
@@ -115,7 +118,7 @@ void main() {
     col = topColor(vFlags.x, vFlags.y, hatch, fwr);
     if (uGoalAmt > 0.002) col = mix(col, SPLASH, splashAt(vTile + vF) * 0.45 * uGoalAmt);
     col = drawAxisLabel(col, vF, df, t, uLabel, uLabelHalo, 0.9, 1.0);
-    if (uHoverOn > 0.5 && t.x == int(uHover.x) && t.y == int(uHover.y)) {
+    if (uHoverOn > 0.5 && t == uHover) {
       col = mix(col, vec3(1.0), (1.0 - smoothstep(-fwRing, fwRing, ringD)) * 0.95);
     }
   } else {
@@ -145,8 +148,7 @@ void main() {
     gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
     return;
   }
-  vec4 w = modelMatrix * vec4(position + vec3(tile.x, 0.003, -tile.y), 1.0);
-  gl_Position = projectionMatrix * viewMatrix * w;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position + vec3(tile.x, 0.003, -tile.y), 1.0);
 }
 `;
 const shadowFragment = /* glsl */ `
@@ -255,6 +257,7 @@ export function Slabs({ level, dim, showStop, showGoal }: { level: CompiledLevel
           ...fadeUniforms(),
           ...areaMask.uniforms,
           ...landUniforms(),
+          ...originUniforms(),
           uGrid: { value: new THREE.Vector2() },
         },
       }),
@@ -285,18 +288,18 @@ export function Slabs({ level, dim, showStop, showGoal }: { level: CompiledLevel
     material.uniforms.uGoalAmt.value = amounts.goal.at(showGoal ? 1 : 0, t);
     const reach = Math.min(MASK_REACH, Math.ceil(updateFade(material.uniforms)));
     const target = cameraRig.target();
-    (material.uniforms.uGrid.value as THREE.Vector2).set(Math.round(target.x), Math.round(-target.z));
+    (material.uniforms.uGrid.value as THREE.Vector2).set(Math.round(target.x) - origin.x, Math.round(-target.z) - origin.y);
     const tilePxAtUnitDistance = (camera.projectionMatrix.elements[5] * canvas.height) / 2;
     cells.update(camera, target, reach, tilePxAtUnitDistance / FACETED_BELOW_PX);
     geoms.near.slabs.instanceCount = geoms.near.shadow.instanceCount = cells.nearCount;
     geoms.far.slabs.instanceCount = geoms.far.shadow.instanceCount = cells.farCount;
   });
   return (
-    <>
+    <AtOrigin>
       <mesh geometry={geoms.near.shadow} material={shadowMat} frustumCulled={false} renderOrder={1} />
       <mesh geometry={geoms.far.shadow} material={shadowMat} frustumCulled={false} renderOrder={1} />
       <mesh geometry={geoms.near.slabs} material={material} frustumCulled={false} />
       <mesh geometry={geoms.far.slabs} material={material} frustumCulled={false} />
-    </>
+    </AtOrigin>
   );
 }

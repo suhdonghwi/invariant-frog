@@ -1,7 +1,9 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { AtOrigin } from '../AtOrigin';
 import { cameraRig } from '../cameraRig';
+import { origin } from '../origin';
 import { SLAB_H } from '../constants';
 import { clamp01, smoothstep } from '../easing';
 import { frogWorld } from '../frogs/frogWorld';
@@ -29,10 +31,11 @@ void main() {
   vec3 sl = slotNow();
   float s = (1.0 - aHide) * backNow() * sl.z * appearNow();
   vec3 p = position * s;
-  vec4 w = modelMatrix * vec4(p + vec3(aTile.x + sl.x, h * ${SLAB_H.toFixed(3)} * (1.0 - landSquash(aTile)), -aTile.y - sl.y), 1.0);
+  vec2 tile = tileAt();
+  vec4 w = vec4(p + vec3(tile.x + sl.x, h * ${SLAB_H.toFixed(3)} * (1.0 - landSquash(tile)), -tile.y - sl.y), 1.0);
   vWorld = w.xyz;
-  vN = normalize(mat3(modelMatrix) * normal);
-  gl_Position = projectionMatrix * viewMatrix * w;
+  vN = normal;
+  gl_Position = projectionMatrix * modelViewMatrix * w;
 }
 `;
 const eggFragment = /* glsl */ `
@@ -64,8 +67,8 @@ void main() {
   vUv = uv;
   vec3 sl = slotNow();
   vA = (1.0 - aHide) * backNow() * sl.z * clamp(appearNow(), 0.0, 1.0);
-  vec4 w = modelMatrix * vec4(position * sl.z + vec3(aTile.x + sl.x, heightNow() * ${SLAB_H.toFixed(3)} * (1.0 - landSquash(aTile)) + 0.006, -aTile.y - sl.y), 1.0);
-  gl_Position = projectionMatrix * viewMatrix * w;
+  vec2 tile = tileAt();
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position * sl.z + vec3(tile.x + sl.x, heightNow() * ${SLAB_H.toFixed(3)} * (1.0 - landSquash(tile)) + 0.006, -tile.y - sl.y), 1.0);
 }
 `;
 const shadowFragment = /* glsl */ `
@@ -136,12 +139,12 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
   const touched = useRef<number[]>([]);
   const synced = useRef({ geom: null as THREE.BufferGeometry | null, hatch: -1, occ: -1 });
 
-  const { geom, shadowGeom } = useMemo(() => {
+  const { geom, shadowGeom, at } = useMemo(() => {
     const n = eggs.length;
     const tile = new Float32Array(n * 2);
     for (let i = 0; i < n; i++) {
-      tile[i * 2] = eggs[i][0];
-      tile[i * 2 + 1] = eggs[i][1];
+      tile[i * 2] = eggs[i][0] - origin.x;
+      tile[i * 2 + 1] = eggs[i][1] - origin.y;
     }
     const back = new Float32Array(n).fill(NEVER_BACK);
     const slotAnim = new Float32Array(n * 3);
@@ -153,7 +156,7 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
       aSlot: [new Float32Array(n * 4), 4],
       aSlotAnim: [slotAnim, 3],
     } as const;
-    return { geom: instanced(base, n, attrs), shadowGeom: instanced(shadowBase, n, attrs) };
+    return { geom: instanced(base, n, attrs), shadowGeom: instanced(shadowBase, n, attrs), at: { x: origin.x, y: origin.y } };
   }, [eggs, base, shadowBase]);
   useEffect(() => () => (geom.dispose(), shadowGeom.dispose()), [geom, shadowGeom]);
 
@@ -219,7 +222,8 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
             uTime: { value: 0 },
             uEgg: colorUniform('egg'),
             uAppearT0: { value: sceneNow() },
-            uAppearCenter: { value: new THREE.Vector2(cameraRig.target().x, -cameraRig.target().z) },
+            uAppearCenter: { value: new THREE.Vector2(cameraRig.target().x - origin.x, -cameraRig.target().z - origin.y) },
+            uTileShift: { value: new THREE.Vector2() },
             ...fadeUniforms(),
             ...areaMask.uniforms,
             ...landUniforms(),
@@ -235,20 +239,21 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
         fragmentShader: shadowFragment,
         transparent: true,
         depthWrite: false,
-        uniforms: { ...areaMask.uniforms, ...landUniforms(), uTime: material.uniforms.uTime, uMap: { value: getBlobTexture() }, uAppearT0: material.uniforms.uAppearT0, uAppearCenter: material.uniforms.uAppearCenter },
+        uniforms: { ...areaMask.uniforms, ...landUniforms(), uTileShift: material.uniforms.uTileShift, uTime: material.uniforms.uTime, uMap: { value: getBlobTexture() }, uAppearT0: material.uniforms.uAppearT0, uAppearCenter: material.uniforms.uAppearCenter },
       }),
     [material],
   );
   useEffect(() => () => (shadowBase.dispose(), material.dispose(), shadowMat.dispose()), [shadowBase, material, shadowMat]);
   useFrame(() => {
     syncFrogs();
+    (material.uniforms.uTileShift.value as THREE.Vector2).set(at.x - origin.x, at.y - origin.y);
     material.uniforms.uTime.value = sceneNow();
     updateFade(material.uniforms);
   });
   return (
-    <>
+    <AtOrigin>
       <mesh geometry={shadowGeom} material={shadowMat} frustumCulled={false} renderOrder={2} />
       <mesh geometry={geom} material={material} frustumCulled={false} />
-    </>
+    </AtOrigin>
   );
 }

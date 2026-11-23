@@ -18,6 +18,11 @@ const PER_DOUBLING = 0.3;
 const LIFT_FROM = 1.2;
 const VIEWS_AT_PEAK = 2.5;
 export const HIGHEST = 60;
+const CUT_FROM = 40;
+const CUT_VIEWS = 2;
+const CUT_DUR = 1.4;
+const VEILED = 0.04;
+const CLEARED = 0.5;
 
 export interface Flight {
   from: Pose;
@@ -25,6 +30,7 @@ export interface Flight {
   v0: Pose;
   dur: number;
   lift: number;
+  cut: { dx: number; dy: number } | null;
 }
 
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
@@ -39,12 +45,15 @@ export function travel(from: Pose, to: Pose): number {
 export function plan(from: Pose, to: Pose, v0: Pose = STILL, reduced = false): Flight {
   const target = { ...to, az: from.az + wrap(to.az - from.az) };
   const w = travel(from, target);
-  const dur = Math.min(FLIGHT_MAX, FLIGHT_MIN + PER_DOUBLING * Math.log2(1 + w));
-  return { from, to: target, v0, dur, lift: reduced ? 0 : liftFor(from, target) };
+  const span = Math.hypot(target.x - from.x, target.y - from.y);
+  const low = Math.max(1e-3, from.d, target.d);
+  const shown = CUT_VIEWS * low;
+  const cut = span / low > CUT_FROM ? { dx: ((target.x - from.x) / span) * shown, dy: ((target.y - from.y) / span) * shown } : null;
+  const dur = cut ? CUT_DUR : Math.min(FLIGHT_MAX, FLIGHT_MIN + PER_DOUBLING * Math.log2(1 + w));
+  return { from, to: target, v0, dur, lift: reduced ? 0 : liftFor(from, target, cut ? shown : span), cut };
 }
 
-function liftFor(from: Pose, to: Pose): number {
-  const span = Math.hypot(to.x - from.x, to.y - from.y);
+function liftFor(from: Pose, to: Pose, span: number): number {
   const low = Math.max(from.d, to.d);
   if (span / low <= LIFT_FROM) return 0;
   const peak = Math.min(HIGHEST, Math.max(low, span / VIEWS_AT_PEAK));
@@ -66,17 +75,32 @@ export function sample(f: Flight, elapsed: number): Sample {
   const c = carry(u) * f.dur;
   const pose = { ...f.to };
   for (const k of KEYS) pose[k] = f.from[k] + (f.to[k] - f.from[k]) * s + f.v0[k] * c;
+  if (f.cut) {
+    const [side, along] = u < 0.5 ? [f.from, s] : [f.to, s - 1];
+    pose.x = side.x + f.cut.dx * along + f.v0.x * c;
+    pose.y = side.y + f.cut.dy * along + f.v0.y * c;
+  }
   pose.d *= 1 + f.lift * swell(u);
   return { pose, done };
+}
+
+export function clarity(f: Flight, elapsed: number): number {
+  if (!f.cut) return 1;
+  const away = Math.abs(2 * clamp01(elapsed / f.dur) - 1);
+  return smootherstep(clamp01((away - VEILED) / (CLEARED - VEILED)));
 }
 
 const EPS = 1 / 120;
 
 export function velocity(f: Flight, elapsed: number): Pose {
   if (elapsed >= f.dur) return { ...STILL };
-  const a = sample(f, Math.max(0, elapsed - EPS)).pose;
-  const b = sample(f, elapsed + EPS).pose;
-  const span = elapsed + EPS - Math.max(0, elapsed - EPS);
+  let lo = Math.max(0, elapsed - EPS);
+  let hi = elapsed + EPS;
+  const mid = f.dur / 2;
+  if (f.cut && lo < mid && hi >= mid) [lo, hi] = elapsed < mid ? [lo, mid - 1e-6] : [mid, hi];
+  const a = sample(f, lo).pose;
+  const b = sample(f, hi).pose;
+  const span = hi - lo;
   const v = { ...STILL };
   for (const k of KEYS) v[k] = (b[k] - a[k]) / span;
   return v;
