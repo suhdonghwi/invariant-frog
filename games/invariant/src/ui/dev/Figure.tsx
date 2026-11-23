@@ -6,7 +6,8 @@ import { clickTile, stepFrogs } from '../../director/controls';
 import { playCounterexample } from '../../director/counterexample';
 import { useGame } from '../../game/store';
 import { levels, tutorialLevel } from '../../levels/catalog';
-import { compileFormula, type LevelDef } from '../../levels/level';
+import { compileFormula, hop, toBig, type LevelDef } from '../../levels/level';
+import { tileState } from '../../levels/tiles';
 import { cameraRig, type Tile } from '../../scene/cameraRig';
 import { figureClip, type ClipBox } from '../../scene/figureClip';
 import { sceneStarted, sleep } from '../../scene/sceneTime';
@@ -18,6 +19,8 @@ interface FigureDef {
   area?: string;
   /** A formula to check as the learner would; its first failure is played on the area. */
   check?: string;
+  /** The failing tile to give as the example, in place of the solver's. */
+  example?: Tile;
   bare?: boolean;
 }
 
@@ -34,20 +37,28 @@ export const FIGURES: Record<string, FigureDef> = {
   b: { level: tutorialLevel, box: STATES, frog: { tile: [0, 2], hops: 2 } },
   c: { level: tutorialLevel, box: STATES, frog: { tile: [0, 2], hops: 2 }, area: `i <= n && ${IN_STATES}` },
   'overshoot-init': { level: overshoot, box: OVERSHOOT, check: 'i == n', area: `i == n && ${IN_OVERSHOOT}` },
-  'overshoot-maint': { level: overshoot, box: OVERSHOOT, check: 'i <= n', area: `i <= n && ${IN_OVERSHOOT}` },
+  // the example on the slab with no egg, so both eggs under the rings show whole
+  'overshoot-maint': { level: overshoot, box: OVERSHOOT, check: 'i <= n', example: [1, 2], area: `i <= n && ${IN_OVERSHOOT}` },
   'overshoot-exit': { level: overshoot, box: OVERSHOOT, check: 'i <= n + 3', area: `i <= n + 3 && ${IN_OVERSHOOT}` },
   'overshoot-pass': { level: overshoot, box: OVERSHOOT, check: 'i <= n + 2', area: `i <= n + 2 && ${IN_OVERSHOOT}` },
 };
 
 const SETTLE_MS = 2500;
 
-async function playFirstFailure(text: string) {
+async function playFirstFailure(text: string, example?: Tile) {
   const { level, inputs } = useGame.getState();
   const inv = compileFormula(level!, text);
   if (!inv.ok) throw new Error(`figure formula ${text} does not compile`);
   const res = await checkFormula(await browserZ3(), level!, inv, inputs);
   const failure = RULES.map((r) => res.verdicts[r]).find((v) => v?.status === 'fail');
-  if (failure?.status === 'fail') await playCounterexample(failure.cex);
+  if (failure?.status === 'fail') {
+    let { cex } = failure;
+    if (example) {
+      const state = toBig(tileState(level!, ...example, inputs));
+      cex = { ...cex, state, next: cex.rule === 'maintenance' ? hop(level!, state) : undefined };
+    }
+    await playCounterexample(cex);
+  }
   // Keep the ring, drop the tag's text: the paper writes its own notes, and
   // the tag would cover the tiles behind the failing one.
   useGame.setState((g) => ({ failMark: g.failMark && { ...g.failMark, label: '' } }));
@@ -72,7 +83,7 @@ export function Figure() {
       }
       if (fig.bare) useGame.getState().setReveal({ eggs: false, stop: false, goals: false });
       if (fig.area) useGame.getState().setFormula(fig.area);
-      if (fig.check) await playFirstFailure(fig.check);
+      if (fig.check) await playFirstFailure(fig.check, fig.example);
       useGame.setState({ caption: null, callouts: [], frogTags: false });
       const { x0, y0, x1, y1 } = fig.box;
       const tiles: Tile[] = [];
