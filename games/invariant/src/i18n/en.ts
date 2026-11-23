@@ -1,7 +1,5 @@
 import type { Rule } from '../checker/types';
 
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
 export const en = {
   gotIt: 'Got it',
 
@@ -127,16 +125,18 @@ export const en = {
     noLongerHolds: (part: string) => ` \`${part}\` no longer holds.`,
     falseThere: (part: string) => ` \`${part}\` is false there.`,
     startsOutsideTag: (area: string) => `starts outside ${area}`,
-    startsOutside: (state: string, area: string) => `The egg at ${state} is outside ${area}.`,
+    startsOutside: (state: string, area: string) => `Some eggs are outside ${area}, so frogs from them start off it. For example, the egg at ${state}.`,
     landsOutsideTag: (area: string) => `lands outside ${area}`,
-    landsOutside: (from: string, to: string, area: string) => `${cap(area)} says a frog could be at ${from}. From there a hop lands on ${to}, outside ${area}.`,
+    landsOutside: (from: string, to: string, area: string) =>
+      `From some tiles of ${area}, a hop lands outside it. For example, ${area} says a frog could be at ${from}, and from there a hop lands on ${to}.`,
     offGoalTag: 'stops, but not on a goal',
     holdsTag: {
       initialization: 'every egg is on the area',
       maintenance: 'every hop lands on the area',
       exit: 'every stop on the area is a goal',
     } satisfies Record<Rule, string>,
-    offGoal: (state: string, area: string) => `${cap(area)} says a frog could be at ${state}. It stops there, but that isn't a goal: the postcondition doesn't hold.`,
+    offGoal: (state: string, area: string) =>
+      `Some stops on ${area} aren't goals: a frog that stopped there would break the postcondition. For example, ${area} says a frog could be at ${state}, and it would stop there.`,
   },
 
   langErrors: {

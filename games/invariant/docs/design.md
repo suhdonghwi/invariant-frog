@@ -178,8 +178,17 @@ programmer expects, and have room for arrays.)
 
   Steps 1 and 2 are exact evaluation, with no solver. The 8 is the same in
   all three.
+- **Around it, every failing tile is ringed.** A rule's failing tiles are
+  those where its query holds (the egg's condition and not the area for
+  Initialization), and the GPU evaluates that condition per tile exactly as
+  it does the area, so the rings reach as far as the slabs: each egg off the
+  area, each tile of the area a hop leaves it from, each stop on the area
+  that is not a goal. They appear all at once. The
+  counterexample is the one tagged and the only one a frog shows, and the caption
+  says what fails in general before giving it as an example. The proof covers
+  what no ring can show.
 - **Check never says whether a real frog gets there.** An Initialization
-  failure is an egg off the area, and only the egg is marked; a Maintenance
+  failure is an egg off the area, and only eggs are marked; a Maintenance
   or Exit failure is a tile of the area, and a see-through frog stands on it (see
   *See-through frogs* above).
 - **Three verdicts**, played rule by rule (see experience.md, *Verifying*):

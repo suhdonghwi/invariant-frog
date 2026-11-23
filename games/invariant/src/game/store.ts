@@ -4,6 +4,7 @@ import { startInputs, type Inputs } from '../levels/inputs';
 import { compileFormula, compileLevel, type CompiledLevel, type Formula, type FormulaResult, type LevelDef } from '../levels/level';
 import { localizeLevel } from '../levels/localize';
 import type { TileWindow } from '../levels/tiles';
+import type { Expr } from '../lang/ast';
 
 export interface Reveal {
   code: boolean;
@@ -92,7 +93,8 @@ export interface Game {
   inputHover: string | null;
   callouts: { x: number; y: number; frog?: number; text: string; tone: 'info' | 'good' | 'fail' }[];
   region: Region | null;
-  failMark: { x: number; y: number; label: string; t0: number } | null;
+  /** The failure shown: a tag on one tile or frog, and rings on every tile where `fail` holds. */
+  failMark: { x: number; y: number; label: string; t0: number; frog?: number; fail?: Expr } | null;
 
   openLevel(def: LevelDef, mode: 'level' | 'tutorial'): void;
   backToMenu(view?: 'home' | 'levels'): void;
