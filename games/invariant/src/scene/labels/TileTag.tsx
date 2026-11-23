@@ -13,7 +13,7 @@ export const TONE_COLORS: Record<TagTone, string> = {
   good: '#34d058',
   fail: COLORS.fail,
 };
-const MARK = 'mr-1 inline size-[0.9em] align-[-0.1em]';
+const MARK = 'mr-1 inline size-[0.9em] align-[-0.15em]';
 export const TONE_PREFIX: Record<TagTone, ReactNode> = {
   info: null,
   good: <Check className={MARK} strokeWidth={4} />,
