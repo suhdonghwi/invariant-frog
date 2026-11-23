@@ -1,5 +1,6 @@
 import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { Check, X } from 'lucide-react';
+import { useRef, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { field } from '../area/field';
 import { COLORS } from '../constants';
@@ -12,7 +13,12 @@ export const TONE_COLORS: Record<TagTone, string> = {
   good: '#34d058',
   fail: COLORS.fail,
 };
-export const TONE_PREFIX: Record<TagTone, string> = { info: '', good: '✓ ', fail: '✕ ' };
+const MARK = 'mr-1 inline size-[0.9em] align-[-0.15em]';
+export const TONE_PREFIX: Record<TagTone, ReactNode> = {
+  info: null,
+  good: <Check className={MARK} strokeWidth={4} />,
+  fail: <X className={MARK} strokeWidth={4} />,
+};
 
 function roundedRect(w: number, r: number): THREE.Shape {
   const s = new THREE.Shape();
