@@ -21,15 +21,16 @@ function Values({ names, state }: { names: string[]; state: Record<string, unkno
   );
 }
 
-const READOUT_ROOM = 440;
+const CHIP_ROOM = 64;
+const ROOM_EDGE = 34;
 
-function useTopRowPlacement(ref: React.RefObject<HTMLDivElement | null>) {
+function useTopRowPlacement(ref: React.RefObject<HTMLDivElement | null>, chips: number) {
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     el.style.transform = '';
     const pill = document.querySelector('[data-topbar] > [data-pill]')?.getBoundingClientRect();
-    if (!pill || window.innerWidth / 2 - READOUT_ROOM / 2 < pill.right) return;
+    if (!pill || window.innerWidth / 2 - (chips * CHIP_ROOM + ROOM_EDGE) / 2 < pill.right) return;
     const r = el.getBoundingClientRect();
     el.style.transform = `translateY(${pill.top + pill.height / 2 - (r.top + r.height / 2)}px)`;
   });
@@ -41,7 +42,7 @@ export function HoverReadout() {
   const reveal = useGame((s) => s.reveal);
   const tile = useHover((s) => s.tile);
   const ref = useRef<HTMLDivElement>(null);
-  useTopRowPlacement(ref);
+  useTopRowPlacement(ref, scalarNames(level).length);
   if (!tile || !reveal.axes) return null;
   const s = tileState(level, tile[0], tile[1], inputs);
   return (
