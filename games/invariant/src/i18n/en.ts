@@ -226,12 +226,12 @@ export const en = {
     afterOwnInitialization: (mine: string) => `Your first try missed an egg, but ${mine} covers every egg.`,
 
     ruleMaintenance: 'Next rule.\n\n**Rule 2 · Maintenance:** no hop leads off your area. From any tile of it, one hop lands on it again.',
-    askMaintenance: 'Now change your area so **no hop leads off it**. **Check** tests rules 1 and 2 together.',
+    askMaintenance: 'Now change your area so **no hop leads off it**. The checker tests rules 1 and 2 together.',
     nudgeMaintenance: 'Every frog starts at `i = 0`, and a hop only ever increases `i`.',
     ghostMaintenance:
-      'Your area says a frog could be here, so Check put a see-through frog here. Its hop lands off your area, and that counts whether or not a real frog ever gets here.',
+      'Your area says a frog could be here, so the checker put a see-through frog here. Its hop lands off your area, and that counts whether or not a real frog ever gets here.',
     passedMaintenance:
-      'Correct! No hop leads off your area: **Maintenance** holds.\n\nThe see-through frogs are just a few examples Check put on your area. Check never runs real frogs and doesn’t try tiles one by one: it reasons about your formula, like solving an equation, so it covers every tile of your area at once. From any tile on your area, a hop lands on your area.',
+      'Correct! No hop leads off your area: **Maintenance** holds.\n\nThe see-through frogs are just a few examples the checker put on your area. It never runs real frogs and doesn’t try tiles one by one: it reasons about your formula, like solving an equation, so it covers every tile of your area at once. From any tile on your area, a hop lands on your area.',
     questionMaintenance: 'Does every hop from the area land on the area?',
 
     together:
@@ -242,7 +242,7 @@ export const en = {
       'When it reaches a striped tile and the loop stops, the frog is still on your area. The outlined tiles are where a frog can stop on this area.\n\n**So does a frog that stops on the area always stop on a goal?** Making sure of that is the third rule.',
 
     askExit:
-      '**Rule 3 · Exit:** every striped tile on your area must be a goal.\n\nChange your area so **every striped tile on it is a goal**, then press **Check**. It now tests all three rules.',
+      '**Rule 3 · Exit:** every striped tile on your area must be a goal.\n\nChange your area so **every striped tile on it is a goal**, then press **Check**. The checker now tests all three rules.',
     nudgeExit: 'A real frog never passes `n`, so `i` is never greater than `n`.',
     objection:
       '“But `i` can never pass `n`!” Indeed, no real frog gets to this tile. But your area claims “a frog could be here too”. The area is too large.',

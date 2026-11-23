@@ -22,9 +22,9 @@ src/
   i18n/        the language switch, and every other line the game says (en.ts, ko.ts)
   game/        the zustand store, cleared levels (progress.ts), what the app's buttons do (actions.ts)
   director/    scripted sequences and the scopes that cancel them (sequence.ts); frogs, the player's Step/Run/egg controls, resets;
-               solver runs, counterexamples, rule-by-rule verification, Check's see-through frogs (`ghosts.ts`) and the proof wave; a hop's sound and code cursor
+               solver runs, counterexamples, rule-by-rule verification, the checker's see-through frogs (`ghosts.ts`) and the proof wave; a hop's sound and code cursor
   tutorial/    the tutorial's steps, and the beat/caption helpers they are written with
-  audio/       sound clips and the synthesised pop of Check's frogs (`sfx.ghost`)
+  audio/       sound clips and the synthesised pop of the checker's frogs (`sfx.ghost`)
   hooks/       React hooks the scene and the DOM share: exit animations, media queries
   storage.ts   localStorage behind a try/catch: language, mute, cleared levels, code panel width
   motion.ts    the motion tokens: every duration and pause (`--duration-*` in styles.css), EXIT_MS
@@ -181,7 +181,7 @@ backend agree. `pnpm validate` and the tests are the safety net.
   panel, or it is more than `TOO_FAR` times further out than the fit; a
   move fits into the free screen inset by `MARGIN`, so a panel that grows
   a little doesn't move it again. Tutorial steps, callouts, counterexamples,
-  Check's rules that hold, Run, a level's start and the home screen all
+  the rules that hold, Run, a level's start and the home screen all
   frame this way. Code that chooses which tiles to show asks the rig what
   is on screen (`shows`, `holds`, `viewWindow`) instead of counting tiles
   from the view's centre, which would read differently at each zoom and
