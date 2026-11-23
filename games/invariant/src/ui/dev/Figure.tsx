@@ -1,8 +1,12 @@
 import { useEffect } from 'react';
+import { checkFormula } from '../../checker/check';
+import { RULES } from '../../checker/types';
+import { browserZ3 } from '../../checker/z3-browser';
 import { clickTile, stepFrogs } from '../../director/controls';
+import { playCounterexample } from '../../director/counterexample';
 import { useGame } from '../../game/store';
 import { levels, tutorialLevel } from '../../levels/catalog';
-import type { LevelDef } from '../../levels/level';
+import { compileFormula, type LevelDef } from '../../levels/level';
 import { cameraRig, type Tile } from '../../scene/cameraRig';
 import { figureClip, type ClipBox } from '../../scene/figureClip';
 import { sceneStarted, sleep } from '../../scene/sceneTime';
@@ -12,6 +16,8 @@ interface FigureDef {
   box: ClipBox;
   frog?: { tile: Tile; hops: number };
   area?: string;
+  /** A formula to check as the learner would; its first failure is played on the area. */
+  check?: string;
   bare?: boolean;
 }
 
@@ -27,13 +33,25 @@ export const FIGURES: Record<string, FigureDef> = {
   a: { level: tutorialLevel, box: STATES, frog: { tile: [0, 2], hops: 2 }, bare: true },
   b: { level: tutorialLevel, box: STATES, frog: { tile: [0, 2], hops: 2 } },
   c: { level: tutorialLevel, box: STATES, frog: { tile: [0, 2], hops: 2 }, area: `i <= n && ${IN_STATES}` },
-  'overshoot-init': { level: overshoot, box: OVERSHOOT, area: `i == n && ${IN_OVERSHOOT}` },
-  'overshoot-maint': { level: overshoot, box: OVERSHOOT, frog: { tile: [0, 2], hops: 1 }, area: `i <= n && ${IN_OVERSHOOT}` },
-  'overshoot-exit': { level: overshoot, box: OVERSHOOT, area: `i <= n + 3 && ${IN_OVERSHOOT}` },
-  'overshoot-pass': { level: overshoot, box: OVERSHOOT, area: `i <= n + 2 && ${IN_OVERSHOOT}` },
+  'overshoot-init': { level: overshoot, box: OVERSHOOT, check: 'i == n', area: `i == n && ${IN_OVERSHOOT}` },
+  'overshoot-maint': { level: overshoot, box: OVERSHOOT, check: 'i <= n', area: `i <= n && ${IN_OVERSHOOT}` },
+  'overshoot-exit': { level: overshoot, box: OVERSHOOT, check: 'i <= n + 3', area: `i <= n + 3 && ${IN_OVERSHOOT}` },
+  'overshoot-pass': { level: overshoot, box: OVERSHOOT, check: 'i <= n + 2', area: `i <= n + 2 && ${IN_OVERSHOOT}` },
 };
 
 const SETTLE_MS = 2500;
+
+async function playFirstFailure(text: string) {
+  const { level, inputs } = useGame.getState();
+  const inv = compileFormula(level!, text);
+  if (!inv.ok) throw new Error(`figure formula ${text} does not compile`);
+  const res = await checkFormula(await browserZ3(), level!, inv, inputs);
+  const failure = RULES.map((r) => res.verdicts[r]).find((v) => v?.status === 'fail');
+  if (failure?.status === 'fail') await playCounterexample(failure.cex);
+  // Keep the ring, drop the tag's text: the paper writes its own notes, and
+  // the tag would cover the tiles behind the failing one.
+  useGame.setState((g) => ({ failMark: g.failMark && { ...g.failMark, label: '' } }));
+}
 
 export function Figure() {
   useEffect(() => {
@@ -54,6 +72,7 @@ export function Figure() {
       }
       if (fig.bare) useGame.getState().setReveal({ eggs: false, stop: false, goals: false });
       if (fig.area) useGame.getState().setFormula(fig.area);
+      if (fig.check) await playFirstFailure(fig.check);
       useGame.setState({ caption: null, callouts: [], frogTags: false });
       const { x0, y0, x1, y1 } = fig.box;
       const tiles: Tile[] = [];
