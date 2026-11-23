@@ -2,8 +2,10 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useGame } from '../../game/store';
+import { planeKey } from '../../levels/inputs';
 import { hopFrom, tileState } from '../../levels/tiles';
 import { field } from '../area/field';
+import { trailDraws } from '../frogs/FrogTrail';
 import { yawToward } from '../frogs/frogWorld';
 import { occupancy } from '../frogs/occupancy';
 import { HopLine } from '../frogs/HopLine';
@@ -44,12 +46,16 @@ export function HoverPreview() {
   return (
     <group>
       <HopLine
-        path={() => ({
-          from: [hop.from[0], hop.from[1], field.groundAt(hop.from[0], hop.from[1])],
-          to: [hop.to[0], hop.to[1], field.groundAt(hop.to[0], hop.to[1])],
-          drawn: 1,
-          opacity: 1,
-        })}
+        path={() =>
+          trailDraws(planeKey(inputs), hop.from, hop.to)
+            ? null
+            : {
+                from: [hop.from[0], hop.from[1], field.groundAt(hop.from[0], hop.from[1])],
+                to: [hop.to[0], hop.to[1], field.groundAt(hop.to[0], hop.to[1])],
+                drawn: 1,
+                opacity: 1,
+              }
+        }
       />
       <group ref={ghost}>
         <mesh geometry={assets.geom} material={assets.depth} renderOrder={4} />

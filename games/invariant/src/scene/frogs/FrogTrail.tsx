@@ -26,6 +26,18 @@ function pathOf(f: FrogSim): number[] {
   return points;
 }
 
+const same = (a: Tile, x: number, y: number) => a[0] === x && a[1] === y;
+
+export function trailDraws(plane: string, from: Tile, to: Tile): boolean {
+  return trailFrogs(plane)
+    .slice(0, TRAILS)
+    .some((f) => {
+      const t = f.trail!;
+      if (t.some((p, k) => k > 0 && same(t[k - 1], ...from) && same(p, ...to))) return true;
+      return !!f.hop && same(from, f.hop.fx, f.hop.fy) && same(to, f.hop.tx, f.hop.ty);
+    });
+}
+
 function TrailLine({ index }: { index: number }) {
   const size = useThree((s) => s.size);
   const plane = useGame((s) => planeKey(s.inputs));
