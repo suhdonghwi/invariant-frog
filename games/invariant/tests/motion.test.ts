@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FLIGHT_MAX, FLIGHT_MIN, HIGHEST, plan, sample, STILL, velocity, type Pose } from '../src/scene/flight';
+import { clarity, FLIGHT_MAX, FLIGHT_MIN, HIGHEST, plan, sample, STILL, velocity, type Pose } from '../src/scene/flight';
 
 const at = (x: number, y: number, d = 14): Pose => ({ x, y, d, az: 0.26, po: 0.8 });
 
@@ -57,8 +57,23 @@ describe('camera flights', () => {
     const lift = (x: number) => plan(at(0, 0), at(x, 0)).lift;
     expect(lift(10)).toBe(0);
     expect(lift(100)).toBeGreaterThan(lift(40));
-    const far = plan(at(0, 0), at(1000, 0));
+    const far = plan(at(0, 0), at(400, 0));
     expect(sample(far, far.dur / 2).pose.d).toBeCloseTo(HIGHEST);
+  });
+
+  it('cut across very long trips behind a veil instead of flying the whole way', () => {
+    const f = plan(at(0, 0), at(1e7, 0));
+    const mid = f.dur / 2;
+    expect(f.cut).not.toBeNull();
+    expect(plan(at(0, 0), at(400, 0)).cut).toBeNull();
+    expect(sample(f, mid - 0.01).pose.x).toBeLessThan(100);
+    expect(sample(f, mid + 0.01).pose.x).toBeGreaterThan(1e7 - 100);
+    expect(sample(f, f.dur).pose.x).toBe(1e7);
+    expect(sample(f, mid).pose.d).toBeLessThan(HIGHEST);
+    expect(clarity(f, 0)).toBe(1);
+    expect(clarity(f, mid)).toBe(0);
+    expect(clarity(f, f.dur)).toBe(1);
+    for (const t of [mid - 0.004, mid, mid + 0.004]) expect(Math.abs(velocity(f, t).x)).toBeLessThan(1000);
   });
 
   it('do not pull back when motion is reduced', () => {

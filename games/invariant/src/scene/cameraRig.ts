@@ -2,7 +2,7 @@ import type { CameraControls } from '@react-three/drei';
 import * as THREE from 'three';
 import type { CompiledLevel } from '../levels/level';
 import { EXIT_MS, reducedMotion } from '../motion';
-import { HIGHEST, plan, sample, STILL, travel, velocity, type Flight, type Pose } from './flight';
+import { clarity, HIGHEST, plan, sample, STILL, travel, velocity, type Flight, type Pose } from './flight';
 import { followKeyboard, freeRect, overlaps, softBlocks, type Rect } from './freeRect';
 import { sceneNow, sceneStarted, sleep } from './sceneTime';
 
@@ -304,6 +304,9 @@ export const cameraRig = {
   userMoved: takeOver,
   get flying() {
     return flight !== null;
+  },
+  clarity(): number {
+    return flight ? clarity(flight.plan, sceneNow() - flight.t0) : 1;
   },
   target(): THREE.Vector3 {
     if (!controls) return tmp.set(0, 0, 0);
