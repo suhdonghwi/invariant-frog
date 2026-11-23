@@ -11,7 +11,7 @@ const isolation = {
 };
 
 const BASE = process.env.BASE_PATH ?? '/';
-const SITE_URL = process.env.SITE_URL ?? 'https://jammy.fun/invariant/';
+const SITE_URL = process.env.SITE_URL ?? 'https://invariant.donghwi.me/';
 const siteUrl = { name: 'site-url', transformIndexHtml: (html: string) => html.replaceAll('%SITE_URL%', SITE_URL) };
 
 const FIRST_SCREEN_FONTS = [/nunito-latin-wght-normal-[\w-]+\.woff2$/, /fredoka-latin-[56]00-normal-[\w-]+\.woff2$/];

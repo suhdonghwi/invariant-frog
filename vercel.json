@@ -4,21 +4,90 @@
   "buildCommand": "pnpm build",
   "outputDirectory": "dist",
   "redirects": [
-    { "source": "/invariant", "destination": "/invariant/", "permanent": true },
-    { "source": "/((?!invariant(?:/|$)|ribbit/).+)", "destination": "/", "permanent": false }
+    {
+      "source": "/invariant",
+      "destination": "/invariant/",
+      "permanent": true
+    },
+    {
+      "source": "/((?!invariant(?:/|$)|ribbit/).+)",
+      "destination": "/",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "invariant.donghwi.me"
+        }
+      ]
+    }
   ],
-  "rewrites": [{ "source": "/ribbit/:path*", "destination": "https://jammy.fun/_vercel/insights/:path*" }],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "invariant.donghwi.me"
+        }
+      ],
+      "destination": "/invariant/index.html"
+    },
+    {
+      "source": "/og.png",
+      "has": [
+        {
+          "type": "host",
+          "value": "invariant.donghwi.me"
+        }
+      ],
+      "destination": "/invariant/og.png"
+    },
+    {
+      "source": "/ribbit/:path*",
+      "destination": "https://jammy.fun/_vercel/insights/:path*"
+    }
+  ],
   "headers": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "invariant.donghwi.me"
+        }
+      ],
+      "headers": [
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        }
+      ]
+    },
     {
       "source": "/invariant(/.*)?",
       "headers": [
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
-        { "key": "Cross-Origin-Embedder-Policy", "value": "require-corp" }
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        }
       ]
     },
     {
       "source": "/invariant/(assets|z3)/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ]
 }

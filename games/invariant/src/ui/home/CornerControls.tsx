@@ -7,7 +7,7 @@ import { PILL } from '../classes';
 
 const ICON = 'grid size-7.5 place-items-center rounded-full text-muted transition-colors duration-150 hover:bg-shade/6 hover:text-ink';
 
-const SOURCE_URL = 'https://github.com/suhdonghwi/jammy';
+const SOURCE_URL = 'https://github.com/suhdonghwi/invariant-frog';
 
 const CONFIRM_MS = 3000;
 
