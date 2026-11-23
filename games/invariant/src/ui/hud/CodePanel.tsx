@@ -64,7 +64,7 @@ export function CodePanel() {
         onClick={() => setFolded(open)}
       >
         <span className={`${CARD_LABEL} mb-0!`}>{tr.code.title}</span>
-        <span className="flex items-center gap-0.5 rounded-full bg-shade/5 py-0.5 pr-1.5 pl-2 font-display text-xs font-medium text-muted transition-colors group-hover:bg-shade/10 group-hover:text-ink">
+        <span className="flex items-center gap-0.5 rounded-full bg-shade/5 py-0.5 pr-1.5 pl-2 md:-mr-0.75 font-display text-xs font-medium text-muted transition-colors group-hover:bg-shade/10 group-hover:text-ink">
           {open ? tr.code.hide : tr.code.show}
           <ChevronDown size={13} strokeWidth={2.6} className={`transition-transform ${FOLD} ${open ? 'rotate-180' : ''}`} />
         </span>
