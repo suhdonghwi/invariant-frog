@@ -12,9 +12,11 @@ const MARK = 'underline decoration-fail decoration-wavy underline-offset-4';
 
 type Token = ReturnType<typeof tokenize>[number];
 
+const PROSE_OPS: ReadonlySet<string> = new Set(['≠', '≤', '≥']);
+
 function tokenClass(t: Token, boldNames: boolean): string {
   if (t.kind === 'num') return TOKEN.num;
-  if (t.kind === 'op') return TOKEN.op;
+  if (t.kind === 'op' || (t.kind === 'bad' && PROSE_OPS.has(t.text))) return TOKEN.op;
   if (t.kind !== 'ident') return '';
   if (KEYWORDS.has(t.text) || BUILTINS.has(t.text)) return TOKEN.keyword;
   return boldNames ? `${TOKEN.name} font-semibold` : TOKEN.name;
