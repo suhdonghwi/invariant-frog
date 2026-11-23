@@ -189,8 +189,7 @@ behind many small decisions; keep them when changing or adding UI.
 - **One moving thing at a time** while a caption explains something; motion
   that only decorates competes with the words.
 - **Draw what doesn't exist faintly**, rather than not at all: states the
-  precondition rules out are ghost tiles, still hoverable, and the readout
-  says they are not possible states.
+  precondition rules out are ghost tiles, still hoverable.
 - **Step and Run move one frog: the one the learner picked.** Clicking an
   egg hatches its frog, which waits. Step hops it once; Run hops it until it
   stops, and turns into Pause meanwhile. In a level there is one real frog
@@ -227,10 +226,10 @@ behind many small decisions; keep them when changing or adding UI.
 - **Reset puts the screen back as the level opened**: frogs in their eggs,
   the starting inputs and view, the intro in the caption. The area and its
   verdicts stay, since those are the learner's work.
-- **Hovering a tile answers Check's question.** The readout gives the tile's
-  values, where it hops or that it stops, and whether it is on the area; a
-  see-through green frog shows the hop, on the same dashed line Check's
-  see-through frogs draw.
+- **Hovering a tile answers Check's question.** The readout gives only the
+  tile's values; the board says the rest (the area's colour, the stops'
+  hatching, the ghost tiles). A see-through green frog shows the hop, on the
+  same dashed line Check's see-through frogs draw.
   Where a frog or a trail's echo already stands on the landing tile, only
   the line is drawn, so two see-through frogs never share a spot.
 - **Errors wait for Check.** A formula is never marked wrong while it is
@@ -279,7 +278,7 @@ behind many small decisions; keep them when changing or adding UI.
   held sideways) the caption, area box and controls form a column on the
   right, so the scene keeps its height.
 - The tile readout sits at the top centre, in the top bar's row when there is
-  room; on phones it is a row of value chips above the caption.
+  room, as a row of value chips; on phones it sits above the caption.
 - The code panel folds from its header (a Hide/Show pill) and resizes from a
   grip on its edge (double-click resets); its width is remembered per level.
   In the tutorial on phones it starts folded and opens when the story points
