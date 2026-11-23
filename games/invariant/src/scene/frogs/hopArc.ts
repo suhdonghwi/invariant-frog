@@ -23,7 +23,7 @@ export function arcPoints([fx, fy, h0]: ArcEnd, [tx, ty, h1]: ArcEnd, segments: 
 }
 
 // LineMaterial's own dashes show hairline gaps at every bend, so each dash is its own segment.
-export function dashes(points: number[]): number[] {
+export function dashes(points: number[], omit?: readonly [number, number]): number[] {
   const n = points.length / 3;
   const along = [0];
   for (let k = 1; k < n; k++)
@@ -35,15 +35,21 @@ export function dashes(points: number[]): number[] {
     const t = along[k + 1] > along[k] ? (d - along[k]) / (along[k + 1] - along[k]) : 0;
     return [0, 1, 2].map((c) => points[k * 3 + c] + (points[k * 3 + 3 + c] - points[k * 3 + c]) * t);
   };
+  const [o0, o1] = omit ? [along[omit[0]], along[omit[1]]] : [Infinity, Infinity];
   const out: number[] = [];
-  for (let s = 0; s < total; s += DASH + GAP) out.push(...at(s), ...at(Math.min(s + DASH, total)));
+  const dash = (a: number, b: number) => b - a > 1e-3 && out.push(...at(a), ...at(b));
+  for (let s = 0; s < total; s += DASH + GAP) {
+    const e = Math.min(s + DASH, total);
+    dash(s, Math.min(e, o0));
+    dash(Math.max(s, o1), e);
+  }
   return out;
 }
 
-export function setArc(line: LineSegments2, ...pieces: number[][]) {
-  const ax = Math.round(pieces[0][0]);
-  const az = Math.round(pieces[0][2]);
-  const local = pieces.flatMap(dashes).map((v, i) => (i % 3 === 0 ? v - ax : i % 3 === 2 ? v - az : v));
+export function setArc(line: LineSegments2, points: number[], omit?: readonly [number, number]) {
+  const ax = Math.round(points[0]);
+  const az = Math.round(points[2]);
+  const local = dashes(points, omit).map((v, i) => (i % 3 === 0 ? v - ax : i % 3 === 2 ? v - az : v));
   line.position.set(ax, 0, az);
   line.geometry.dispose();
   line.geometry = new LineSegmentsGeometry().setPositions(local);

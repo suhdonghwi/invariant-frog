@@ -22,17 +22,19 @@ function arc(from: Tile, to: Tile, upTo = 1): number[] {
 
 const same = (a: Tile, b: Tile) => a[0] === b[0] && a[1] === b[1];
 
-function piecesOf(f: FrogSim): number[][] {
+function pathOf(f: FrogSim): { points: number[]; omit?: [number, number] } {
   const trail = f.trail!;
   const skip = hoverHop.current;
-  const pieces: number[][] = [[]];
+  const points: number[] = [];
+  let omit: [number, number] | undefined;
   const add = (from: Tile, to: Tile, upTo = 1) => {
-    if (skip && same(from, skip.from) && same(to, skip.to)) pieces.push([]);
-    else pieces.at(-1)!.push(...arc(from, to, upTo));
+    const start = points.length / 3;
+    points.push(...arc(from, to, upTo));
+    if (skip && same(from, skip.from) && same(to, skip.to)) omit = [start, points.length / 3 - 1];
   };
   trail.slice(1).forEach((to, k) => add(trail[k], to));
   if (f.hop) add([f.hop.fx, f.hop.fy], [f.hop.tx, f.hop.ty], (sceneNow() - f.hop.t0) / f.hop.dur);
-  return pieces.filter((p) => p.length >= 6);
+  return { points, omit };
 }
 
 function TrailLine({ index }: { index: number }) {
@@ -42,13 +44,13 @@ function TrailLine({ index }: { index: number }) {
 
   useFrame(() => {
     const f = trailFrogs(plane)[index];
-    const pieces = f ? piecesOf(f) : [];
-    line.visible = !!f && pieces.length > 0;
+    const path = f ? pathOf(f) : { points: [] };
+    line.visible = !!f && path.points.length >= 6;
     if (!f || !line.visible) return;
-    const key = pieces.map((p) => p.join()).join('|');
+    const key = `${path.points.join()}|${path.omit}`;
     if (key !== line.userData.key) {
       line.userData.key = key;
-      setArc(line, ...pieces);
+      setArc(line, path.points, path.omit);
     }
     line.material.opacity = 0.9 * leaveFade(f, sceneNow());
     fitArcLine(line, size);
