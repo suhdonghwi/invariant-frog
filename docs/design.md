@@ -17,7 +17,7 @@ plane (the loop invariant), and **Check** tests it against three rules:
 
 The area is a **claim**: every frog is always somewhere on it. Initialization
 and Maintenance make the claim true; Exit makes it strong enough. If all three
-hold, every frog, for every input, stops on a goal.
+hold, a frog, for any input, can only stop on a goal.
 
 **Audience:** programmers who write loops every day but have never met loop
 invariants. Nothing beyond boolean expressions is assumed.
@@ -79,7 +79,7 @@ The game never leads with the rules; each is met as a picture first:
 2. **Testing can't be enough**: zoom out; the eggs never end.
 3. **What an invariant is for**: a different loop with a fixed area. Bad
    stops are off the area and the only stops on it are goals, so if the claim
-   is true every frog stops on a goal. That argument never followed a frog,
+   is true a frog can only stop on a goal. That argument never followed a frog,
    which is why it survives endless eggs.
 4. **Each rule on our loop**: the picture and the plain sentence, then the
    learner checks their own area, and a what-if shows the rule's typical

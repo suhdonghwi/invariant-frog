@@ -85,7 +85,7 @@ export const en = {
   rulesCard: {
     title: 'The three rules',
     intro:
-      'With Initialization and Maintenance, every frog always stays on your area. Add Exit, and every frog stops on a goal.',
+      'With Initialization and Maintenance, every frog always stays on your area. Add Exit, and a frog can only stop on a goal.',
     initialization: 'Every egg is on the area.',
     maintenance: 'Every hop lands on the area.',
     exit: 'Every stop on the area is a goal.',
@@ -211,10 +211,10 @@ export const en = {
     exBadTag: 'stops, but not a goal',
     exWhy:
       'Why does that help? If a frog stopped on one of these red tiles, it would stop off a goal, and the program would be wrong.\n\nBut these tiles are off the area. If every frog is always on the area, as it claims, no frog can ever reach them.',
-    exEndings: 'On the area, the loop can only stop in this one column, and every tile of it is a goal. So if the claim that frogs only ever move on the area is true, **every frog stops on a goal**.',
+    exEndings: 'On the area, the loop can only stop in this one column, and every tile of it is a goal. So if the claim that frogs only ever move on the area is true, **a frog can only stop on a goal**.',
     exEndingTag: 'a possible ending',
     exRules:
-      'So all it takes is three things:\n\n- **Initialization:** every egg is on the area.\n- **Maintenance:** no hop leads off the area.\n- **Exit:** every striped tile on the area is a goal.\n\nThen every frog is proved to stop on a goal.',
+      'So all it takes is three things:\n\n- **Initialization:** every egg is on the area.\n- **Maintenance:** no hop leads off the area.\n- **Exit:** every striped tile on the area is a goal.\n\nThen it is proved that a frog can only stop on a goal.',
     backToOurs: 'Back to our loop',
 
     draw: 'Back to our loop, and this time you draw the area. Type any condition on `i` and `n`: the tiles where it’s true rise as **slabs**.\n\nTry something like `i == 2`, `i % 2 == 0` or `i < n`.',
@@ -258,7 +258,7 @@ export const en = {
       'So two things can keep an area from proving the program:\n\n- If it fails **rule 1 or 2**, we can’t be sure frogs stay on it: an egg is off the area, or a hop from some tile on it lands off it.\n- If it fails **rule 3**, frogs may stay on it and still stop off a goal. The area is too **weak**.\n\nThe area that proves the program passes all three.',
 
     wrapUp: (mine: string) =>
-      `Your area ${mine} passes all three rules:\n\n- **Initialization:** every egg is on it.\n- **Maintenance:** no hop leads off it.\n- **Exit:** every striped tile on it is a goal.\n\nSo every frog that stops, stops on a goal. You’ve proved our loop correct for infinitely many inputs! 🎉`,
+      `Your area ${mine} passes all three rules:\n\n- **Initialization:** every egg is on it.\n- **Maintenance:** no hop leads off it.\n- **Exit:** every striped tile on it is a goal.\n\nSo a frog can only stop on a goal. You’ve proved our loop correct for infinitely many inputs! 🎉`,
     finish: 'Finish',
   },
 };
