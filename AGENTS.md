@@ -1,5 +1,13 @@
 # Agents
 
+## Docs
+
+Read the doc for what you are changing first, and keep it true when the change affects it:
+
+- `docs/design.md`: what the game teaches and the rules of its world
+- `docs/experience.md`: how it looks, moves and responds
+- `docs/architecture.md`: how the code is organised
+
 ## Comments
 
 Don't write comments. The one exception is code so bizarre that its intention is nearly impossible to understand without one: a workaround for a library or browser quirk, a number measured from somewhere else. Then keep it to a line or two. Let names say what code is for; put the reasoning in commit messages and `docs/`.

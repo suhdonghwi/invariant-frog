@@ -19,7 +19,7 @@ src/
   scene/       the 3D world: floor, slabs, frogs, labels, camera rig, scene time
   ui/          the DOM over the scene
   motion.ts    every duration and pause
-scripts/       level validation, the Z3 copy, fonts, the link preview
+scripts/       level validation, the Z3 copy, fonts, the link preview, the paper's figures
 tests/         unit tests
 ```
 
