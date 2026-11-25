@@ -39,8 +39,8 @@ function earlyNext(label = messages().caption.next, last?: () => void) {
     label,
     onClick: () => {
       if (tooSoonAfter(shownAt)) return;
-      if (skipStep) skipStep();
-      else last?.();
+      if (last) last();
+      else skipStep?.();
     },
   };
 }
@@ -107,11 +107,14 @@ export async function beat(
   let pressed = false;
   let press = () => {};
   const early = new Promise<void>((resolve) => (press = resolve));
+  let preparing = !!opts.prepare;
   say(text, opts.spot ?? null, tone, label, () => {
+    if (preparing && skipStep) return skipStep();
     pressed = true;
     press();
   });
   if (opts.prepare) await Promise.race([opts.prepare(), early]);
+  preparing = false;
   gen.guard();
   if (pressed) return;
   await Promise.race([sleep(opts.settle ?? ms(BEAT)), early]);

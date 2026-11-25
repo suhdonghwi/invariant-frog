@@ -248,9 +248,12 @@ behind many small decisions; keep them when changing or adding UI.
 ## The tutorial
 
 - **The caption comes first**, then the scene change it describes.
-- **Next is always clickable** when shown. Pressed while a step is still
-  playing, it skips ahead: the next step's scene is rebuilt at once. Nothing
-  is queued and the learner never waits for an animation. Where the story
+- **Next is always clickable** when shown. Pressed while a step's scene
+  change is still playing, it skips ahead: the next step's scene is rebuilt
+  at once. Pressed once the change has played, during the short hold before
+  the story would move on by itself, it moves on just as it would after the
+  hold, so nothing on screen cuts. Nothing is queued and the learner never
+  waits for an animation. Where the story
   waits for the learner (Check, a yes/no, a demo), there is no Next.
 - **Back is always there** (after the first step) and at once rebuilds the
   last earlier step that showed something.
