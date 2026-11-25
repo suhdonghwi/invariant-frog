@@ -17,7 +17,7 @@ plane (the loop invariant), and **Check** tests it against three rules:
 
 The area is a **claim**: every frog is always somewhere on it. Initialization
 and Maintenance make the claim true; Exit makes it strong enough. If all three
-hold, a frog, for any input, can only stop on a goal.
+hold, every frog that stops, for every input, stops on a goal.
 
 **Audience:** programmers who write loops every day but have never met loop
 invariants. Nothing beyond boolean expressions is assumed.

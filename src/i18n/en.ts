@@ -214,7 +214,7 @@ export const en = {
     exEndings: 'On the area, the loop can only stop in this one column, and every tile of it is a goal. So if the claim that frogs only ever move on the area is true, **a frog can only stop on a goal**.',
     exEndingTag: 'a possible ending',
     exRules:
-      'So all it takes is three things:\n\n- **Initialization:** every egg is on the area.\n- **Maintenance:** no hop leads off the area.\n- **Exit:** every striped tile on the area is a goal.\n\nThen it is proved that a frog can only stop on a goal.',
+      'So all it takes is three things:\n\n- **Initialization:** every egg is on the area.\n- **Maintenance:** no hop leads off the area.\n- **Exit:** every striped tile on the area is a goal.\n\nThen it is proved that every frog that stops, stops on a goal.',
     backToOurs: 'Back to our loop',
 
     draw: 'Back to our loop, and this time you draw the area. Type any condition on `i` and `n`: the tiles where it’s true rise as **slabs**.\n\nTry something like `i == 2`, `i % 2 == 0` or `i < n`.',
@@ -258,7 +258,7 @@ export const en = {
       'So two things can keep an area from proving the program:\n\n- If it fails **rule 1 or 2**, we can’t be sure frogs stay on it: an egg is off the area, or a hop from some tile on it lands off it.\n- If it fails **rule 3**, frogs may stay on it and still stop off a goal. The area is too **weak**.\n\nThe area that proves the program passes all three.',
 
     wrapUp: (mine: string) =>
-      `Your area ${mine} passes all three rules:\n\n- **Initialization:** every egg is on it.\n- **Maintenance:** no hop leads off it.\n- **Exit:** every striped tile on it is a goal.\n\nSo a frog can only stop on a goal. You’ve proved our loop correct for infinitely many inputs! 🎉`,
+      `Your area ${mine} passes all three rules:\n\n- **Initialization:** every egg is on it.\n- **Maintenance:** no hop leads off it.\n- **Exit:** every striped tile on it is a goal.\n\nSo every frog that stops, stops on a goal. You’ve proved our loop correct for infinitely many inputs! 🎉`,
     finish: 'Finish',
   },
 };
