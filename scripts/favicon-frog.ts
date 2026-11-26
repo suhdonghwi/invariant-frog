@@ -111,10 +111,37 @@ function shrunk(art: HTMLCanvasElement, size: number): HTMLCanvasElement {
     g.drawImage(c, 0, 0, half.width, half.height);
     c = half;
   }
+  if (c.width === size) return c;
+  const [exact, g] = canvas(size);
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(c, 0, 0, size, size);
+  return exact;
+}
+
+function tiled(art: HTMLCanvasElement, { size, background, fill }: Tile): HTMLCanvasElement {
+  const inner = Math.round(size * fill);
+  const [c, g] = canvas(size);
+  g.fillStyle = background;
+  g.fillRect(0, 0, size, size);
+  g.drawImage(shrunk(art, inner), (size - inner) / 2, (size - inner) / 2);
   return c;
 }
 
-export function renderFavicon(sizes: number[]): Record<number, string> {
+type Tile = { size: number; background: string; fill: number };
+
+const ICONS: Record<string, number | Tile> = {
+  'favicon-16.png': 16,
+  'favicon-32.png': 32,
+  'favicon-192.png': 192,
+  'apple-touch-icon.png': { size: 180, background: '#f6f8fb', fill: 0.78 },
+};
+
+export function renderIcons(): Record<string, string> {
   const art = outlined(framed(shoot()));
-  return Object.fromEntries(sizes.map((n) => [n, shrunk(art, n).toDataURL('image/png').split(',')[1]]));
+  return Object.fromEntries(
+    Object.entries(ICONS).map(([name, icon]) => {
+      const c = typeof icon === 'number' ? shrunk(art, icon) : tiled(art, icon);
+      return [name, c.toDataURL('image/png').split(',')[1]];
+    }),
+  );
 }

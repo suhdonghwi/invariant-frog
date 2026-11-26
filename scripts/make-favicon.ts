@@ -3,9 +3,8 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 import { createServer } from 'vite';
 
-const SIZES = [16, 32];
 const MODULE = '/scripts/favicon-frog.ts';
-const out = (n: number) => fileURLToPath(new URL(`../public/favicon-${n}.png`, import.meta.url));
+const out = (name: string) => fileURLToPath(new URL(`../public/${name}`, import.meta.url));
 
 const server = await createServer({ server: { host: '127.0.0.1', port: 0 }, logLevel: 'warn' });
 await server.listen();
@@ -15,13 +14,10 @@ try {
   const blank = new URL('favicon-blank', server.resolvedUrls!.local[0]).href;
   await page.route(blank, (route) => route.fulfill({ contentType: 'text/html', body: '<!doctype html>' }));
   await page.goto(blank);
-  const pngs: Record<number, string> = await page.evaluate(
-    async ([module, sizes]) => (await import(module)).renderFavicon(sizes),
-    [MODULE, SIZES] as const,
-  );
-  for (const n of SIZES) {
-    writeFileSync(out(n), Buffer.from(pngs[n], 'base64'));
-    console.log(`wrote ${out(n)}`);
+  const icons: Record<string, string> = await page.evaluate(async (module) => (await import(module)).renderIcons(), MODULE);
+  for (const [name, png] of Object.entries(icons)) {
+    writeFileSync(out(name), Buffer.from(png, 'base64'));
+    console.log(`wrote ${out(name)}`);
   }
 } finally {
   await browser.close();
