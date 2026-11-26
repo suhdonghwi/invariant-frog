@@ -19,7 +19,7 @@ let frogGeom: THREE.BufferGeometry | undefined;
 
 function PeekingFrog({ x, y, letterIndex, wave, clock }: { x: number; y: number; letterIndex: number; wave: number; clock: { t: number } }) {
   const mesh = useMemo(() => {
-    const geom = (frogGeom ??= frogGeometry({ fine: true }));
+    const geom = (frogGeom ??= frogGeometry({ fine: true, sparkle: true }));
     const body = new THREE.InstancedMesh(geom, frogMaterial(), 1);
     body.setColorAt(0, new THREE.Color(COLORS.frog));
     body.frustumCulled = false;

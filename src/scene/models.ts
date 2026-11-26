@@ -9,6 +9,7 @@ const EYE = [0.105, 0.405, 0.09] as const;
 const BLINK_SHUT = 0.12;
 const TORSO = { r: 0.15, stretch: 1.3, lean: -0.42, at: [0, 0.18, -0.03] } as const;
 const BELLY = { pitch: -0.777, wide: 0.6, tall: 0.29 };
+const SPARKLE = { r: 0.011, dx: 0.01, y: 0.422, z: 0.152 } as const;
 
 function tag(g: THREE.BufferGeometry, part: number): THREE.BufferGeometry {
   const n = g.attributes.position.count;
@@ -18,7 +19,7 @@ function tag(g: THREE.BufferGeometry, part: number): THREE.BufferGeometry {
   return g;
 }
 
-export function frogGeometry({ fine = false }: { fine?: boolean } = {}): THREE.BufferGeometry {
+export function frogGeometry({ fine = false, sparkle = false }: { fine?: boolean; sparkle?: boolean } = {}): THREE.BufferGeometry {
   const k = fine ? 3 : 2;
   const lp = (r: number, w = 9, h = 7) => new THREE.SphereGeometry(r, Math.max(fine ? 20 : 12, w * k), Math.max(fine ? 14 : 8, h * k));
   const parts: THREE.BufferGeometry[] = [];
@@ -34,6 +35,7 @@ export function frogGeometry({ fine = false }: { fine?: boolean } = {}): THREE.B
     add(lp(0.06, 8, 4).scale(0.95, 0.3, 1.55).translate(s * 0.15, 0.016, 0.05), PART.body);
     add(new THREE.CapsuleGeometry(0.028, 0.1, fine ? 6 : 3, fine ? 14 : 10).rotateX(0.2).translate(s * 0.078, 0.08, 0.1), PART.body);
     add(lp(0.034, 7, 4).scale(1.3, 0.4, 1.2).translate(s * 0.08, 0.012, 0.125), PART.body);
+    if (sparkle) add(lp(SPARKLE.r, 6, 5).scale(1, 1, 0.5).translate(s * 0.11 + SPARKLE.dx, SPARKLE.y, SPARKLE.z), PART.sclera);
   }
   const merged = mergeGeometries(parts)!;
   merged.scale(FROG_SCALE, FROG_SCALE, FROG_SCALE);
