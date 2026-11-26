@@ -11,7 +11,7 @@ export const en = {
 
   home: {
     tagline: 'A little game about loop invariants',
-    pitch: "How do you know if your loop is correct for every input? Let's find that out, with frogs.",
+    pitch: "How do you know if your loop is correct for every input? Let's find out, with frogs.",
     tutorial: 'Tutorial',
     levels: 'Levels',
     back: 'Back',
@@ -106,7 +106,7 @@ export const en = {
     anotherHint: 'Another hint',
     undecided: "I couldn't prove this, and I couldn't find a tile where it breaks either.",
     avoidDivision: ' Try avoiding division — for example `2 * s == …` instead of `s == … / 2`.',
-    proved: 'Proved. Every frog, everywhere you claimed — for every input.',
+    proved: 'Proved, for every input: no frog ever leaves your area, and a frog can only stop on a goal.',
     next: (title: string) => `Next: ${title}`,
     backToLevels: 'Back to levels',
     pickEgg: 'pick an egg first',
@@ -136,7 +136,7 @@ export const en = {
       exit: 'every stop on the area is a goal',
     } satisfies Record<Rule, string>,
     offGoal: (state: string, area: string) =>
-      `Some stops on ${area} aren’t goals: a frog that stopped there would break the postcondition. For example, ${area} says a frog could be at ${state}, and it would stop there.`,
+      `Some tiles where a frog stops on ${area} aren’t goals: a frog that stopped there would break the postcondition. For example, ${area} says a frog could be at ${state}, and it would stop there.`,
   },
 
   langErrors: {
@@ -173,7 +173,7 @@ export const en = {
   tutorial: {
     hint: 'Hint:',
     undecided: "I couldn't prove that either way. Try a simpler formula.",
-    lostRule: (rule: string) => `${rule} held a moment ago; this change lost it. `,
+    lostRule: (rule: string) => `${rule} held a moment ago; your change broke it. `,
     fixAndCheck: 'Fix your area and press **Check** again.',
     trying: (f: string) => `Trying \`${f}\`…`,
     guessedRight: 'Right, no. ',
@@ -182,7 +182,7 @@ export const en = {
     whatIf: (pitfall: string, question: string) => `Before we move on: what if we had tried \`${pitfall}\`? ${question}`,
 
     hello:
-      'Hi. This is a game about **loop invariants**, which are used to prove that a loop works correctly for every input.\n\nIn this tutorial you’re going to prove a small loop correct. First, the world it lives in.',
+      'Hi. This game is about **loop invariants**: the tool for proving that a loop works for every input.\n\nIn this tutorial you’re going to prove a small loop correct. First, the world it lives in.',
     letsGo: 'Let’s go',
     frog: 'Each frog stands for the program, run on one input. The tile it sits on is its **program state**, the current values of its variables.',
     program: 'Here is the **code** of the program we are running. The loop runs its body again and again while `i < n`.',
@@ -195,7 +195,7 @@ export const en = {
     goals:
       'The **postcondition**, `ensures i == n`, is the condition that must hold once the loop ends. The striped tiles where it holds are the **goals**, the amber pools.\n\nYour frog stopped on one, at `i = 3, n = 3`.',
     goalsTag: 'stopped on a goal',
-    bug: 'Not every place to stop is a goal. A frog that stopped here, at `i = 3, n = 1`, would leave the loop with `i ≠ n`: the program would be wrong.\n\nFor the program to be correct, **every frog must stop on a goal**.',
+    bug: 'Not every stopping tile is a goal. A frog that stopped here, at `i = 3, n = 1`, would leave the loop with `i ≠ n`: the program would be wrong.\n\nFor the program to be correct, **every frog must stop on a goal**.',
     bugTag: 'stops, but i ≠ n',
     testTen: 'Does every frog really stop on a goal? Let’s test it on ten eggs.',
     hatchTen: 'Hatch ten eggs',
@@ -207,17 +207,17 @@ export const en = {
     detour: 'There is a way to be sure about every egg without hatching infinitely many of them. Let’s leave our loop for a moment.',
     exWorld: 'Here is another loop. Its frogs hatch and hop straight to the right until they reach the stripes, where they stop.\n\nThis loop’s eggs never end either: they go on up and down forever.',
     exArea:
-      'These blue slabs are an **invariant area**. Drawing an area is claiming that **“every tile a frog ever lands on is on this area.”**',
+      'These blue slabs are an **invariant area**. An area is a claim: **“frogs never leave this area.”**',
     exBadTag: 'stops, but not a goal',
     exWhy:
       'Why does that help? If a frog stopped on one of these red tiles, it would stop off a goal, and the program would be wrong.\n\nBut these tiles are off the area. If every frog is always on the area, as it claims, no frog can ever reach them.',
-    exEndings: 'On the area, the loop can only stop in this one column, and every tile of it is a goal. So if the claim that frogs only ever move on the area is true, **a frog can only stop on a goal**.',
+    exEndings: 'On the area, the loop can only stop in this one column, and every tile of it is a goal. So if the claim holds and frogs never leave the area, **a frog can only stop on a goal**.',
     exEndingTag: 'a possible ending',
     exRules:
-      'So all it takes is three things:\n\n- **Initialization:** every egg is on the area.\n- **Maintenance:** no hop leads off the area.\n- **Exit:** every striped tile on the area is a goal.\n\nThen it is proved that every frog that stops, stops on a goal.',
+      'All it takes is three things:\n\n- **Initialization:** every egg is on the area.\n- **Maintenance:** no hop leads off the area.\n- **Exit:** every striped tile on the area is a goal.\n\nTogether, they prove that every frog that stops, stops on a goal.',
     backToOurs: 'Back to our loop',
 
-    draw: 'Back to our loop, and this time you draw the area. Type any condition on `i` and `n`: the tiles where it’s true rise as **slabs**.\n\nTry something like `i == 2`, `i % 2 == 0` or `i < n`.',
+    draw: 'This time, you draw the area. Type any condition on `i` and `n`: the tiles where it’s true rise as **slabs**.\n\nTry something like `i == 2`, `i % 2 == 0` or `i < n`.',
     askInitialization: '**Rule 1 · Initialization:** every egg must be on your area.\n\nChange your area so **every egg is on it**, then press **Check**.',
     nudgeInitialization: 'Every egg has the same `i`. What is it?',
     passedInitialization: 'Correct! Every egg is on your area: **Initialization** holds.',
@@ -231,7 +231,7 @@ export const en = {
     ghostMaintenance:
       'The checker put a see-through frog there. It doesn’t matter whether a real frog ever gets there: your area claims one could.',
     passedMaintenance:
-      'Correct! No hop leads off your area: **Maintenance** holds.\n\nThe see-through frogs are just a few examples the checker put on your area. It never runs real frogs and doesn’t try tiles one by one: it reasons about your formula, like solving an equation, so it covers every tile of your area at once. From any tile on your area, a hop lands on your area.',
+      'Correct! No hop leads off your area: **Maintenance** holds.\n\nThe see-through frogs are just a few examples the checker put on your area. It never runs real frogs and doesn’t try tiles one by one: it reasons about your formula, like solving an equation, so it covers every tile of your area at once.',
     questionMaintenance: 'Does every hop from the area land on the area?',
 
     together:
@@ -239,23 +239,23 @@ export const en = {
     stillOnTag: 'still on your area',
 
     leadExit:
-      'A frog that reaches a striped tile stops there, still on your area. The outlined tiles are where a frog can stop on this area.\n\n**So does a frog that stops on the area always stop on a goal?** Making sure of that is the third rule.',
+      'A frog that reaches a striped tile stops there, still on your area. The outlined tiles are where a frog can stop on this area.\n\n**So does a frog that stops on the area always stop on a goal?** The third rule makes sure of that.',
 
     askExit:
       '**Rule 3 · Exit:** every striped tile on your area must be a goal.\n\nChange your area so **every striped tile on it is a goal**, then press **Check**. The checker now tests all three rules.',
-    nudgeExit: 'A real frog never passes `n`, so `i` is never greater than `n`.',
+    nudgeExit: 'A real frog’s `i` never passes `n`. Does your area say so?',
     objection:
-      '“But `i` can never pass `n`!” Indeed, no real frog gets to this tile. But your area claims “a frog could be here too”. The area is too large.',
+      '“But `i` can never pass `n`!” True: no real frog gets here. But your area claims “a frog could be here too”. The area is too large.',
     objectionDemo:
-      '“But `i` can never pass `n`!” Indeed, no real frog gets to this tile.\n\nBut the area `i >= 0` claims “a frog could be on any tile where `i >= 0`”. Checking that claim covers tiles where `i` is greater than `n` too.',
+      '“But `i` can never pass `n`!” True: no real frog gets here.\n\nBut the area `i >= 0` claims “a frog could be on any tile where `i >= 0`”. Checking that claim covers tiles where `i` is greater than `n` too.',
     passedExit: 'Correct! Every striped tile on your area is a goal: **Exit** holds.',
     questionExit: 'Would it pass all three rules?',
     afterDemoExit: (mine: string) =>
-      `\`i >= 0\` isn’t a false claim in itself: every real frog keeps \`i >= 0\`. But it leaves room for a frog to stop off a goal, so it is too weak to prove the postcondition.\n\nYour area ${mine}, on the other hand, is strong enough to prove it.`,
+      `\`i >= 0\` isn’t false: every real frog keeps \`i >= 0\`. But it leaves room for a frog to stop off a goal, so it is too weak to prove the postcondition.\n\nYour area ${mine} closes that gap: it is strong enough to prove it.`,
     afterOwnExit: (weak: string, mine: string) =>
-      `Your earlier area ${weak} was a true claim too, but it left room to stop off a goal, so it was too weak to prove the postcondition.\n\nYour area ${mine}, on the other hand, is strong enough to prove it.`,
+      `Your earlier area ${weak} was a true claim too, but it left room to stop off a goal, so it was too weak to prove the postcondition.\n\nYour area ${mine} closes that gap: it is strong enough to prove it.`,
     twoWays:
-      'So two things can keep an area from proving the program:\n\n- If it fails **rule 1 or 2**, we can’t be sure frogs stay on it: an egg is off the area, or a hop from some tile on it lands off it.\n- If it fails **rule 3**, frogs may stay on it and still stop off a goal. The area is too **weak**.\n\nThe area that proves the program passes all three.',
+      'So two things can keep an area from proving the program:\n\n- If it fails **rule 1 or 2**, we can’t be sure frogs stay on it: an egg is off the area, or a hop from some tile on it lands off it.\n- If it fails **rule 3**, frogs may stay on it and still stop off a goal. The area is too **weak**.\n\nAn area proves the program only when it passes all three.',
 
     wrapUp: (mine: string) =>
       `Your area ${mine} passes all three rules:\n\n- **Initialization:** every egg is on it.\n- **Maintenance:** no hop leads off it.\n- **Exit:** every striped tile on it is a goal.\n\nSo every frog that stops, stops on a goal. You’ve proved our loop correct for infinitely many inputs! 🎉`,
