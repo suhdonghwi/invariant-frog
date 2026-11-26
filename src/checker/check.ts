@@ -17,13 +17,17 @@ export interface CheckResult {
   pitfall?: Pitfall;
 }
 
-export async function checkFormula(
-  ctx: Context<'main'>,
-  level: CompiledLevel,
-  inv: Formula,
-  inputs: Inputs,
-  opts: CheckOptions = {},
-): Promise<CheckResult> {
+// Z3 builds terms with one allocator that isn't thread-safe, and a check runs on a worker
+// thread, so no other check may build terms on the main thread until it ends.
+let queue: Promise<unknown> = Promise.resolve();
+
+export function checkFormula(ctx: Context<'main'>, level: CompiledLevel, inv: Formula, inputs: Inputs, opts: CheckOptions = {}): Promise<CheckResult> {
+  const run = queue.then(() => checkAlone(ctx, level, inv, inputs, opts));
+  queue = run.catch(() => {});
+  return run;
+}
+
+async function checkAlone(ctx: Context<'main'>, level: CompiledLevel, inv: Formula, inputs: Inputs, opts: CheckOptions): Promise<CheckResult> {
   const timeout = opts.timeout ?? 3000;
   const rules = opts.rules ?? RULES;
   const verdicts: Partial<Verdicts> = {};

@@ -41,6 +41,7 @@ export const FIGURES: Record<string, FigureDef> = {
 };
 
 const SETTLE_MS = 2500;
+let started = false;
 
 async function playFirstFailure(text: string, example?: Tile) {
   const { level, inputs } = useGame.getState();
@@ -61,6 +62,8 @@ async function playFirstFailure(text: string, example?: Tile) {
 
 export function Figure() {
   useEffect(() => {
+    if (started) return;
+    started = true;
     const name = new URLSearchParams(location.search).get('figure') || 'c';
     const fig = FIGURES[name];
     if (!fig) throw new Error(`no figure ${name}`);

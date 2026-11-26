@@ -12,7 +12,7 @@ import { sceneNow } from '../sceneTime';
 import { sfx } from '../../audio/sfx';
 import { SHORT } from '../../motion';
 import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
-import { ringGeometry, TONE_COLORS, washGeometry } from './TileTag';
+import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 import { useTileWindow } from './useTileWindow';
 
 export const APPEAR = SHORT;
@@ -140,14 +140,16 @@ function useTicks(region: Region | null, plan: Sweep | null, t0: number) {
   }, [region]);
 }
 
-const COLOR = Object.fromEntries(Object.entries(TONE_COLORS).map(([k, v]) => [k, new THREE.Color(v)]));
+const colors = (tones: Record<string, string>) => Object.fromEntries(Object.entries(tones).map(([k, v]) => [k, new THREE.Color(v)]));
+const RING = colors(RING_COLORS);
+const WASH = colors(WASH_COLORS);
 
 export function OutlineRegion() {
   const { value: region, leaving } = useLingering(useGame((s) => s.region));
   const valid = useGame((s) => s.valid);
   const win = useTileWindow();
-  const ring = useMemo(() => regionMaterial(0.85), []);
-  const wash = useMemo(() => regionMaterial(0.3), []);
+  const ring = useMemo(() => regionMaterial(RING_ALPHA), []);
+  const wash = useMemo(() => regionMaterial(WASH_ALPHA), []);
   useEffect(() => () => (ring.dispose(), wash.dispose()), [ring, wash]);
   const exit = useExitFade(leaving);
   const [shown, setShown] = useState<{ id: string; t0: number } | null>(null);
@@ -166,17 +168,19 @@ export function OutlineRegion() {
     const { tiles } = plan;
     const n = tiles.length;
     const tile = new Float32Array(n * 2);
-    const color = new Float32Array(n * 3);
+    const ringColor = new Float32Array(n * 3);
+    const washColor = new Float32Array(n * 3);
     const delay = new Float32Array(n);
     const delays = plan.sweep?.delays;
     tiles.forEach((t, i) => {
       tile.set([t.x - origin.x, t.y - origin.y], i * 2);
-      const c = COLOR[t.tone];
-      color.set([c.r, c.g, c.b], i * 3);
+      const [r, w] = [RING[t.tone], WASH[t.tone]];
+      ringColor.set([r.r, r.g, r.b], i * 3);
+      washColor.set([w.r, w.g, w.b], i * 3);
       delay[i] = delays?.[i] ?? 0;
     });
-    const attrs = { aTile: [tile, 2], aColor: [color, 3], aDelay: [delay, 1] } as const;
-    return { ring: instanced(ringGeometry, n, attrs), wash: instanced(washGeometry, n, attrs), at: { x: origin.x, y: origin.y } };
+    const attrs = (color: Float32Array) => ({ aTile: [tile, 2], aColor: [color, 3], aDelay: [delay, 1] }) as const;
+    return { ring: instanced(ringGeometry, n, attrs(ringColor)), wash: instanced(washGeometry, n, attrs(washColor)), at: { x: origin.x, y: origin.y } };
   }, [plan]);
   useEffect(() => () => (geoms?.ring.dispose(), geoms?.wash.dispose()), [geoms]);
 
