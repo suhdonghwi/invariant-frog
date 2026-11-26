@@ -3,44 +3,17 @@ import { Check, X } from 'lucide-react';
 import { useRef, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { field } from '../area/field';
-import { COLORS } from '../constants';
 import { useExitFade } from '../../hooks/presence';
 import { sceneNow } from '../sceneTime';
+import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 import { SceneTag, type TagTone } from './SceneTag';
 
-export const TONE_COLORS: Record<TagTone, string> = {
-  info: '#2b3445',
-  good: '#34d058',
-  fail: COLORS.fail,
-};
 const MARK = 'mr-1 inline size-[0.9em] align-[-0.15em]';
 export const TONE_PREFIX: Record<TagTone, ReactNode> = {
   info: null,
   good: <Check className={MARK} strokeWidth={4} />,
   fail: <X className={MARK} strokeWidth={4} />,
 };
-
-function roundedRect(w: number, r: number): THREE.Shape {
-  const s = new THREE.Shape();
-  const h = w / 2;
-  s.moveTo(-h + r, -h);
-  s.lineTo(h - r, -h);
-  s.quadraticCurveTo(h, -h, h, -h + r);
-  s.lineTo(h, h - r);
-  s.quadraticCurveTo(h, h, h - r, h);
-  s.lineTo(-h + r, h);
-  s.quadraticCurveTo(-h, h, -h, h - r);
-  s.lineTo(-h, -h + r);
-  s.quadraticCurveTo(-h, -h, -h + r, -h);
-  return s;
-}
-
-export const ringGeometry = (() => {
-  const outer = roundedRect(1.0, 0.17);
-  outer.holes.push(roundedRect(0.88, 0.12) as unknown as THREE.Path);
-  return new THREE.ShapeGeometry(outer, 8).rotateX(-Math.PI / 2);
-})();
-export const washGeometry = new THREE.ShapeGeometry(roundedRect(0.88, 0.12), 8).rotateX(-Math.PI / 2);
 
 interface TileTagProps {
   x: number;
@@ -53,7 +26,6 @@ interface TileTagProps {
 }
 
 export function TileTag({ x, y, label, tone, pulse = false, wash = false, leaving = false }: TileTagProps) {
-  const color = TONE_COLORS[tone];
   const group = useRef<THREE.Group>(null);
   const ring = useRef<THREE.Mesh>(null);
   const washRef = useRef<THREE.Mesh>(null);
@@ -70,9 +42,9 @@ export function TileTag({ x, y, label, tone, pulse = false, wash = false, leavin
     const beat = pulse ? 0.5 + 0.5 * Math.sin(t * 4.2) : 1;
     if (ring.current) {
       ring.current.scale.setScalar(0.9 + 0.1 * pop + (pulse ? 0.035 * beat : 0));
-      (ring.current.material as THREE.MeshBasicMaterial).opacity = pop * (pulse ? 0.75 + 0.25 * beat : 0.85);
+      (ring.current.material as THREE.MeshBasicMaterial).opacity = pop * RING_ALPHA * (pulse ? 0.85 + 0.15 * beat : 1);
     }
-    if (washRef.current) (washRef.current.material as THREE.MeshBasicMaterial).opacity = pop * (pulse ? 0.12 + 0.1 * beat : 0.3);
+    if (washRef.current) (washRef.current.material as THREE.MeshBasicMaterial).opacity = pop * (pulse ? 0.12 + 0.1 * beat : WASH_ALPHA);
   });
 
   return (
@@ -80,11 +52,11 @@ export function TileTag({ x, y, label, tone, pulse = false, wash = false, leavin
       <group ref={group}>
         {wash && (
           <mesh ref={washRef} geometry={washGeometry} renderOrder={8}>
-            <meshBasicMaterial color={color} transparent opacity={0} depthWrite={false} />
+            <meshBasicMaterial color={WASH_COLORS[tone]} transparent opacity={0} depthWrite={false} />
           </mesh>
         )}
         <mesh ref={ring} geometry={ringGeometry} renderOrder={9}>
-          <meshBasicMaterial color={color} transparent opacity={0} depthWrite={false} />
+          <meshBasicMaterial color={RING_COLORS[tone]} transparent opacity={0} depthWrite={false} />
         </mesh>
       </group>
       {label !== '' && (

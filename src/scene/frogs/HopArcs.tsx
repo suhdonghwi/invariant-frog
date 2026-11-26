@@ -10,7 +10,7 @@ import { AtOrigin } from '../AtOrigin';
 import { uploadInstances } from '../instances';
 import { origin } from '../origin';
 import { APPEAR, ringPop } from '../labels/Region';
-import { ringGeometry, TONE_COLORS, washGeometry } from '../labels/TileTag';
+import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from '../labels/markStyle';
 import { sceneNow } from '../sceneTime';
 import { frogWorld, leaveFade } from './frogWorld';
 import { HopLine } from './HopLine';
@@ -75,7 +75,8 @@ const m = new THREE.Matrix4();
 const q = new THREE.Quaternion();
 const pos = new THREE.Vector3();
 const scl = new THREE.Vector3();
-const RING = new THREE.Color(TONE_COLORS.good);
+const RING = new THREE.Color(RING_COLORS.good);
+const WASH = new THREE.Color(WASH_COLORS.good);
 
 function GhostHop({ arc, plane }: { arc: Arc; plane: string }) {
   return (
@@ -126,12 +127,12 @@ export function HopArcs() {
       const h0 = field.groundAt(a.fx, a.fy);
       m.compose(pos.set(a.fx - origin.x, h0 + 0.012, origin.y - a.fy), q, scl.set(scale, 1, scale));
       const fade = alpha * a.fade * leaveFade(ghosts.get(a.frog), t);
-      for (const [mesh, p, opacity] of [
-        [r, parts.ring, 0.85],
-        [w, parts.wash, 0.3],
+      for (const [mesh, p, opacity, c] of [
+        [r, parts.ring, RING_ALPHA, RING],
+        [w, parts.wash, WASH_ALPHA, WASH],
       ] as const) {
         mesh.setMatrixAt(nr, m);
-        p.color.setXYZ(nr, RING.r, RING.g, RING.b);
+        p.color.setXYZ(nr, c.r, c.g, c.b);
         p.alpha.setX(nr, opacity * fade);
       }
       nr++;

@@ -16,7 +16,7 @@ import { origin } from '../origin';
 import { sceneNow } from '../sceneTime';
 import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
 import { APPEAR, GLSL_RING_POP } from './Region';
-import { ringGeometry, TONE_COLORS, washGeometry } from './TileTag';
+import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 
 
 const vertex = /* glsl */ `
@@ -93,21 +93,20 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
       uTime: { value: 0 },
       uT0: { value: 0 },
       uOut: { value: 1 },
-      uColor: { value: new THREE.Color(TONE_COLORS.fail) },
       ...fadeUniforms(),
     }),
     [],
   );
   const materials = useMemo(() => {
-    const make = (alpha: number) =>
+    const make = (alpha: number, color: string) =>
       new THREE.ShaderMaterial({
         vertexShader: vertex,
         fragmentShader: fragment,
         transparent: true,
         depthWrite: false,
-        uniforms: { ...shared, ...areaMask.uniforms, uAlpha: { value: alpha } },
+        uniforms: { ...shared, ...areaMask.uniforms, uAlpha: { value: alpha }, uColor: { value: new THREE.Color(color) } },
       });
-    return { ring: make(0.85), wash: make(0.3) };
+    return { ring: make(RING_ALPHA, RING_COLORS.fail), wash: make(WASH_ALPHA, WASH_COLORS.fail) };
   }, [shared]);
   useEffect(() => () => (materials.ring.dispose(), materials.wash.dispose()), [materials]);
   const geoms = useMemo(() => {
