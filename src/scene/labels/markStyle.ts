@@ -2,10 +2,6 @@ import * as THREE from 'three';
 import { COLORS } from '../constants';
 import type { TagTone } from './SceneTag';
 
-// The rings and washes that mark tiles. Rings are dark, so they stand apart from
-// both the white floor and the blue slabs even in grayscale, and they stop short
-// of the tile's edge, so the rings of neighbouring tiles stay apart.
-
 const INFO = '#2b3445';
 
 export const RING_COLORS: Record<TagTone, string> = { info: INFO, good: '#166534', fail: '#a3121a' };
