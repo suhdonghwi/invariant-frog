@@ -1,5 +1,5 @@
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { AtOrigin } from '../AtOrigin';
 import { cameraRig } from '../cameraRig';
@@ -107,10 +107,11 @@ export function Eggs() {
   }, [tiles, cx, cy, distance]);
   const shapes = useMemo(() => ({ detailed: eggGeometry(), plain: eggGeometry(5, 8) }), []);
   useEffect(() => () => (shapes.detailed.dispose(), shapes.plain.dispose()), [shapes]);
+  const [slots] = useState(() => new Map<string, SlotAnim>());
   return (
     <>
-      <EggField eggs={near} base={shapes.detailed} />
-      <EggField eggs={far} base={shapes.plain} />
+      <EggField eggs={near} all={tiles} slots={slots} base={shapes.detailed} />
+      <EggField eggs={far} all={tiles} slots={slots} base={shapes.plain} />
     </>
   );
 }
@@ -133,9 +134,15 @@ const AT_REST: SlotAnim = { fx: EGG_ALONE.dx, fy: EGG_ALONE.dy, fs: EGG_ALONE.sc
 
 const settled = (a: SlotAnim, now: number) => !a.hidden && a.tx === EGG_ALONE.dx && a.ty === EGG_ALONE.dy && a.ts === EGG_ALONE.scale && now - a.t0 >= SLOT_DUR;
 
-function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.BufferGeometry }) {
+interface EggFieldProps {
+  eggs: [number, number][];
+  all: [number, number][];
+  slots: Map<string, SlotAnim>;
+  base: THREE.BufferGeometry;
+}
+
+function EggField({ eggs, all, slots, base }: EggFieldProps) {
   const shadowBase = useMemo(() => new THREE.PlaneGeometry(EGG_SHADOW_SIZE, EGG_SHADOW_SIZE).rotateX(-Math.PI / 2), []);
-  const slots = useRef(new Map<string, SlotAnim>());
   const touched = useRef<number[]>([]);
   const synced = useRef({ geom: null as THREE.BufferGeometry | null, hatch: -1, occ: -1 });
 
@@ -178,21 +185,23 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
         slotAnim.set([EGG_ALONE.scale, EGG_ALONE.scale, 0], i * 3);
       }
     }
-    const keys = new Set([...frogWorld.hatched, ...frogWorld.returned.keys(), ...occupancy.frogs.keys(), ...slots.current.keys()]);
+    const keys = new Set([...frogWorld.hatched, ...frogWorld.returned.keys(), ...occupancy.frogs.keys(), ...slots.keys()]);
     const next: number[] = [];
     for (const k of keys) {
       const comma = k.indexOf(',');
-      const i = indexOf(eggs, Number(k.slice(0, comma)), Number(k.slice(comma + 1)));
+      const x = Number(k.slice(0, comma));
+      const y = Number(k.slice(comma + 1));
+      const i = indexOf(eggs, x, y);
       if (i < 0) {
-        slots.current.delete(k);
+        if (indexOf(all, x, y) < 0) slots.delete(k);
         continue;
       }
       const hatched = frogWorld.hatched.has(k);
       hide[i] = hatched ? 1 : 0;
       back[i] = frogWorld.returned.get(k) ?? NEVER_BACK;
       const target = occupancy.frogs.has(k) ? EGG_ASIDE : EGG_ALONE;
-      const prev = slots.current.get(k) ?? AT_REST;
-      const unseen = hatched || prev.hidden || now - back[i] < EGG_REGROW;
+      const prev = slots.get(k) ?? AT_REST;
+      const unseen = hatched || prev.hidden || now - back[i] < EGG_REGROW || (fresh && !slots.has(k));
       let cur: SlotAnim = { fx: target.dx, fy: target.dy, fs: target.scale, tx: target.dx, ty: target.dy, ts: target.scale, t0: 0, hidden: hatched };
       if (!unseen) {
         const e = smoothstep(clamp01((now - prev.t0) / SLOT_DUR));
@@ -202,8 +211,8 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
             ? prev
             : { fx: at.x, fy: at.y, fs: at.s, tx: target.dx, ty: target.dy, ts: target.scale, t0: now, hidden: false };
       }
-      if (settled(cur, now)) slots.current.delete(k);
-      else slots.current.set(k, cur);
+      if (settled(cur, now)) slots.delete(k);
+      else slots.set(k, cur);
       slot.set([cur.fx, cur.fy, cur.tx, cur.ty], i * 4);
       slotAnim.set([cur.fs, cur.ts, cur.t0], i * 3);
       next.push(i);
