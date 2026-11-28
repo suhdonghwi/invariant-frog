@@ -11,6 +11,20 @@ import { check, openLevel, openTutorial } from './game/actions';
 import { levels } from './levels/catalog';
 import { frogWorld } from './scene/frogs/frogWorld';
 
+const RELOADED = 'invariant-frog:reloaded';
+const RELOAD_AGAIN_AFTER_MS = 10_000;
+
+window.addEventListener('vite:preloadError', (e) => {
+  try {
+    if (Date.now() - Number(sessionStorage.getItem(RELOADED) ?? 0) < RELOAD_AGAIN_AFTER_MS) return;
+    sessionStorage.setItem(RELOADED, String(Date.now()));
+  } catch {
+    return;
+  }
+  e.preventDefault();
+  location.reload();
+});
+
 if (import.meta.env.DEV) {
   Object.assign(window, {
     __rig: cameraRig,
