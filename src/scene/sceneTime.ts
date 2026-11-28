@@ -69,6 +69,10 @@ export function switchScene(go: () => void): boolean {
   if (leaving || !started) return false;
   leaving = true;
   document.documentElement.dataset.leaving = '';
+  for (const d of document.querySelectorAll<HTMLDialogElement>('dialog[open]')) {
+    d.close();
+    d.show();
+  }
   setTimeout(() => {
     leaving = false;
     started = false;

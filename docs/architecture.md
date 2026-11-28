@@ -66,6 +66,8 @@ the tests are the safety net.
   anything that animates in the scene.
 - **Each screen starts together**: scene time and CSS animations hold until
   the first frame is drawn and the fonts are in.
+- **Each screen leaves together**: on a scene switch the screen fades out as
+  one, and an open dialog leaves the top layer so it fades with the screen.
 - **Every duration and pause is a token** from `motion.ts`, mirrored in CSS as
   `--duration-*`.
 
