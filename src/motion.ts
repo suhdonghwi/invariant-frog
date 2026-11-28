@@ -15,9 +15,8 @@ export const ms = (seconds: number) => seconds * 1000;
 
 export const RISE = BASE;
 export const RISE_OVERSHOOT = 0.9;
-export const WAVE_SPREAD = 0.012;
-export const WAVE_CAP = SHORT;
-export const WAVE_END = WAVE_CAP + RISE;
+export const WAVE_SPREAD = 0.3;
+export const WAVE_END = WAVE_SPREAD + RISE;
 
 export const FLIGHT_MIN = 0.42;
 export const FLIGHT_MAX = HOLD;

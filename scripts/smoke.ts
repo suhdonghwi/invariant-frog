@@ -41,10 +41,17 @@ async function home(page: Page, query = '') {
 const caption = (page: Page) => page.evaluate(() => window.__game.getState().caption?.text ?? null);
 const tone = (page: Page) => page.evaluate(() => window.__game.getState().caption?.tone ?? null);
 
+const tagShown = () =>
+  [...document.querySelectorAll('[data-scene-tag]')].some((el) => {
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 && r.right > 0 && r.bottom > 0 && r.left < innerWidth && r.top < innerHeight && getComputedStyle(el).visibility !== 'hidden';
+  });
+
 async function checkFormula(page: Page, formula: string, expect: 'fail' | 'success') {
   const box = page.getByRole('textbox', { name: 'area' });
   await box.fill(formula);
   await page.getByRole('button', { name: 'Check', exact: true }).click();
+  await page.waitForFunction(tagShown, null, { timeout: CHECK_TIMEOUT });
   await page.waitForFunction((want) => window.__game.getState().caption?.tone === want && !window.__game.getState().busy, expect, { timeout: CHECK_TIMEOUT });
   console.log(`  ${formula}: ${await tone(page)}`);
 }

@@ -9,7 +9,7 @@ import { goalEvents, landEvents } from '../tileEvents';
 import { Eggs } from './Eggs';
 import { field } from './field';
 import { GoalColumns } from './GoalColumns';
-import { areaMask } from './mask';
+import { areaMask, MASK_REACH } from './mask';
 import { Slabs } from './Slabs';
 
 interface AreaLayerProps {
@@ -55,7 +55,8 @@ function useArea(level: CompiledLevel, inputs: Inputs, area: Formula | null) {
     goalEvents.sync(planeKey(inputs));
     landEvents.sync(planeKey(inputs));
     const now = sceneNow();
-    if (areaMask.draw(gl, t.x, -t.z, inputs, now)) field.begin(areaMask.level, areaMask.tag as Formula | null, inputs, now, t.x, -t.z);
+    const reach = cameraRig.reachFrom(t.x, -t.z, MASK_REACH);
+    if (areaMask.draw(gl, t.x, -t.z, inputs, now, reach)) field.begin(areaMask.level, areaMask.tag as Formula | null, inputs, now, t.x, -t.z, reach);
   }, -1);
 }
 

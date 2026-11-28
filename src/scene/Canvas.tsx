@@ -28,6 +28,7 @@ class Catch extends Component<{ set: (e: unknown) => void; children: ReactNode }
 
 export function Canvas({ children, ...config }: CanvasProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
+  const wrapper = useRef<HTMLDivElement>(null);
   const root = useRef<ReconcilerRoot<HTMLCanvasElement> | null>(null);
   const [size, setSize] = useState<Size | null>(null);
   const [error, setError] = useState<unknown>(null);
@@ -35,6 +36,7 @@ export function Canvas({ children, ...config }: CanvasProps) {
   if (error) throw error;
 
   const measure = (el: HTMLDivElement | null) => {
+    wrapper.current = el;
     if (!el) return;
     const sizes = new ResizeObserver(() => {
       const r = el.getBoundingClientRect();
@@ -49,7 +51,15 @@ export function Canvas({ children, ...config }: CanvasProps) {
     if (!el || !size?.width || !size.height) return;
     root.current ??= createRoot(el);
     const r = root.current;
-    r.configure({ ...config, events, size }).catch(setError);
+    r.configure({
+      ...config,
+      events,
+      size,
+      onCreated: (state) => {
+        state.events.connect?.(wrapper.current ?? el);
+        config.onCreated?.(state);
+      },
+    }).catch(setError);
     if (r.ready.status === 'fulfilled') r.render(<Catch set={setError}>{children}</Catch>);
     else if (r.ready.status === 'pending') void r.ready.then(() => setReady(true));
   }, [size, config, children]);
