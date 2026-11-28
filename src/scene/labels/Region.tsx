@@ -84,7 +84,6 @@ function regionMaterial(alpha: number) {
 const TICKS = 10;
 const TICK_STEP = 0.06;
 const MAX_SPAN = 0.8;
-export const SWEEP = MAX_SPAN + APPEAR;
 
 let lastSweep = { id: '', span: MAX_SPAN };
 export const sweepLength = (id: string) => (lastSweep.id === id ? lastSweep.span : MAX_SPAN) + APPEAR;

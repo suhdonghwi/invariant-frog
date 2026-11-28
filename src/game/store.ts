@@ -57,9 +57,9 @@ export interface Caption {
   text: string;
   aside?: string;
   tone: CaptionTone;
-  action?: { label: string; onClick: () => void; disabled?: boolean };
-  replay?: () => void;
-  choices?: { label: string; onClick: () => void; tone?: 'yes' | 'no' }[];
+  action?: { label: string; disabled?: boolean };
+  replay?: boolean;
+  choices?: { label: string; tone?: 'yes' | 'no' }[];
 }
 
 interface Hint {
@@ -121,9 +121,9 @@ export interface Region {
 }
 
 export interface TutorialState {
-  back: (() => void) | null;
-  check: (() => void) | null;
-  nextAction: { label: string; onClick: () => void } | null;
+  canGoBack: boolean;
+  awaitingCheck: boolean;
+  next: { label: string } | null;
   allow: { step: boolean; run: boolean; eggs: boolean; formula: boolean };
   spotLines: number[];
   spotlight: 'code' | 'step' | 'run' | 'formula' | 'check' | 'lights' | null;
@@ -133,9 +133,9 @@ export interface TutorialState {
 export const ALLOW_NONE: TutorialState['allow'] = { step: false, run: false, eggs: false, formula: false };
 
 export const NO_TUTORIAL: TutorialState = {
-  back: null,
-  check: null,
-  nextAction: null,
+  canGoBack: false,
+  awaitingCheck: false,
+  next: null,
   allow: ALLOW_NONE,
   spotLines: [],
   spotlight: null,

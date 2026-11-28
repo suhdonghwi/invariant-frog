@@ -4,11 +4,13 @@ import { runChecker } from '../director/checkRun';
 import { sendFrogsHome } from '../director/frogs';
 import { Aborted, caption, createScope, events, type EventName, type Token } from '../director/sequence';
 import { checkAndPlay, revealAll } from '../director/verification';
+import { captionOf, replayOf } from '../game/captions';
 import { ALLOW_NONE, setTutorial, useGame, type CaptionTone, type Game, type TutorialState } from '../game/store';
 import { t as messages } from '../i18n/i18n';
 import { cameraRig } from '../scene/cameraRig';
 import { BEAT, LONG, MICRO, ms, TYPE_KEY, TYPE_SPACE } from '../motion';
 import { sleep } from '../scene/sceneTime';
+import { awaitCheck, currentNext, pressCheck, setNext } from './controller';
 
 const generations = createScope();
 let skipStep: (() => void) | null = null;
@@ -46,19 +48,19 @@ function earlyNext(label = messages().caption.next, last?: () => void) {
   };
 }
 
-const nextAfterCounterexample = () => useGame.getState().tutorial.nextAction ?? earlyNext();
+const nextAfterCounterexample = () => currentNext() ?? earlyNext();
 
 type Spot = TutorialState['spotlight'];
 
 export function say(text: string, spot: Spot = null, tone: CaptionTone = 'info', reserve?: string, last?: () => void) {
   captionShownAt = performance.now();
-  useGame.setState({ caption: { text, tone, action: reserve ? earlyNext(reserve, last) : undefined } });
+  useGame.setState({ caption: captionOf({ text, tone, action: reserve ? earlyNext(reserve, last) : undefined }) });
   setTutorial({ spotlight: spot });
 }
 
 export function sayWaiting(text: string, spot: Spot = null) {
   captionShownAt = performance.now();
-  useGame.setState({ caption: { text, tone: 'info', action: { label: messages().caption.next, onClick: () => {}, disabled: true } } });
+  useGame.setState({ caption: { text, tone: 'info', action: { label: messages().caption.next, disabled: true } } });
   setTutorial({ spotlight: spot });
 }
 
@@ -69,7 +71,8 @@ function next(gen: Token, text: string, label = messages().caption.next, spot: S
     pendingNext = () => {
       if (tooSoonAfter(shownAt)) return;
       pendingNext = null;
-      setTutorial({ spotLines: [], nextAction: null });
+      setTutorial({ spotLines: [] });
+      setNext(null);
       const passing = useGame.getState().caption;
       setTimeout(() => {
         if (useGame.getState().caption === passing) setTutorial({ spotlight: null });
@@ -77,9 +80,10 @@ function next(gen: Token, text: string, label = messages().caption.next, spot: S
       settle();
     };
     const action = { label, onClick: () => pendingNext?.() };
-    const replay = shown?.text === text ? shown.replay : undefined;
-    useGame.setState({ caption: { text, tone, action, replay } });
-    setTutorial({ spotlight: spot, nextAction: action });
+    const replay = shown?.text === text ? replayOf(shown) : undefined;
+    useGame.setState({ caption: captionOf({ text, tone, action, replay }) });
+    setTutorial({ spotlight: spot });
+    setNext(action);
   });
 }
 
@@ -162,16 +166,16 @@ export function ask(gen: Token, text: string): Promise<boolean> {
       { label: messages().caption.yes, tone: 'yes' as const, onClick: () => settle(true) },
       { label: messages().caption.no, tone: 'no' as const, onClick: () => settle(false) },
     ];
-    useGame.setState({ caption: { text, tone: 'info', choices }, callouts: [], region: null });
+    useGame.setState({ caption: captionOf({ text, tone: 'info', choices }), callouts: [], region: null });
     setTutorial({ spotlight: null });
   });
 }
 
 export function tutorialCheck(): 'refused' | void {
   const { formula, tutorial } = useGame.getState();
-  if (!tutorial.check) return;
+  if (!tutorial.awaitingCheck) return;
   if (!formula || !formula.ok) return 'refused';
-  tutorial.check();
+  pressCheck();
 }
 
 function waitCheck(gen: Token): Promise<void> {
@@ -180,15 +184,13 @@ function waitCheck(gen: Token): Promise<void> {
     const off = useSolver.subscribe((s) => {
       if (s.status !== 'failed') return;
       off();
-      setTutorial({ check: null });
+      awaitCheck(null);
       settle();
     });
-    setTutorial({
-      check: () => {
-        off();
-        setTutorial({ check: null });
-        settle();
-      },
+    awaitCheck(() => {
+      off();
+      awaitCheck(null);
+      settle();
     });
   });
 }
@@ -204,7 +206,7 @@ export interface StageOptions {
   ask: string;
   rules: Rule[];
   nudge: string;
-  ghost?: Partial<Record<Rule, string>>;
+  seeThrough?: Partial<Record<Rule, string>>;
   region?: Game['region'];
   onFail?: (rule: Rule) => void;
 }
@@ -216,7 +218,8 @@ export async function stage(gen: Token, o: StageOptions): Promise<boolean> {
   for (;;) {
     if (useSolver.getState().status === 'failed') {
       allow({});
-      setTutorial({ hint: null, check: null });
+      setTutorial({ hint: null });
+      awaitCheck(null);
       await next(gen, messages().home.checkerUnavailable);
       return false;
     }
@@ -230,7 +233,7 @@ export async function stage(gen: Token, o: StageOptions): Promise<boolean> {
       (failing) => ({
         note: failing !== stageRule ? messages().tutorial.lostRule : undefined,
         extra: messages().tutorial.fixAndCheck,
-        ghostExtra: o.ghost?.[failing],
+        seeThroughExtra: o.seeThrough?.[failing],
       }),
       gen,
     );
@@ -254,13 +257,13 @@ export async function demo(
   gen: Token,
   formula: string,
   rules: Rule[],
-  opts: { ghostExtra?: string; restore?: string; guessedRight?: boolean } = {},
+  opts: { seeThroughExtra?: string; restore?: string; guessedRight?: boolean } = {},
 ): Promise<void> {
   const g = useGame.getState();
   const mine = opts.restore ?? g.formulaText;
   useGame.setState({ busy: true, callouts: [], region: null });
   try {
-    void sendFrogsHome('test');
+    void sendFrogsHome('seeThrough');
     say(messages().tutorial.trying(formula), null, 'muted');
     if (g.formulaText.trim() !== formula) {
       setTutorial({ spotlight: 'formula' });
@@ -279,7 +282,7 @@ export async function demo(
   }
   const verdict = opts.guessedRight === undefined ? undefined : opts.guessedRight ? messages().tutorial.guessedRight : messages().tutorial.guessedWrong;
   const tone = opts.guessedRight ? 'success' : 'fail';
-  const out = await checkAndPlay(rules, () => ({ prefix: verdict, tone, ghostExtra: opts.ghostExtra, area: messages().verdicts.theArea, action: nextAfterCounterexample }), gen);
+  const out = await checkAndPlay(rules, () => ({ prefix: verdict, tone, seeThroughExtra: opts.seeThroughExtra, area: messages().verdicts.theArea, action: nextAfterCounterexample }), gen);
   gen.guard();
   if (out?.failing) await holdCaption(gen);
   void sendFrogsHome();

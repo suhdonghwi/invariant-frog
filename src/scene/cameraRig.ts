@@ -345,9 +345,6 @@ export const cameraRig = {
     current = framed;
     void apply(framed, sceneStarted(), 0, ANGLE);
   },
-  get flying() {
-    return flight !== null;
-  },
   clarity(): number {
     return flight ? clarity(flight.plan, sceneNow() - flight.t0) : 1;
   },

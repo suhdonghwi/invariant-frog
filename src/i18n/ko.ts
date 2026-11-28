@@ -186,7 +186,6 @@ export const ko: Messages = {
     chainedEquality: (op) => `'${op}'는 다른 비교와 이어 쓸 수 없습니다. \`(x >= 0) ${op} (y >= 0)\`처럼 괄호로 묶으세요`,
     expectedEnded: (text) => `'${text}' 없이 식이 끝났습니다`,
     expectedFound: (text, found) => `'${found}' 대신 '${text}' 기호가 와야 합니다`,
-    expected: (text) => `'${text}' 기호가 필요합니다`,
     expectedNameEnded: '이름이 와야 하는데 식이 끝났습니다',
     expectedNameFound: (found) => `'${found}' 자리에는 이름이 와야 합니다`,
     notHere: (word) => `'${word}' 키워드는 여기에 쓸 수 없습니다`,
@@ -267,7 +266,7 @@ export const ko: Messages = {
     ruleMaintenance: '다음 규칙입니다.\n\n**규칙 2 · 유지:** 모든 점프가 영역 위에 착지해야 합니다. 영역 위의 어느 칸에서든, 한 번 뛰면 다시 영역 위에 착지해야 합니다.',
     askMaintenance: '이제 **모든 점프가 영역 위에 착지하도록** 고쳐 보세요. 검사기는 규칙 1과 2를 함께 확인합니다.',
     nudgeMaintenance: '개구리는 모두 `i = 0`에서 출발하고, 뛸 때마다 `i`는 늘어나기만 합니다.',
-    ghostMaintenance:
+    seeThroughMaintenance:
       '검사기가 그 칸에 반투명 개구리를 세웠습니다. 실제 개구리가 거기에 오는지는 상관없습니다. 영역은 개구리가 거기 올 수 있다고 주장하니까요.',
     passedMaintenance:
       '정답입니다! 모든 점프가 영역 위에 착지하므로 **유지** 규칙이 성립합니다.\n\n반투명 개구리들은 검사기가 영역 위에 세워 본 몇 가지 예시일 뿐입니다. 검사기는 실제 개구리를 실행하지 않고 칸을 하나씩 확인하지도 않습니다. 방정식을 풀듯 식을 따져서 영역의 모든 칸을 한꺼번에 다룹니다.',

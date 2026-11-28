@@ -186,7 +186,6 @@ export const en = {
     chainedEquality: (op: string) => `'${op}' can’t be chained with other comparisons; add parentheses, like \`(x >= 0) ${op} (y >= 0)\``,
     expectedEnded: (text: string) => `Expected '${text}' but the input ended`,
     expectedFound: (text: string, found: string) => `Expected '${text}' but found '${found}'`,
-    expected: (text: string) => `Expected '${text}'`,
     expectedNameEnded: 'Expected a name but the input ended',
     expectedNameFound: (found: string) => `Expected a name but found '${found}'`,
     notHere: (word: string) => `'${word}' can’t be used here`,
@@ -268,7 +267,7 @@ export const en = {
     ruleMaintenance: 'Next rule.\n\n**Rule 2 · Maintenance:** every hop lands on your area. From any tile of it, one hop lands on it again.',
     askMaintenance: 'Now change your area so **every hop lands on it**. The checker tests rules 1 and 2 together.',
     nudgeMaintenance: 'Every frog starts at `i = 0`, and a hop only ever increases `i`.',
-    ghostMaintenance:
+    seeThroughMaintenance:
       'The checker put a see-through frog there. It doesn’t matter whether a real frog ever gets there: your area claims one could.',
     passedMaintenance:
       'Correct! Every hop lands on your area: **Maintenance** holds.\n\nThe see-through frogs are just a few examples the checker put on your area. It never runs real frogs and doesn’t try tiles one by one: it reasons about your formula, like solving an equation, so it covers every tile of your area at once.',

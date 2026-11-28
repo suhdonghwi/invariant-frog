@@ -1,7 +1,8 @@
 import { sfx } from '../audio/sfx';
 import { ruleQuery } from '../checker/rules';
 import type { Counterexample } from '../checker/types';
-import { useGame, type Caption, type CaptionTone } from '../game/store';
+import { captionOf, type CaptionSpec } from '../game/captions';
+import { useGame, type CaptionTone } from '../game/store';
 import { t as messages } from '../i18n/i18n';
 import { mk, type Expr, type State } from '../lang/ast';
 import { inputsOf, planeKey, showInputs } from '../levels/inputs';
@@ -14,7 +15,7 @@ import { after, sceneNow, sleep } from '../scene/sceneTime';
 import { traceHop } from './codeTrace';
 import { sendFrogsHome } from './frogs';
 import type { FrogSim } from '../scene/frogs/frogWorld';
-import { ARC_AFTER_RISE, GHOST_RISE, previewHop, raiseGhost } from './ghosts';
+import { ARC_AFTER_RISE, SEE_THROUGH_RISE, previewHop, raiseSeeThrough } from './seeThrough';
 import { busyWhile, currentLevel, type Token } from './sequence';
 
 export interface CounterexampleOptions {
@@ -23,8 +24,8 @@ export interface CounterexampleOptions {
   area?: string;
   tone?: CaptionTone;
   extra?: string;
-  ghostExtra?: string;
-  action?: () => Caption['action'];
+  seeThroughExtra?: string;
+  action?: () => CaptionSpec['action'];
 }
 
 const fmt = (s: State) => '`' + showState(currentLevel(), s) + '`';
@@ -54,7 +55,7 @@ export function offerOtherBoard(cex: Counterexample, opts: CounterexampleOptions
   const there = showInputs(L, planeOf(cex));
   sfx.fail();
   useGame.setState({
-    caption: { text: say.elsewhere(showInputs(L, useGame.getState().inputs), there), tone: 'fail', action: { label: say.showThere(there), onClick: () => void playCounterexample(cex, { ...opts, note: opts.note ?? '' }) } },
+    caption: captionOf({ text: say.elsewhere(showInputs(L, useGame.getState().inputs), there), tone: 'fail', action: { label: say.showThere(there), onClick: () => void playCounterexample(cex, { ...opts, note: opts.note ?? '' }) } }),
   });
 }
 
@@ -112,21 +113,21 @@ export async function counterexample(tok: Token, cex: Counterexample, opts: Coun
     finish(cex, opts, text);
     return;
   }
-  sfx.ghost();
+  sfx.seeThrough();
   if (cex.rule === 'maintenance' && cex.next) {
     const { state, next } = cex;
     const frog = previewHop(state, 1, next, false);
-    after(ms(GHOST_RISE + ARC_AFTER_RISE), () => tok.alive && traceHop(L, state, next, ARC_DRAW));
-    await sleep(ms(GHOST_RISE + ARC_AFTER_RISE + ARC_DRAW));
+    after(ms(SEE_THROUGH_RISE + ARC_AFTER_RISE), () => tok.alive && traceHop(L, state, next, ARC_DRAW));
+    await sleep(ms(SEE_THROUGH_RISE + ARC_AFTER_RISE + ARC_DRAW));
     if (!tok.alive) return;
     markFailure(cex.rule, x, y, say.landsOutsideTag(area), frog);
   } else {
-    const frog = raiseGhost(cex.state);
-    await sleep(ms(GHOST_RISE + BEAT));
+    const frog = raiseSeeThrough(cex.state);
+    await sleep(ms(SEE_THROUGH_RISE + BEAT));
     if (!tok.alive) return;
     markFailure(cex.rule, x, y, say.offGoalTag, frog);
   }
-  finish(cex, opts, opts.ghostExtra ? `${text}\n\n${opts.ghostExtra}` : text);
+  finish(cex, opts, opts.seeThroughExtra ? `${text}\n\n${opts.seeThroughExtra}` : text);
 }
 
 function finish(cex: Counterexample, opts: CounterexampleOptions, said: string) {
@@ -136,5 +137,5 @@ function finish(cex: Counterexample, opts: CounterexampleOptions, said: string) 
   const aside = mode === 'level' && pitfallMessage ? pitfallMessage : undefined;
   const action = opts.action?.();
   const tone = opts.tone ?? 'fail';
-  useGame.setState({ caption: { text, aside, tone, action, replay: () => void playCounterexample(cex, opts) } });
+  useGame.setState({ caption: captionOf({ text, aside, tone, action, replay: () => void playCounterexample(cex, opts) }) });
 }

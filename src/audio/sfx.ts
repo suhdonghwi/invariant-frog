@@ -171,9 +171,9 @@ export const sfx = {
     blip(c, 2349, at + 0.07, LANDING_GAIN, 0.006, 0.18, 0.2);
   },
 
-  ghost() {
+  seeThrough() {
     const c = live();
-    if (!c || !gap('ghost', 700)) return;
+    if (!c || !gap('seeThrough', 700)) return;
     const g = c.createGain();
     g.gain.value = SIREN_GAIN;
     g.connect(master!);

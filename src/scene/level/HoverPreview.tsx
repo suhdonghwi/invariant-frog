@@ -8,18 +8,18 @@ import { yawToward } from '../frogs/frogWorld';
 import { occupancy } from '../frogs/occupancy';
 import { HopLine } from '../frogs/HopLine';
 import { hoverHop, useHover } from '../hover';
-import { frogGeometry, frogMaterial, ghostDepthMaterial } from '../models';
+import { frogGeometry, frogMaterial, seeThroughDepthMaterial } from '../models';
 
 export function HoverPreview() {
   const level = useGame((s) => s.level)!;
   const inputs = useGame((s) => s.inputs);
   const idle = useGame((s) => !s.busy);
   const tile = useHover((s) => s.tile);
-  const ghost = useRef<THREE.Group>(null);
+  const frog = useRef<THREE.Group>(null);
   const assets = useMemo(() => {
     const geom = frogGeometry();
-    const mat = frogMaterial({ ghost: true });
-    const depth = ghostDepthMaterial();
+    const mat = frogMaterial({ seeThrough: true });
+    const depth = seeThroughDepthMaterial();
     return { geom, mat, depth };
   }, []);
   useEffect(() => () => (assets.geom.dispose(), assets.mat.dispose(), assets.depth.dispose()), [assets]);
@@ -40,7 +40,7 @@ export function HoverPreview() {
   }, [idle, hop]);
 
   useFrame(() => {
-    const g = ghost.current;
+    const g = frog.current;
     if (!g || !hop) return;
     g.visible = !occupancy.frogs.has(`${hop.to[0]},${hop.to[1]}`);
     g.position.set(hop.to[0], field.groundAt(hop.to[0], hop.to[1]), -hop.to[1]);
@@ -58,7 +58,7 @@ export function HoverPreview() {
           opacity: 1,
         })}
       />
-      <group ref={ghost}>
+      <group ref={frog}>
         <mesh geometry={assets.geom} material={assets.depth} renderOrder={4} />
         <mesh geometry={assets.geom} material={assets.mat} renderOrder={5} />
       </group>

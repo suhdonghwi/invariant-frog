@@ -76,7 +76,7 @@ export async function runFrogs() {
   if (!tok.alive) return;
   if (!f || !running(L, f.state)) return nothingToHop(f);
   useGame.setState({ failMark: null, running: true });
-  void sendFrogsHome('test');
+  void sendFrogsHome('seeThrough');
   try {
     for (let beats = 0; tok.alive && useGame.getState().running && beats < RUN_BEATS && !f.leave && running(L, f.state); beats++) {
       await whileStepping(() => hopOn(L, f));

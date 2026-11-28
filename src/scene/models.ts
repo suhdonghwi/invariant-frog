@@ -44,7 +44,7 @@ export function frogGeometry({ fine = false, sparkle = false }: { fine?: boolean
 }
 
 // Drawn just before a faded frog, so only its front surface is blended, once.
-export function ghostDepthMaterial(): THREE.MeshBasicMaterial {
+export function seeThroughDepthMaterial(): THREE.MeshBasicMaterial {
   return new THREE.MeshBasicMaterial({ colorWrite: false, transparent: true, depthWrite: true });
 }
 
@@ -75,14 +75,14 @@ export function clipBelowFloor<M extends THREE.Material>(m: M): M {
 
 const CLEAR = { middle: 0.5, edge: 1, power: 1.5 };
 
-export function frogMaterial(opts: { ghost?: boolean; fade?: boolean; blink?: boolean } = {}): THREE.MeshStandardMaterial {
+export function frogMaterial(opts: { seeThrough?: boolean; fade?: boolean; blink?: boolean } = {}): THREE.MeshStandardMaterial {
   const m = new THREE.MeshStandardMaterial({
     vertexColors: true,
     roughness: 0.45,
     metalness: 0,
-    transparent: !!opts.ghost,
-    opacity: opts.ghost ? 0.4 : 1,
-    depthWrite: !opts.ghost,
+    transparent: !!opts.seeThrough,
+    opacity: opts.seeThrough ? 0.4 : 1,
+    depthWrite: !opts.seeThrough,
   });
   m.onBeforeCompile = (shader) => {
     shader.uniforms.uTint = { value: new THREE.Color(COLORS.frog) };

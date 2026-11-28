@@ -11,7 +11,7 @@ import { HATCH_PRESS, TAKEOFF_PRESS } from '../area/landBounce';
 import { HATCH_GROW, TOUCH } from './motion';
 import type { Slot } from './occupancy';
 
-export type FrogKind = 'real' | 'test';
+export type FrogKind = 'real' | 'seeThrough';
 
 export const HOP = BASE;
 export const HOP_GAP_MS = ms(TICK);

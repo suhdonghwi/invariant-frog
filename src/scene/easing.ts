@@ -4,8 +4,6 @@ export const smoothstep = (u: number) => u * u * (3 - 2 * u);
 
 export const smootherstep = (u: number) => u * u * u * (u * (u * 6 - 15) + 10);
 
-export const easeOut = (u: number) => 1 - (1 - u) ** 3;
-
 export const easeIn = (u: number) => u * u * u;
 
 export const easeInOut = (u: number) => (u < 0.5 ? 4 * u * u * u : 1 - (-2 * u + 2) ** 3 / 2);

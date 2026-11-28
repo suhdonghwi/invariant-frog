@@ -1,5 +1,7 @@
 import { ArrowLeft, ArrowRight, Check, RotateCcw, X } from 'lucide-react';
+import { pressAction, pressChoice, pressReplay } from '../../game/captions';
 import { useGame, type CaptionTone } from '../../game/store';
+import { goBack } from '../../tutorial/controller';
 import { useT } from '../../i18n/i18n';
 import { button } from '../classes';
 import { Markdown } from '../Markdown';
@@ -25,7 +27,7 @@ export function CaptionAnnouncer() {
 
 export function CaptionBar() {
   const { value: caption, leaving } = useLingering(useGame((s) => s.caption));
-  const back = useGame((s) => (s.mode === 'tutorial' ? s.tutorial.back : null));
+  const back = useGame((s) => s.mode === 'tutorial' && s.tutorial.canGoBack);
   const replayLocked = useGame((s) => s.busy || s.checking);
   const inLevel = useGame((s) => s.mode === 'level');
   const tr = useT();
@@ -57,26 +59,26 @@ export function CaptionBar() {
       {(caption.action || caption.replay || caption.choices || back) && (
         <div className="-mr-1.5 flex min-h-8.5 flex-wrap items-center justify-end gap-1.5 compact:-mr-1">
           {back && (
-            <button className={button('quiet', 'sm')} onClick={back}>
+            <button className={button('quiet', 'sm')} onClick={goBack}>
               <ArrowLeft size={15} strokeWidth={2.4} /> {tr.caption.back}
             </button>
           )}
           <span className="flex-1" />
-          {caption.choices?.map((c) => (
-            <button key={c.label} className={button('plain', 'sm')} onClick={c.onClick}>
+          {caption.choices?.map((c, i) => (
+            <button key={c.label} className={button('plain', 'sm')} onClick={() => pressChoice(caption, i)}>
               {c.tone === 'yes' && <Check size={15} strokeWidth={2.6} className="text-pass" />}
               {c.tone === 'no' && <X size={15} strokeWidth={2.6} className="text-fail" />}
               {c.label}
             </button>
           ))}
           {caption.replay && (
-            <button className={button(caption.action ? 'quiet' : 'primary', 'sm')} disabled={replayLocked} onClick={caption.replay}>
+            <button className={button(caption.action ? 'quiet' : 'primary', 'sm')} disabled={replayLocked} onClick={() => pressReplay(caption)}>
               <RotateCcw size={15} strokeWidth={2.4} />
               {tr.caption.replay}
             </button>
           )}
           {caption.action && (
-            <button className={button('primary', 'sm')} disabled={caption.action.disabled} onClick={() => caption.action!.onClick()}>
+            <button className={button('primary', 'sm')} disabled={caption.action.disabled} onClick={() => pressAction(caption)}>
               {caption.action.label}
               <ArrowRight size={15} strokeWidth={2.4} />
             </button>

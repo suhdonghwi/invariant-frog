@@ -102,7 +102,6 @@ vec3 floorLook(float stopFlag, float goalFlag, float hatch, float fwr, vec4 df, 
   return mix(uFloorGap, col, inside);
 }
 void main() {
-  vec2 fw = fwidth(vF);
   vec4 df = vec4(dFdx(vF), dFdy(vF));
   float hatchV = (vF.x - vF.y) * STOP_HATCH_FREQ;
   float hatch = stopHatch(hatchV, fwidth(hatchV));

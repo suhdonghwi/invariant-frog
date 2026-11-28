@@ -3,7 +3,7 @@ import { useSolver } from '../checker/solverStatus';
 import { RULES, type Rule } from '../checker/types';
 import { stepFrogs } from '../director/controls';
 import { hatch, HATCHED_MS, placeFrog, sendFrogsHome, testEggs } from '../director/frogs';
-import { playProof, previewHop } from '../director/ghosts';
+import { playProof, previewHop } from '../director/seeThrough';
 import { eggRegion, endingsRegion } from '../director/regions';
 import { resetFrogs } from '../director/reset';
 import type { Token } from '../director/sequence';
@@ -84,17 +84,17 @@ async function passStage(gen: Token, rule: Rule, o: Omit<StageOptions, 'rules'>)
   if (!passed) return;
   const text = { initialization: T().passedInitialization, maintenance: T().passedMaintenance, exit: T().passedExit }[rule];
   await beat(gen, text, { spot: 'lights', tone: 'success', keep: true });
-  void sendFrogsHome('test');
+  void sendFrogsHome('seeThrough');
 }
 
-async function witness(gen: Token, rule: Rule, pitfall: string, o: { question: string; afterDemo?: string; afterOwn?: string; ghost?: string }) {
+async function witness(gen: Token, rule: Rule, pitfall: string, o: { question: string; afterDemo?: string; afterOwn?: string; seeThrough?: string }) {
   if (useSolver.getState().status === 'failed') return;
   if (!witnessed.has(rule)) {
     const mine = useGame.getState().formulaText;
     useGame.getState().setFormula(pitfall);
     const yes = await ask(gen, T().whatIf(pitfall, o.question));
     gen.guard();
-    await demo(gen, pitfall, upTo(rule), { ghostExtra: o.ghost, restore: mine, guessedRight: !yes });
+    await demo(gen, pitfall, upTo(rule), { seeThroughExtra: o.seeThrough, restore: mine, guessedRight: !yes });
     gen.guard();
     if (o.afterDemo) await beat(gen, o.afterDemo, { spot: 'lights' });
   } else if (o.afterOwn) {
@@ -261,7 +261,7 @@ export const STEPS: Step[] = [
         prepare: async () => {
           await sleep(ms(LONG));
           gen.guard();
-          sfx.ghost();
+          sfx.seeThrough();
           const f = previewHop({ x: 1n, y: 0n });
           useGame.setState((g) => ({ callouts: [...g.callouts, { x: f.x, y: f.y, frog: f.id, text: holds().maintenance, tone: 'good' }] }));
         },
@@ -311,7 +311,7 @@ export const STEPS: Step[] = [
       await passStage(gen, 'maintenance', {
         ask: T().askMaintenance,
         nudge: T().nudgeMaintenance,
-        ghost: { maintenance: T().ghostMaintenance },
+        seeThrough: { maintenance: T().seeThroughMaintenance },
       });
     },
   },
@@ -355,7 +355,7 @@ export const STEPS: Step[] = [
       await passStage(gen, 'exit', {
         ask: T().askExit,
         nudge: T().nudgeExit,
-        ghost: { maintenance: T().ghostMaintenance, exit: T().objection },
+        seeThrough: { maintenance: T().seeThroughMaintenance, exit: T().objection },
         onFail: (r) => {
           if (r === 'exit' && !weakArea) weakArea = mine();
         },
@@ -369,7 +369,7 @@ export const STEPS: Step[] = [
         question: T().questionExit,
         afterDemo: T().afterDemoExit(mine()),
         afterOwn: T().afterOwnExit(weakArea, mine()),
-        ghost: T().objectionDemo,
+        seeThrough: T().objectionDemo,
       }),
   },
   {
