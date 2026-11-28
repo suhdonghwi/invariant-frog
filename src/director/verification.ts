@@ -35,14 +35,11 @@ interface Outcome {
   others?: string[];
 }
 
-export async function checkAndPlay(rules: Rule[], onFail?: (rule: Rule) => CounterexampleOptions, owner?: Token): Promise<Outcome | null> {
+export async function checkAndPlay(rules: Rule[], onFail: (rule: Rule) => CounterexampleOptions = () => ({}), owner?: Token): Promise<Outcome | null> {
   void sendFrogsHome('seeThrough');
   const res = await runChecker(rules);
   owner?.guard();
-  return res && playVerification(res, rules, onFail);
-}
-
-function playVerification(res: CheckResult, rules: Rule[], onFail: (rule: Rule) => CounterexampleOptions = () => ({})): Promise<Outcome | null> {
+  if (!res) return null;
   return busyWhile(async (tok) => {
     clearTrace();
     useGame.setState({ failMark: null, region: null, callouts: [] });

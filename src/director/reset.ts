@@ -15,7 +15,7 @@ export function interrupt() {
   frogWorld.clear();
   hatchFx.clear();
   hopArcs.clear();
-  useGame.setState({ busy: false, running: false, stepping: false, failMark: null, pending: [] });
+  useGame.setState({ stepping: false, failMark: null });
 }
 
 export function resetLevel() {
@@ -27,5 +27,5 @@ export function resetFrogs() {
   begin();
   clearTrace();
   void sendFrogsHome();
-  useGame.setState({ running: false, failMark: null });
+  useGame.setState({ failMark: null });
 }

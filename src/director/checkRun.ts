@@ -7,14 +7,13 @@ import { useGame, type Caption } from '../game/store';
 import { t as messages } from '../i18n/i18n';
 import { clearTrace } from './codeTrace';
 import { sendFrogsHome } from './frogs';
-import { abandonCheck, begin, beginCheck, caption } from './sequence';
+import { begin, caption } from './sequence';
 
 const SLOW_MS = 2000;
 
 let live: CheckControl | null = null;
 
 export function abandonRun() {
-  abandonCheck();
   live?.cancel();
   live = null;
   useGame.setState({ checking: false, pending: [] });
@@ -25,7 +24,7 @@ export function cancelCheck() {
   abandonRun();
   clearTrace();
   void sendFrogsHome();
-  useGame.setState({ busy: false, region: null, callouts: [], failMark: null });
+  useGame.setState({ region: null, callouts: [], failMark: null });
 }
 
 function borrowCaption() {
@@ -84,14 +83,13 @@ export async function runChecker(rules: Rule[]): Promise<CheckResult | null> {
   const keep = { ...g.verdicts };
   for (const r of rules) delete keep[r];
   abandonRun();
-  const run = beginCheck();
-  const current = () => {
-    const now = useGame.getState();
-    return run.alive && now.level === g.level && now.mode === g.mode && now.valid === inv;
-  };
   let slow: ReturnType<typeof slowNotice> | null = null;
   const control = new CheckControl(CHECK_BUDGET_MS, () => slow?.ruleChanged());
   live = control;
+  const current = () => {
+    const now = useGame.getState();
+    return !control.cancelled && now.level === g.level && now.mode === g.mode && now.valid === inv;
+  };
   useGame.setState({ checking: true, verdicts: keep, pending: rules, failMark: null, region: null });
   let res: CheckResult | null = null;
   try {
@@ -113,7 +111,7 @@ export async function runChecker(rules: Rule[]): Promise<CheckResult | null> {
     }
   } finally {
     slow?.end();
-    if (run.alive) {
+    if (!control.cancelled) {
       live = null;
       useGame.setState((now) => ({
         checking: false,

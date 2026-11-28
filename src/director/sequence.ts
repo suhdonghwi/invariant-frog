@@ -10,46 +10,29 @@ export interface Token {
 
 export function createScope() {
   let current = 0;
-  return {
-    begin(): Token {
-      const id = ++current;
-      return {
-        get alive() {
-          return id === current;
-        },
-        guard() {
-          if (id !== current) throw new Aborted();
-        },
-      };
+  const token = (id: number): Token => ({
+    get alive() {
+      return id === current;
     },
-    cancel() {
-      current++;
+    guard() {
+      if (id !== current) throw new Aborted();
     },
-    watch(): Token {
-      const id = current;
-      return {
-        get alive() {
-          return id === current;
-        },
-        guard() {
-          if (id !== current) throw new Aborted();
-        },
-      };
-    },
-  };
+  });
+  return { begin: () => token(++current), watch: () => token(current) };
 }
 
 const sequences = createScope();
-const checks = createScope();
 
-export const begin = sequences.begin;
+export function begin(): Token {
+  useGame.setState({ busy: false, running: false });
+  return sequences.begin();
+}
+
 export const watchSequence = sequences.watch;
-export const beginCheck = checks.begin;
-export const abandonCheck = checks.cancel;
 
 export async function busyWhile<T>(body: (tok: Token) => Promise<T>): Promise<T> {
   const tok = begin();
-  useGame.setState({ busy: true, running: false });
+  useGame.setState({ busy: true });
   try {
     return await body(tok);
   } finally {
