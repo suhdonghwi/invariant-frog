@@ -191,7 +191,6 @@ export const en = {
     chainedEquality: (op: string) => `'${op}' can’t be chained with other comparisons; add parentheses, like \`(x >= 0) ${op} (y >= 0)\``,
     expectedEnded: (text: string) => `Expected '${text}' but the input ended`,
     expectedFound: (text: string, found: string) => `Expected '${text}' but found '${found}'`,
-    expected: (text: string) => `Expected '${text}'`,
     expectedNameEnded: 'Expected a name but the input ended',
     expectedNameFound: (found: string) => `Expected a name but found '${found}'`,
     notHere: (word: string) => `'${word}' can’t be used here`,

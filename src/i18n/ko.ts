@@ -191,7 +191,6 @@ export const ko: Messages = {
     chainedEquality: (op) => `'${op}'는 다른 비교와 이어 쓸 수 없습니다. \`(x >= 0) ${op} (y >= 0)\`처럼 괄호로 묶으세요`,
     expectedEnded: (text) => `'${text}' 없이 식이 끝났습니다`,
     expectedFound: (text, found) => `'${found}' 대신 '${text}' 기호가 와야 합니다`,
-    expected: (text) => `'${text}' 기호가 필요합니다`,
     expectedNameEnded: '이름이 와야 하는데 식이 끝났습니다',
     expectedNameFound: (found) => `'${found}' 자리에는 이름이 와야 합니다`,
     notHere: (word) => `'${word}' 키워드는 여기에 쓸 수 없습니다`,

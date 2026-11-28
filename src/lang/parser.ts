@@ -107,11 +107,6 @@ class Parser {
     if (t.kind === 'op' && t.text === text) return this.next();
     throw new LangError(t.kind === 'eof' ? tr().expectedEnded(text) : tr().expectedFound(text, t.text), t.span);
   }
-  expectKw(text: string): Token {
-    if (this.isKw(text)) return this.next();
-    const t = this.peek();
-    throw new LangError(tr().expected(text), t.span);
-  }
   ident(): Token {
     const t = this.peek();
     if (t.kind !== 'ident' || KEYWORDS.has(t.text)) {

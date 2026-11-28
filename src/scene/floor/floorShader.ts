@@ -48,7 +48,6 @@ void main() {
   bool ex = existsAt(t);
 
   // derivatives up front, outside branches (they need uniform control flow)
-  vec2 fw = fwidth(p);
   vec4 df = vec4(dFdx(p), dFdy(p));
   float fwr = fwidth(length(f));
   float ringD = abs(sdRoundBox(f, vec2(0.47), 0.13)) - 0.035;
