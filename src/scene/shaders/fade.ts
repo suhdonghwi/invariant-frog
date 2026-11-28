@@ -13,13 +13,11 @@ vec3 applyFade(vec3 col, vec3 world) {
 }
 `;
 
-export function fadeUniforms(): Record<string, THREE.IUniform> {
-  return {
-    uCenter: { value: new THREE.Vector2() },
-    uFade: { value: new THREE.Vector2(20, 30) },
-    uHorizon: colorUniform('horizon'),
-  };
-}
+export const FADE_UNIFORMS = {
+  uCenter: { value: new THREE.Vector2() },
+  uFade: { value: new THREE.Vector2(20, 30) },
+  uHorizon: colorUniform('horizon'),
+};
 
 export const fadeRadius = () => Math.max(26, cameraRig.distance() * 2.6);
 
@@ -43,10 +41,9 @@ export function viewRadius(): number {
   return Math.min(R, reach + VIEW_MARGIN);
 }
 
-export function updateFade(u: Record<string, THREE.IUniform>): number {
+export function updateFade() {
   const t = cameraRig.target();
   const R = fadeRadius();
-  (u.uCenter.value as THREE.Vector2).set(t.x - origin.x, t.z + origin.y);
-  (u.uFade.value as THREE.Vector2).set(R * 0.62, R);
-  return R;
+  FADE_UNIFORMS.uCenter.value.set(t.x - origin.x, t.z + origin.y);
+  FADE_UNIFORMS.uFade.value.set(R * 0.62, R);
 }

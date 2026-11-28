@@ -9,9 +9,9 @@ import { clamp01, smoothstep } from '../easing';
 import { frogWorld } from '../frogs/frogWorld';
 import { EGG_ALONE, EGG_ASIDE, occupancy } from '../frogs/occupancy';
 import { eggGeometry } from '../models';
-import { sceneNow } from '../sceneTime';
+import { sceneNow, TIME_UNIFORM } from '../sceneTime';
 import { colorUniform, EGG_SHADOW_SIZE, getBlobTexture, GLSL_COMMON, GLSL_EGG_SHADOW, SHADOW_INK, stencilMark } from '../shaders/common';
-import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
+import { FADE_UNIFORMS, GLSL_FADE } from '../shaders/fade';
 import { areaMask, EGG } from './mask';
 import { useMaskTiles } from './maskTiles';
 import { EGG_REGROW, GLSL_APPEAR, GLSL_BACK, GLSL_HEIGHT, GLSL_SLOT, instanced, SLOT_DUR } from './glsl';
@@ -266,12 +266,12 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
           vertexShader: eggVertex,
           fragmentShader: eggFragment,
           uniforms: {
-            uTime: { value: 0 },
+            uTime: TIME_UNIFORM,
             uEgg: colorUniform('egg'),
             uAppearT0: { value: sceneNow() },
             uAppearCenter: { value: new THREE.Vector2(cameraRig.target().x - origin.x, -cameraRig.target().z - origin.y) },
             uTileShift: { value: new THREE.Vector2() },
-            ...fadeUniforms(),
+            ...FADE_UNIFORMS,
             ...areaMask.uniforms,
             ...landUniforms(),
           },
@@ -299,8 +299,6 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
     syncFrogs(egg.geometry, shadowMesh.current.geometry);
     const u = egg.material.uniforms;
     (u.uTileShift.value as THREE.Vector2).set(egg.geometry.userData.at.x - origin.x, egg.geometry.userData.at.y - origin.y);
-    u.uTime.value = sceneNow();
-    updateFade(u);
   });
   return (
     <AtOrigin>

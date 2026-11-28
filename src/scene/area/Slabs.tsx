@@ -9,10 +9,10 @@ import { SLAB_H, TILE } from '../constants';
 import { Toward } from '../easing';
 import { hover } from '../hover';
 import { GLSL_ORIGIN, origin, originUniforms } from '../origin';
-import { sceneNow } from '../sceneTime';
+import { sceneNow, TIME_UNIFORM } from '../sceneTime';
 import { axisNameUniforms, getDigitTexture, GLSL_AXIS_LABELS, setAxisNames } from '../shaders/axisLabels';
 import { colorUniform, getBlobTexture, GLSL_COMMON, SHADOW_INK } from '../shaders/common';
-import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
+import { FADE_UNIFORMS, fadeRadius, GLSL_FADE } from '../shaders/fade';
 import { GLSL_GOAL, goalUniforms } from '../shaders/goal';
 import { GLSL_MASK, instanced } from './glsl';
 import { GLSL_LAND, LAND_BULGE, landUniforms } from './landBounce';
@@ -234,7 +234,7 @@ export function Slabs({ level, dim, showStop, showGoal }: { level: CompiledLevel
         vertexShader: slabVertex,
         fragmentShader: slabFragment,
         uniforms: {
-          uTime: { value: 0 },
+          uTime: TIME_UNIFORM,
           uTop: colorUniform('slabTop'),
           uSide: colorUniform('slabSide'),
           uHatch: colorUniform('slabHatch'),
@@ -254,7 +254,7 @@ export function Slabs({ level, dim, showStop, showGoal }: { level: CompiledLevel
           uGoalAmt: { value: showGoal ? 1 : 0 },
           uDigits: { value: getDigitTexture() },
           ...axisNameUniforms(),
-          ...fadeUniforms(),
+          ...FADE_UNIFORMS,
           ...areaMask.uniforms,
           ...landUniforms(),
           ...originUniforms(),
@@ -284,14 +284,13 @@ export function Slabs({ level, dim, showStop, showGoal }: { level: CompiledLevel
     if (!nearSlabs.current || !farSlabs.current || !nearShadow.current || !farShadow.current) return;
     const u = nearSlabs.current.material.uniforms;
     const t = sceneNow();
-    u.uTime.value = t;
     const ht = hover.tile;
     u.uHoverOn.value = ht ? 1 : 0;
     if (ht) u.uHover.value.set(ht[0], ht[1]);
     u.uDim.value = amounts.dim.at(dim ? 0.55 : 0, t);
     u.uStopAmt.value = amounts.stop.at(showStop ? 1 : 0, t);
     u.uGoalAmt.value = amounts.goal.at(showGoal ? 1 : 0, t);
-    const reach = Math.min(MASK_REACH, Math.ceil(updateFade(u)));
+    const reach = Math.min(MASK_REACH, Math.ceil(fadeRadius()));
     const target = cameraRig.target();
     (u.uGrid.value as THREE.Vector2).set(Math.round(target.x) - origin.x, Math.round(-target.z) - origin.y);
     const tilePxAtUnitDistance = (camera.projectionMatrix.elements[5] * canvas.height) / 2;

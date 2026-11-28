@@ -13,8 +13,8 @@ import { cameraRig } from '../cameraRig';
 import { SLAB_H } from '../constants';
 import { figureClip } from '../figureClip';
 import { origin } from '../origin';
-import { sceneNow } from '../sceneTime';
-import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
+import { sceneNow, TIME_UNIFORM } from '../sceneTime';
+import { FADE_UNIFORMS, fadeRadius, GLSL_FADE } from '../shaders/fade';
 import { APPEAR, GLSL_RING_POP } from './Region';
 import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 
@@ -90,10 +90,10 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
       uGrid: { value: new THREE.Vector2() },
       uClip: { value: new THREE.Vector4() },
       uClipOn: { value: 0 },
-      uTime: { value: 0 },
+      uTime: TIME_UNIFORM,
       uT0: { value: 0 },
       uOut: { value: 1 },
-      ...fadeUniforms(),
+      ...FADE_UNIFORMS,
     }),
     [],
   );
@@ -128,12 +128,11 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
     const u = ring.current.material.uniforms;
     const target = cameraRig.target();
     failMask.draw(gl, target.x, -target.z, inputs, sceneNow());
-    const reach = Math.min(MASK_REACH, Math.ceil(updateFade(u)));
+    const reach = Math.min(MASK_REACH, Math.ceil(fadeRadius()));
     (u.uGrid.value as THREE.Vector2).set(Math.round(target.x) - origin.x, Math.round(-target.z) - origin.y);
     const box = figureClip.box;
     u.uClipOn.value = box ? 1 : 0;
     if (box) (u.uClip.value as THREE.Vector4).set(box.x0 - origin.x, box.y0 - origin.y, box.x1 - origin.x, box.y1 - origin.y);
-    u.uTime.value = sceneNow();
     u.uT0.value = t0;
     u.uOut.value = exit();
     cells.update(camera, target, reach, Infinity);
