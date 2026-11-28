@@ -1,6 +1,7 @@
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { useGame } from '../../game/store';
 import { field } from '../area/field';
 import { useExitFade } from '../../hooks/presence';
 import { keepAlive } from '../awake';
@@ -24,6 +25,7 @@ export function TileTag({ x, y, label, tone, pulse = false, leaving = false }: T
   const washRef = useRef<THREE.Mesh>(null);
   const t0 = useRef(sceneNow());
   const exit = useExitFade(leaving);
+  const [inRegion] = useState(() => !!useGame.getState().region?.tiles({ cx: x, cy: y, R: 0 }).length);
   useEffect(() => (pulse ? keepAlive(() => !reducedMotion()) : undefined), [pulse]);
 
   useFrame(() => {
@@ -43,14 +45,16 @@ export function TileTag({ x, y, label, tone, pulse = false, leaving = false }: T
 
   return (
     <>
-      <group ref={group}>
-        <mesh ref={washRef} geometry={washGeometry} renderOrder={8}>
-          <meshBasicMaterial color={WASH_COLORS[tone]} transparent opacity={0} depthWrite={false} />
-        </mesh>
-        <mesh ref={ring} geometry={ringGeometry} renderOrder={9}>
-          <meshBasicMaterial color={RING_COLORS[tone]} transparent opacity={0} depthWrite={false} />
-        </mesh>
-      </group>
+      {!inRegion && (
+        <group ref={group}>
+          <mesh ref={washRef} geometry={washGeometry} renderOrder={8}>
+            <meshBasicMaterial color={WASH_COLORS[tone]} transparent opacity={0} depthWrite={false} />
+          </mesh>
+          <mesh ref={ring} geometry={ringGeometry} renderOrder={9}>
+            <meshBasicMaterial color={RING_COLORS[tone]} transparent opacity={0} depthWrite={false} />
+          </mesh>
+        </group>
+      )}
       {label !== '' && (
         <SceneTag anchor={{ tile: [x, y] }} tone={tone} leaving={leaving}>
           {label}
