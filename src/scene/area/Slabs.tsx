@@ -11,7 +11,7 @@ import { hover } from '../hover';
 import { GLSL_ORIGIN, origin, originUniforms } from '../origin';
 import { sceneNow, TIME_UNIFORM } from '../sceneTime';
 import { axisNameUniforms, getDigitTexture, GLSL_AXIS_LABELS, setAxisNames } from '../shaders/axisLabels';
-import { colorUniform, getBlobTexture, GLSL_COMMON, SHADOW_INK } from '../shaders/common';
+import { colorUniform, GLSL_BLOB, GLSL_COMMON, SHADOW_INK } from '../shaders/common';
 import { FADE_UNIFORMS, fadeRadius, GLSL_FADE } from '../shaders/fade';
 import { GLSL_GOAL, goalUniforms } from '../shaders/goal';
 import { GLSL_MASK, instanced } from './glsl';
@@ -155,12 +155,12 @@ const shadowFragment = /* glsl */ `
 ${GLSL_COMMON}
 varying vec2 vUv;
 varying float vH;
-uniform sampler2D uMap;
+${GLSL_BLOB}
 void main() {
-  float blob = texture2D(uMap, vUv).a * 0.75;
+  float soft = blob(vUv) * 0.75;
   float d = sdRoundBox((vUv - 0.5) * ${SHADOW_SIZE.toFixed(2)}, vec2(${(TILE / 2).toFixed(3)}), ${CONTACT.corner.toFixed(2)});
   float contact = ${CONTACT.strength.toFixed(2)} * (1.0 - smoothstep(0.0, ${CONTACT.reach.toFixed(2)}, d));
-  float a = 1.0 - (1.0 - blob) * (1.0 - contact);
+  float a = 1.0 - (1.0 - soft) * (1.0 - contact);
   gl_FragColor = vec4(${SHADOW_INK}, a * vH);
 }
 `;
@@ -269,7 +269,7 @@ export function Slabs({ level, dim, showStop, showGoal }: { level: CompiledLevel
         fragmentShader: shadowFragment,
         transparent: true,
         depthWrite: false,
-        uniforms: { ...areaMask.uniforms, uGrid: material.uniforms.uGrid, uMap: { value: getBlobTexture() } },
+        uniforms: { ...areaMask.uniforms, uGrid: material.uniforms.uGrid },
       }),
     [material],
   );

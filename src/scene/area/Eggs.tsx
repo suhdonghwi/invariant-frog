@@ -10,7 +10,7 @@ import { frogWorld } from '../frogs/frogWorld';
 import { EGG_ALONE, EGG_ASIDE, occupancy } from '../frogs/occupancy';
 import { eggGeometry } from '../models';
 import { sceneNow, TIME_UNIFORM } from '../sceneTime';
-import { colorUniform, EGG_SHADOW_SIZE, getBlobTexture, GLSL_COMMON, GLSL_EGG_SHADOW, SHADOW_INK, stencilMark } from '../shaders/common';
+import { colorUniform, EGG_SHADOW_SIZE, GLSL_COMMON, GLSL_EGG_SHADOW, SHADOW_INK, stencilMark } from '../shaders/common';
 import { FADE_UNIFORMS, GLSL_FADE } from '../shaders/fade';
 import { areaMask, EGG } from './mask';
 import { useMaskTiles } from './maskTiles';
@@ -286,7 +286,7 @@ function EggField({ eggs, base }: { eggs: [number, number][]; base: THREE.Buffer
         fragmentShader: shadowFragment,
         transparent: true,
         depthWrite: false,
-        uniforms: { ...areaMask.uniforms, ...landUniforms(), uTileShift: material.uniforms.uTileShift, uTime: material.uniforms.uTime, uMap: { value: getBlobTexture() }, uAppearT0: material.uniforms.uAppearT0, uAppearCenter: material.uniforms.uAppearCenter },
+        uniforms: { ...areaMask.uniforms, ...landUniforms(), uTileShift: material.uniforms.uTileShift, uTime: material.uniforms.uTime, uAppearT0: material.uniforms.uAppearT0, uAppearCenter: material.uniforms.uAppearCenter },
       }),
     [material],
   );

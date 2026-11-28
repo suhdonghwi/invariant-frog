@@ -21,31 +21,15 @@ vec3 shadeLit(vec3 base, vec3 n) {
 }
 `;
 
-const BLOB_SIZE = 128;
 const STENCIL_SOLID = 1;
 const BLOB_CORE = 0.55;
-const SHADOW_RGB = [40, 50, 70];
-export const SHADOW_INK = `vec3(${SHADOW_RGB.map((c) => (c / 255).toFixed(3)).join(', ')})`;
+export const SHADOW_INK = 'vec3(0.157, 0.196, 0.275)';
 
-let blobTexture: THREE.Texture | null = null;
-export function getBlobTexture(): THREE.Texture {
-  if (blobTexture) return blobTexture;
-  const c = document.createElement('canvas');
-  c.width = c.height = BLOB_SIZE;
-  const g = c.getContext('2d')!;
-  const img = g.createImageData(BLOB_SIZE, BLOB_SIZE);
-  const half = BLOB_SIZE / 2;
-  for (let y = 0; y < BLOB_SIZE; y++) {
-    for (let x = 0; x < BLOB_SIZE; x++) {
-      const r = Math.min(1, Math.hypot(x + 0.5 - half, y + 0.5 - half) / half);
-      const i = (y * BLOB_SIZE + x) * 4;
-      img.data.set([...SHADOW_RGB, Math.round(255 * BLOB_CORE * (1 - r * r * (3 - 2 * r)))], i);
-    }
-  }
-  g.putImageData(img, 0, 0);
-  blobTexture = new THREE.CanvasTexture(c);
-  return blobTexture;
+export const GLSL_BLOB = /* glsl */ `
+float blob(vec2 uv) {
+  return ${BLOB_CORE.toFixed(2)} * (1.0 - smoothstep(0.0, 1.0, length(uv - 0.5) * 2.0));
 }
+`;
 
 export function blobShadowMaterial(strength: number, plateau = 0): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
@@ -76,12 +60,12 @@ const EGG_CONTACT = { strength: 0.15, from: 0.12, to: 0.26 };
 const EGG_BLOB = 0.36;
 
 export const GLSL_EGG_SHADOW = /* glsl */ `
-uniform sampler2D uMap;
+${GLSL_BLOB}
 float eggShadow(vec2 uv) {
-  float blob = texture2D(uMap, uv).a * ${EGG_BLOB.toFixed(2)};
+  float soft = blob(uv) * ${EGG_BLOB.toFixed(2)};
   float r = length(uv - 0.5) * ${EGG_SHADOW_SIZE.toFixed(2)};
   float contact = ${EGG_CONTACT.strength.toFixed(2)} * (1.0 - smoothstep(${EGG_CONTACT.from.toFixed(2)}, ${EGG_CONTACT.to.toFixed(2)}, r));
-  return 1.0 - (1.0 - blob) * (1.0 - contact);
+  return 1.0 - (1.0 - soft) * (1.0 - contact);
 }
 `;
 
@@ -89,7 +73,6 @@ export function eggShadowMaterial(): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
-    uniforms: { uMap: { value: getBlobTexture() } },
     vertexShader: /* glsl */ `
       varying vec2 vUv;
       void main() {
