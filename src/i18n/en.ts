@@ -39,6 +39,12 @@ export const en = {
     allLevels: 'All levels',
   },
 
+  view: {
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    reset: 'Reset view',
+  },
+
   caption: {
     back: 'Back',
     next: 'Next',

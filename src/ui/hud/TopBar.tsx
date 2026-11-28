@@ -1,8 +1,9 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Scan, ZoomIn, ZoomOut } from 'lucide-react';
 import { goMenu } from '../../game/actions';
 import { useGame } from '../../game/store';
 import { useT } from '../../i18n/i18n';
 import { levelNumber } from '../../levels/catalog';
+import { cameraRig, ZOOM } from '../../scene/cameraRig';
 import { button, PILL } from '../classes';
 
 export function TopBar() {
@@ -26,6 +27,26 @@ export function TopBar() {
           {level.title}
         </div>
       </div>
+      <span className="flex-1" />
+      <ViewControl />
+    </div>
+  );
+}
+
+function ViewControl() {
+  const tr = useT().view;
+  const icon = `${button('quiet', 'none')} size-7.5`;
+  return (
+    <div className={`${PILL} pointer-events-auto gap-0.5`}>
+      <button className={icon} title={tr.zoomIn} aria-label={tr.zoomIn} onClick={() => cameraRig.zoomBy(1 / ZOOM)}>
+        <ZoomIn size={16} strokeWidth={2.2} />
+      </button>
+      <button className={icon} title={tr.zoomOut} aria-label={tr.zoomOut} onClick={() => cameraRig.zoomBy(ZOOM)}>
+        <ZoomOut size={16} strokeWidth={2.2} />
+      </button>
+      <button className={icon} title={tr.reset} aria-label={tr.reset} onClick={cameraRig.resetView}>
+        <Scan size={16} strokeWidth={2.2} />
+      </button>
     </div>
   );
 }

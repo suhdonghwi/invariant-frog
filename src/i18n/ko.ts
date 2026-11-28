@@ -39,6 +39,12 @@ export const ko: Messages = {
     allLevels: '레벨 목록',
   },
 
+  view: {
+    zoomIn: '확대',
+    zoomOut: '축소',
+    reset: '시점 되돌리기',
+  },
+
   caption: {
     back: '이전',
     next: '다음',
