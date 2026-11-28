@@ -3,7 +3,6 @@ import { checkFormula, type CheckResult } from '../checker/check';
 import { useSolver } from '../checker/solverStatus';
 import type { Rule } from '../checker/types';
 import { browserZ3 } from '../checker/z3-browser';
-import { captionOf } from '../game/captions';
 import { useGame, type Caption } from '../game/store';
 import { t as messages } from '../i18n/i18n';
 import { clearTrace } from './codeTrace';
@@ -51,13 +50,11 @@ function slowNotice(control: CheckControl) {
   const say = () => {
     if (!control.rule) return;
     due = true;
-    notice.show(
-      captionOf({
-        text: messages().verdicts.stillChecking(messages().rules[control.rule]),
-        tone: 'muted',
-        action: { label: messages().verdicts.cancel, onClick: cancelCheck },
-      }),
-    );
+    notice.show({
+      text: messages().verdicts.stillChecking(messages().rules[control.rule]),
+      tone: 'muted',
+      action: { label: messages().verdicts.cancel, onClick: cancelCheck },
+    });
   };
   const timer = setTimeout(say, SLOW_MS);
   return {

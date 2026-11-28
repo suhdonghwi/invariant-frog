@@ -54,10 +54,6 @@ the tests are the safety net.
 
 - **The store** (`game/store.ts`) holds what the UI and the sequences share.
   Store actions exist only where there is logic.
-- **What a button does is not in the store.** A caption stores its buttons'
-  labels; `captionOf` (`game/captions.ts`) keeps what each press does,
-  keyed by that caption. The tutorial's Back, Next and Check live in
-  `tutorial/controller.ts`, and the store says only whether each exists.
 - **Per-frame scene data lives outside the store**, in plain module objects
   read in `useFrame`. Never put per-frame data in zustand.
 - **Slab height has one source: the area's formula.** Nothing lists the tiles
