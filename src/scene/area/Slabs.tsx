@@ -1,5 +1,5 @@
 import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import type { CompiledLevel } from '../../levels/level';
 import { BASE, LONG } from '../../motion';
@@ -228,7 +228,7 @@ export function Slabs({ level, dim, showStop, showGoal }: { level: CompiledLevel
   }, [cells]);
   useEffect(() => () => [geoms.near, geoms.far].forEach((g) => (g.slabs.dispose(), g.shadow.dispose())), [geoms]);
 
-  const material = useMemo(
+  const [material] = useState(
     () =>
       new THREE.ShaderMaterial({
         vertexShader: slabVertex,
@@ -261,7 +261,6 @@ export function Slabs({ level, dim, showStop, showGoal }: { level: CompiledLevel
           uGrid: { value: new THREE.Vector2() },
         },
       }),
-    [],
   );
   const shadowMat = useMemo(
     () =>
@@ -276,30 +275,36 @@ export function Slabs({ level, dim, showStop, showGoal }: { level: CompiledLevel
   );
   useEffect(() => () => (material.dispose(), shadowMat.dispose()), [material, shadowMat]);
   useEffect(() => setAxisNames(material.uniforms, level), [material, level]);
-  const amounts = useMemo(() => ({ dim: new Toward(0, BASE), stop: new Toward(showStop ? 1 : 0, LONG), goal: new Toward(showGoal ? 1 : 0, LONG) }), []);
+  const [amounts] = useState(() => ({ dim: new Toward(0, BASE), stop: new Toward(showStop ? 1 : 0, LONG), goal: new Toward(showGoal ? 1 : 0, LONG) }));
+  const nearShadow = useRef<THREE.Mesh<THREE.InstancedBufferGeometry>>(null);
+  const farShadow = useRef<THREE.Mesh<THREE.InstancedBufferGeometry>>(null);
+  const nearSlabs = useRef<THREE.Mesh<THREE.InstancedBufferGeometry, THREE.ShaderMaterial>>(null);
+  const farSlabs = useRef<THREE.Mesh<THREE.InstancedBufferGeometry>>(null);
   useFrame(() => {
+    if (!nearSlabs.current || !farSlabs.current || !nearShadow.current || !farShadow.current) return;
+    const u = nearSlabs.current.material.uniforms;
     const t = sceneNow();
-    material.uniforms.uTime.value = t;
+    u.uTime.value = t;
     const ht = hover.tile;
-    material.uniforms.uHoverOn.value = ht ? 1 : 0;
-    if (ht) material.uniforms.uHover.value.set(ht[0], ht[1]);
-    material.uniforms.uDim.value = amounts.dim.at(dim ? 0.55 : 0, t);
-    material.uniforms.uStopAmt.value = amounts.stop.at(showStop ? 1 : 0, t);
-    material.uniforms.uGoalAmt.value = amounts.goal.at(showGoal ? 1 : 0, t);
-    const reach = Math.min(MASK_REACH, Math.ceil(updateFade(material.uniforms)));
+    u.uHoverOn.value = ht ? 1 : 0;
+    if (ht) u.uHover.value.set(ht[0], ht[1]);
+    u.uDim.value = amounts.dim.at(dim ? 0.55 : 0, t);
+    u.uStopAmt.value = amounts.stop.at(showStop ? 1 : 0, t);
+    u.uGoalAmt.value = amounts.goal.at(showGoal ? 1 : 0, t);
+    const reach = Math.min(MASK_REACH, Math.ceil(updateFade(u)));
     const target = cameraRig.target();
-    (material.uniforms.uGrid.value as THREE.Vector2).set(Math.round(target.x) - origin.x, Math.round(-target.z) - origin.y);
+    (u.uGrid.value as THREE.Vector2).set(Math.round(target.x) - origin.x, Math.round(-target.z) - origin.y);
     const tilePxAtUnitDistance = (camera.projectionMatrix.elements[5] * canvas.height) / 2;
     cells.update(camera, target, reach, tilePxAtUnitDistance / FACETED_BELOW_PX);
-    geoms.near.slabs.instanceCount = geoms.near.shadow.instanceCount = cells.nearCount;
-    geoms.far.slabs.instanceCount = geoms.far.shadow.instanceCount = cells.farCount;
+    nearSlabs.current.geometry.instanceCount = nearShadow.current.geometry.instanceCount = cells.nearCount;
+    farSlabs.current.geometry.instanceCount = farShadow.current.geometry.instanceCount = cells.farCount;
   });
   return (
     <AtOrigin>
-      <mesh geometry={geoms.near.shadow} material={shadowMat} frustumCulled={false} renderOrder={1} />
-      <mesh geometry={geoms.far.shadow} material={shadowMat} frustumCulled={false} renderOrder={1} />
-      <mesh geometry={geoms.near.slabs} material={material} frustumCulled={false} />
-      <mesh geometry={geoms.far.slabs} material={material} frustumCulled={false} />
+      <mesh ref={nearShadow} geometry={geoms.near.shadow} material={shadowMat} frustumCulled={false} renderOrder={1} />
+      <mesh ref={farShadow} geometry={geoms.far.shadow} material={shadowMat} frustumCulled={false} renderOrder={1} />
+      <mesh ref={nearSlabs} geometry={geoms.near.slabs} material={material} frustumCulled={false} />
+      <mesh ref={farSlabs} geometry={geoms.far.slabs} material={material} frustumCulled={false} />
     </AtOrigin>
   );
 }

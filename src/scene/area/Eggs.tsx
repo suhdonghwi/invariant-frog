@@ -146,7 +146,7 @@ function EggField({ eggs, all, slots, base }: EggFieldProps) {
   const touched = useRef<number[]>([]);
   const synced = useRef({ geom: null as THREE.BufferGeometry | null, hatch: -1, occ: -1 });
 
-  const { geom, shadowGeom, at } = useMemo(() => {
+  const { geom, shadowGeom } = useMemo(() => {
     const n = eggs.length;
     const tile = new Float32Array(n * 2);
     for (let i = 0; i < n; i++) {
@@ -163,11 +163,13 @@ function EggField({ eggs, all, slots, base }: EggFieldProps) {
       aSlot: [new Float32Array(n * 4), 4],
       aSlotAnim: [slotAnim, 3],
     } as const;
-    return { geom: instanced(base, n, attrs), shadowGeom: instanced(shadowBase, n, attrs), at: { x: origin.x, y: origin.y } };
+    const geom = instanced(base, n, attrs);
+    geom.userData.at = { x: origin.x, y: origin.y };
+    return { geom, shadowGeom: instanced(shadowBase, n, attrs) };
   }, [eggs, base, shadowBase]);
   useEffect(() => () => (geom.dispose(), shadowGeom.dispose()), [geom, shadowGeom]);
 
-  const syncFrogs = () => {
+  const syncFrogs = (geom: THREE.BufferGeometry, shadowGeom: THREE.BufferGeometry) => {
     const s = synced.current;
     if (s.geom === geom && s.hatch === frogWorld.hatchVersion && s.occ === occupancy.version) return;
     const fresh = s.geom !== geom;
@@ -253,16 +255,21 @@ function EggField({ eggs, all, slots, base }: EggFieldProps) {
     [material],
   );
   useEffect(() => () => (shadowBase.dispose(), material.dispose(), shadowMat.dispose()), [shadowBase, material, shadowMat]);
+  const eggMesh = useRef<THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>>(null);
+  const shadowMesh = useRef<THREE.Mesh>(null);
   useFrame(() => {
-    syncFrogs();
-    (material.uniforms.uTileShift.value as THREE.Vector2).set(at.x - origin.x, at.y - origin.y);
-    material.uniforms.uTime.value = sceneNow();
-    updateFade(material.uniforms);
+    const egg = eggMesh.current;
+    if (!egg || !shadowMesh.current) return;
+    syncFrogs(egg.geometry, shadowMesh.current.geometry);
+    const u = egg.material.uniforms;
+    (u.uTileShift.value as THREE.Vector2).set(egg.geometry.userData.at.x - origin.x, egg.geometry.userData.at.y - origin.y);
+    u.uTime.value = sceneNow();
+    updateFade(u);
   });
   return (
     <AtOrigin>
-      <mesh geometry={shadowGeom} material={shadowMat} frustumCulled={false} renderOrder={2} />
-      <mesh geometry={geom} material={material} frustumCulled={false} />
+      <mesh ref={shadowMesh} geometry={shadowGeom} material={shadowMat} frustumCulled={false} renderOrder={2} />
+      <mesh ref={eggMesh} geometry={geom} material={material} frustumCulled={false} />
     </AtOrigin>
   );
 }

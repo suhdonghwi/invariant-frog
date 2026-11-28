@@ -1,5 +1,5 @@
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { AtOrigin } from '../AtOrigin';
 import { COLORS, SLAB_H } from '../constants';
@@ -92,13 +92,16 @@ export function GoalColumns() {
     [],
   );
   useEffect(() => () => (base.dispose(), material.dispose()), [base, material]);
+  const mesh = useRef<THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>>(null);
   useFrame(() => {
-    material.uniforms.uTime.value = sceneNow();
-    (material.uniforms.uTileShift.value as THREE.Vector2).set(geom.userData.at.x - origin.x, geom.userData.at.y - origin.y);
+    const m = mesh.current;
+    if (!m) return;
+    m.material.uniforms.uTime.value = sceneNow();
+    (m.material.uniforms.uTileShift.value as THREE.Vector2).set(m.geometry.userData.at.x - origin.x, m.geometry.userData.at.y - origin.y);
   });
   return (
     <AtOrigin>
-      <mesh geometry={geom} material={material} frustumCulled={false} renderOrder={6} />
+      <mesh ref={mesh} geometry={geom} material={material} frustumCulled={false} renderOrder={6} />
     </AtOrigin>
   );
 }

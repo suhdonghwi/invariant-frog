@@ -1,5 +1,5 @@
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { field } from '../area/field';
 import { COLORS } from '../constants';
@@ -34,7 +34,12 @@ export function StartEggs({ eggs }: { eggs: React.RefObject<StartEgg[]> }) {
     return m;
   }, []);
   useEffect(() => () => [mesh, shadow].forEach((m) => (m.geometry.dispose(), m.material.dispose())), [mesh, shadow]);
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const shadowRef = useRef<THREE.InstancedMesh>(null);
   useFrame(() => {
+    const mesh = meshRef.current;
+    const shadow = shadowRef.current;
+    if (!mesh || !shadow) return;
     const t = sceneNow();
     let n = 0;
     for (const e of eggs.current) {
@@ -54,8 +59,8 @@ export function StartEggs({ eggs }: { eggs: React.RefObject<StartEgg[]> }) {
   });
   return (
     <>
-      <primitive object={shadow} />
-      <primitive object={mesh} />
+      <primitive ref={shadowRef} object={shadow} />
+      <primitive ref={meshRef} object={mesh} />
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { planeExists, type Inputs } from '../../levels/inputs';
 import type { CompiledLevel } from '../../levels/level';
@@ -63,10 +63,10 @@ export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true,
         ...originUniforms(),
         uHoverOn: { value: 0 },
         ...fadeUniforms(),
-        uOpacity: { value: fadeIn ? 0 : 1 },
-        uShowStop: { value: showStop ? 1 : 0 },
-        uShowGoal: { value: showGoal ? 1 : 0 },
-        uShowAxes: { value: showAxes ? 1 : 0 },
+        uOpacity: { value: 0 },
+        uShowStop: { value: 0 },
+        uShowGoal: { value: 0 },
+        uShowAxes: { value: 0 },
         uClip: { value: new THREE.Vector4() },
         uClipOn: { value: 0 },
         uDigits: { value: getDigitTexture() },
@@ -88,16 +88,18 @@ export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true,
   }, [level]);
   useEffect(() => () => material.dispose(), [material]);
 
-  const u = material.uniforms;
+  const makeAmounts = () => ({ stop: new Toward(showStop ? 1 : 0, LONG), goal: new Toward(showGoal ? 1 : 0, LONG), axes: new Toward(showAxes ? 1 : 0, LONG), shown: new Toward(fadeIn ? 0 : 1, fadeIn || LONG) });
+  const [amounts, setAmounts] = useState(makeAmounts);
+  const [amountsLevel, setAmountsLevel] = useState(level);
+  if (amountsLevel !== level) {
+    setAmountsLevel(level);
+    setAmounts(makeAmounts());
+  }
 
-  const amounts = useMemo(
-    () => ({ stop: new Toward(showStop ? 1 : 0, LONG), goal: new Toward(showGoal ? 1 : 0, LONG), axes: new Toward(showAxes ? 1 : 0, LONG), shown: new Toward(fadeIn ? 0 : 1, fadeIn || LONG) }),
-    [level],
-  );
-
-  useFrame(() => {
-    const m = mesh.current;
+  useFrame(({ gl }) => {
+    const m = mesh.current as THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial> | null;
     if (!m) return;
+    const u = m.material.uniforms;
     const now = sceneNow();
     setInputUniforms(u, level, inputs, planeExists(level, inputs));
     const R = updateFade(u);
@@ -119,7 +121,7 @@ export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true,
     } else u.uHoverOn.value = 0;
     if (interactive) {
       const cursor = hover.tile && clickable?.(hover.tile[0], hover.tile[1]) ? 'pointer' : '';
-      if (canvas.style.cursor !== cursor) canvas.style.cursor = cursor;
+      if (gl.domElement.style.cursor !== cursor) gl.domElement.style.cursor = cursor;
     }
     m.visible = u.uOpacity.value > 0.004;
   });

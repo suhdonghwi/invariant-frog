@@ -1,4 +1,6 @@
 import { useFrame, useThree } from '@react-three/fiber';
+import { useRef } from 'react';
+import type { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
 import { useGame } from '../../game/store';
 import { planeKey } from '../../levels/inputs';
 import { field } from '../area/field';
@@ -41,8 +43,11 @@ function TrailLine({ index }: { index: number }) {
   const size = useThree((s) => s.size);
   const plane = useGame((s) => planeKey(s.inputs));
   const line = useArcLine(COLORS.trail);
+  const lineRef = useRef<LineSegments2>(null);
 
   useFrame(() => {
+    const line = lineRef.current;
+    if (!line) return;
     const f = trailFrogs(plane)[index];
     const path = f ? pathOf(f) : { points: [] };
     line.visible = !!f && path.points.length >= 6;
@@ -56,7 +61,7 @@ function TrailLine({ index }: { index: number }) {
     fitArcLine(line, size);
   });
 
-  return <primitive object={line} />;
+  return <primitive ref={lineRef} object={line} />;
 }
 
 export function FrogTrail() {

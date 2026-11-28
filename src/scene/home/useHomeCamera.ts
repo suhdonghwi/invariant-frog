@@ -1,5 +1,5 @@
 import { useFrame, useThree } from '@react-three/fiber';
-import { useLayoutEffect, useRef } from 'react';
+import { useEffectEvent, useLayoutEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGame } from '../../game/store';
 import { cameraRig, type Shot } from '../cameraRig';
@@ -29,14 +29,15 @@ export function useHomeCamera() {
   const intro = useRef<{ t0: number; eye: THREE.Vector3; target: THREE.Vector3 } | null>(null);
 
   const { camera, size } = useThree();
-  useLayoutEffect(() => {
+  const place = useEffectEvent(() => {
     const t = sceneNow();
     restingPose(t, size);
     intro.current = { t0: t, eye: eye.clone().add(OVERVIEW), target: target.clone() };
     camera.position.copy(intro.current.eye);
     camera.lookAt(intro.current.target);
     void cameraRig.controls?.setLookAt(...intro.current.eye.toArray(), ...intro.current.target.toArray(), false);
-  }, []);
+  });
+  useLayoutEffect(() => place(), []);
 
   useFrame(({ size, camera }) => {
     if (mode !== 'menu' || !intro.current) return;

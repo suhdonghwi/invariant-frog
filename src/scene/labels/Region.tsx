@@ -1,5 +1,5 @@
 import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import * as THREE from 'three';
 import { useGame, type Region, type RegionTile } from '../../game/store';
 import { useExitFade, useLingering } from '../../hooks/presence';
@@ -132,12 +132,13 @@ function sweep(tiles: RegionTile[], camera: THREE.Camera): Sweep {
 }
 
 function useTicks(region: Region | null, plan: Sweep | null, t0: number) {
-  useEffect(() => {
+  const play = useEffectEvent(() => {
     if (!region?.tick || !plan) return;
     lastSweep = { id: region.id, span: plan.span };
     const late = sceneNow() - t0;
     sfx.ticks(plan.ticks.map((at) => at - late));
-  }, [region]);
+  });
+  useEffect(() => play(), [region]);
 }
 
 const colors = (tones: Record<string, string>) => Object.fromEntries(Object.entries(tones).map(([k, v]) => [k, new THREE.Color(v)]));
@@ -146,7 +147,6 @@ const WASH = colors(WASH_COLORS);
 
 export function OutlineRegion() {
   const { value: region, leaving } = useLingering(useGame((s) => s.region));
-  const valid = useGame((s) => s.valid);
   const win = useTileWindow();
   const ring = useMemo(() => regionMaterial(RING_ALPHA), []);
   const wash = useMemo(() => regionMaterial(WASH_ALPHA), []);
@@ -161,7 +161,7 @@ export function OutlineRegion() {
     if (!region) return null;
     const tiles = region.tiles(win);
     return { tiles, sweep: region.tick && tiles.length ? sweep(tiles, camera) : null };
-  }, [region, win, valid]);
+  }, [region, win, camera]);
   useTicks(region, plan?.sweep ?? null, t0);
   const geoms = useMemo(() => {
     if (!plan) return null;

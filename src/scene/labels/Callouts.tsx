@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useState } from 'react';
 import { useGame, type Game } from '../../game/store';
 import { useLingering, usePresentList } from '../../hooks/presence';
 import { frogWorld, type FrogSim } from '../frogs/frogWorld';
@@ -14,22 +14,30 @@ export function Callouts() {
     useGame((s) => s.callouts),
     calloutKey,
   );
-  const frogs = useRef(new Map<number, FrogSim>());
   return (
     <>
-      {callouts.map(({ item: c, key, leaving }) => {
-        if (c.frog === undefined) return <TileTag key={key} x={c.x} y={c.y} label={c.text} tone={c.tone} wash leaving={leaving} />;
-        const frog = frogWorld.frogs.find((f) => f.id === c.frog) ?? frogs.current.get(c.frog);
-        if (!frog) return null;
-        frogs.current.set(c.frog, frog);
-        return (
-          <SceneTag key={key} anchor={{ frog }} tone={c.tone} leaving={leaving}>
-            {TONE_PREFIX[c.tone]}
-            {c.text}
-          </SceneTag>
-        );
-      })}
+      {callouts.map(({ item: c, key, leaving }) =>
+        c.frog === undefined ? (
+          <TileTag key={key} x={c.x} y={c.y} label={c.text} tone={c.tone} wash leaving={leaving} />
+        ) : (
+          <FrogCallout key={key} callout={c} frogId={c.frog} leaving={leaving} />
+        ),
+      )}
     </>
+  );
+}
+
+function FrogCallout({ callout, frogId, leaving }: { callout: Callout; frogId: number; leaving: boolean }) {
+  const live = frogWorld.frogs.find((f) => f.id === frogId);
+  const [seen, setSeen] = useState<FrogSim | undefined>(live);
+  if (live && live !== seen) setSeen(live);
+  const frog = live ?? seen;
+  if (!frog) return null;
+  return (
+    <SceneTag anchor={{ frog }} tone={callout.tone} leaving={leaving}>
+      {TONE_PREFIX[callout.tone]}
+      {callout.text}
+    </SceneTag>
   );
 }
 

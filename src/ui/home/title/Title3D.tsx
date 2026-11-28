@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useMemo, type CSSProperties } from 'react';
+import { useMemo, useRef, type CSSProperties } from 'react';
 import * as THREE from 'three';
 import { layouts } from 'virtual:title-glyphs';
 import { COLORS, MAX_DPR } from '../../../scene/constants';
@@ -17,7 +17,7 @@ const FROG_AT = (LINE1.length + LINE2.length) * STAGGER + 0.05;
 const dummy = new THREE.Object3D();
 let frogGeom: THREE.BufferGeometry | undefined;
 
-function PeekingFrog({ x, y, letterIndex, wave, clock }: { x: number; y: number; letterIndex: number; wave: number; clock: { t: number } }) {
+function PeekingFrog({ x, y, letterIndex, wave, clock }: { x: number; y: number; letterIndex: number; wave: number; clock: React.RefObject<{ t: number }> }) {
   const mesh = useMemo(() => {
     const geom = (frogGeom ??= frogGeometry({ fine: true, sparkle: true }));
     const body = new THREE.InstancedMesh(geom, frogMaterial(), 1);
@@ -31,7 +31,7 @@ function PeekingFrog({ x, y, letterIndex, wave, clock }: { x: number; y: number;
     const t = sceneNow();
     const ride = waveAt(t, letterIndex, PHASE2) * wave;
     const breath = 0.02 * Math.sin(t * 2.4);
-    const s = FROG_SCALE * entrance(clock.t, FROG_AT);
+    const s = FROG_SCALE * entrance(clock.current.t, FROG_AT);
     dummy.position.set(x, y + ride, -0.58);
     dummy.rotation.set(0, 0, 0);
     dummy.scale.set(s * (1 - breath * 0.5), s * (1 + breath), s * (1 - breath * 0.5));
@@ -52,10 +52,10 @@ function PeekingFrog({ x, y, letterIndex, wave, clock }: { x: number; y: number;
 function TitleScene({ align, wave }: { align: TitleAlign; wave: number }) {
   const L = layouts[align];
   const { camera, size } = useThree();
-  const clock = useMemo(() => ({ t: -0.15 }), []);
+  const clock = useRef({ t: -0.15 });
 
   useFrame((_, dt) => {
-    if (sceneStarted()) clock.t += Math.min(dt, 1 / 30);
+    if (sceneStarted()) clock.current.t += Math.min(dt, 1 / 30);
     const cam = camera as THREE.PerspectiveCamera;
     cam.position.copy(cameraFor(L, cam.fov, size.width / size.height));
     cam.lookAt(cam.position.x, cam.position.y, 0);

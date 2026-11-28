@@ -3,7 +3,8 @@
 How the code is organised, and the rules that keep it working.
 
 Stack: Vite, React (with React Compiler), TypeScript, react-three-fiber with
-drei, zustand, Tailwind CSS v4, z3-solver (WebAssembly), Vitest.
+drei, zustand, Tailwind CSS v4, z3-solver (WebAssembly), Vitest, ESLint, and
+playwright-core for the browser smoke test.
 
 ## Layout
 
@@ -19,7 +20,7 @@ src/
   scene/       the 3D world: floor, slabs, frogs, labels, camera rig, scene time
   ui/          the DOM over the scene
   motion.ts    every duration and pause
-scripts/       level validation, the Z3 copy, fonts, the link preview, the favicon, the paper's figures
+scripts/       level validation, the browser smoke test, the Z3 copy, fonts, the link preview, the favicon, the paper's figures
 tests/         unit tests
 ```
 
@@ -107,5 +108,13 @@ the level list, a level or the tutorial.
 - Components are `PascalCase.tsx`, other modules `camelCase.ts`; one concern
   per file.
 - Remove dead code rather than leaving it behind.
-- Before committing: `pnpm typecheck`, `pnpm test`, `pnpm validate` (when
-  levels, the language or the checker changed), `pnpm build`.
+- **Per-frame updates reach three.js objects through refs** (a mesh's `ref`,
+  or `primitive ref`), never through a value a hook returned, so the React
+  Compiler's lint rules hold.
+- Before committing: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm
+  validate` (when levels, the language or the checker changed), `pnpm build`.
+  `pnpm smoke` opens the game in Chrome (home, a level with a wrong and a right
+  formula, a few tutorial steps) and fails on any console error.
+- `typescript` is aliased to `@typescript/typescript6` because typescript-eslint
+  needs the TypeScript 6 API; `tsc` itself is TypeScript 7 from
+  `@typescript/native`.
