@@ -37,6 +37,11 @@ export function CaptionBar() {
       )}
       <div className={`min-h-0 overflow-y-auto ${closable ? 'pr-7 compact:pr-6.5' : ''}`}>
         <Markdown text={caption.text} />
+        {caption.aside && (
+          <div className="mt-2.5 border-t border-line pt-2.5 font-medium compact:mt-2 compact:pt-2">
+            <Markdown text={caption.aside} />
+          </div>
+        )}
       </div>
       {(caption.action || caption.replay || caption.choices || back) && (
         <div className="-mr-1.5 flex min-h-8.5 flex-wrap items-center justify-end gap-1.5 compact:-mr-1">

@@ -37,9 +37,11 @@ adding UI.
   checks (eggs, the tiles hops start from, stops), then its light turns. The
   first failing rule ends the check.
 - **A failure looks the same whether or not a real frog gets there** (see
-  design.md, *See-through frogs*). The caption says what fails in general,
-  then gives the counterexample, putting the area first: "your area says a
-  frog could be at …".
+  design.md, *See-through frogs*). The caption opens with the rule's name
+  ("**Exit fails.**"), says what fails in general in one clause, then gives the
+  counterexample, putting the area first: "your area says a frog could be at
+  …". When the area matches a known wrong answer, that answer's message sits
+  below a line, as the question to act on.
 - **Typing is the cancel.** In a level the formula box stays editable while a
   check runs or its replay plays (a counterexample replayed from a red light
   too). The first edit ends the check: the solver stops, frogs go home, tags

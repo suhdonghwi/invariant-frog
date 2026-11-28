@@ -55,6 +55,7 @@ export type CaptionTone = 'info' | 'fail' | 'success' | 'muted';
 
 export interface Caption {
   text: string;
+  aside?: string;
   tone: CaptionTone;
   action?: { label: string; onClick: () => void; disabled?: boolean };
   replay?: () => void;

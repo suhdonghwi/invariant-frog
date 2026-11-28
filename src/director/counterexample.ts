@@ -19,6 +19,7 @@ import { busyWhile, currentLevel, type Token } from './sequence';
 
 export interface CounterexampleOptions {
   prefix?: string;
+  note?: string;
   area?: string;
   tone?: CaptionTone;
   extra?: string;
@@ -53,7 +54,7 @@ export function offerOtherBoard(cex: Counterexample, opts: CounterexampleOptions
   const there = showInputs(L, planeOf(cex));
   sfx.fail();
   useGame.setState({
-    caption: { text: say.elsewhere(showInputs(L, useGame.getState().inputs), there), tone: 'fail', action: { label: say.showThere(there), onClick: () => void playCounterexample(cex, { ...opts, prefix: opts.prefix ?? '' }) } },
+    caption: { text: say.elsewhere(showInputs(L, useGame.getState().inputs), there), tone: 'fail', action: { label: say.showThere(there), onClick: () => void playCounterexample(cex, { ...opts, note: opts.note ?? '' }) } },
   });
 }
 
@@ -78,21 +79,22 @@ const FARTHEST = 1_000_000_000n;
 const withinReach = (cex: Counterexample) =>
   [cex.state, cex.next].every((s) => !s || Object.values(s).every((v) => (Array.isArray(v) ? v : [v]).every((x) => x <= FARTHEST && x >= -FARTHEST)));
 
-function told(cex: Counterexample, area: string, broken: string): string {
+function told(cex: Counterexample, area: string, note: string, broken: string): string {
   const say = messages().verdicts;
-  if (cex.rule === 'initialization') return say.startsOutside(fmt(cex.state), area) + broken;
-  if (cex.rule === 'maintenance' && cex.next) return say.landsOutside(fmt(cex.state), fmt(cex.next), area) + broken;
-  return say.offGoal(fmt(cex.state), area);
+  if (cex.rule === 'initialization') return say.startsOutside(fmt(cex.state), area, note) + broken;
+  if (cex.rule === 'maintenance' && cex.next) return say.landsOutside(fmt(cex.state), fmt(cex.next), area, note) + broken;
+  return say.offGoal(fmt(cex.state), area, note);
 }
 
 export async function counterexample(tok: Token, cex: Counterexample, opts: CounterexampleOptions) {
   const L = currentLevel();
   useGame.setState({ failMark: null, region: null });
   const say = messages().verdicts;
-  const prefix = opts.prefix ?? (cex.far ? say.far : '');
+  const prefix = opts.prefix ?? '';
+  const note = opts.note ?? (cex.far ? say.far : '');
   const area = opts.area ?? say.yourArea;
   const broken = cex.broken ? (cex.rule === 'maintenance' ? say.noLongerHolds(cex.broken) : say.falseThere(cex.broken)) : '';
-  const text = prefix + told(cex, area, broken);
+  const text = prefix + told(cex, area, note, broken);
   if (!withinReach(cex)) {
     await sendFrogsHome();
     if (!tok.alive) return;
@@ -131,8 +133,8 @@ function finish(cex: Counterexample, opts: CounterexampleOptions, said: string) 
   let text = said;
   if (opts.extra) text += `\n\n${opts.extra}`;
   const { mode, pitfallMessage } = useGame.getState();
-  if (mode === 'level' && pitfallMessage) text += `\n\n${pitfallMessage}`;
+  const aside = mode === 'level' && pitfallMessage ? pitfallMessage : undefined;
   const action = opts.action?.();
   const tone = opts.tone ?? 'fail';
-  useGame.setState({ caption: { text, tone, action, replay: () => void playCounterexample(cex, opts) } });
+  useGame.setState({ caption: { text, aside, tone, action, replay: () => void playCounterexample(cex, opts) } });
 }
