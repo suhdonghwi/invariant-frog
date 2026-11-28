@@ -381,6 +381,9 @@ export const cameraRig = {
     place(v.x, v.y, v.d, currentAngle());
     return inside(bounds({ focus: [[x, y]] }), safeRect());
   },
+  moving(): boolean {
+    return !!flight || !!pending || !layout.settled;
+  },
   holds(shot: Shot): boolean {
     if (!controls || !tilesOf(shot).length) return false;
     return !needsMove(shot, placement(shot, currentAngle()).d);

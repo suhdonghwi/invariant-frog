@@ -7,11 +7,13 @@ import { outlineGeometry, outlineMaterial } from '../../../scene/models';
 import { sceneNow } from '../../../scene/sceneTime';
 import { letterOpts, OUTLINE } from './layout';
 import { extrudeLetters } from './text3d';
+import { BEAT } from '../../../motion';
 
 const outline = outlineMaterial(OUTLINE, 0.08);
 
 export const STAGGER = 0.03;
-export const entrance = (t: number, start: number) => popIn((t - start) / 0.28, 0.6);
+export const ENTRANCE = BEAT;
+export const entrance = (t: number, start: number) => popIn((t - start) / ENTRANCE, 0.6);
 
 export const waveAt = (t: number, i: number, phase: number) => Math.max(0, Math.sin(t * 1.6 - i * 0.55 + phase));
 

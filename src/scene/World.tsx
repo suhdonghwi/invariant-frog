@@ -1,8 +1,9 @@
-import { CameraControls, CameraControlsImpl, PerformanceMonitor } from '@react-three/drei';
+import { CameraControls, CameraControlsImpl } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { prepareSound } from '../audio/sfx';
 import { useGame } from '../game/store';
+import { keepAlive, live, restless, touched, wake } from './awake';
 import { cameraRig, FOV, MAX_DISTANCE } from './cameraRig';
 import { MAX_DPR } from './constants';
 import { HomeScene } from './home/HomeScene';
@@ -10,8 +11,10 @@ import { LevelScene } from './level/LevelScene';
 import { figurePage } from './figureClip';
 import { Framing } from './Framing';
 import { grab } from './grab';
-import { startScene } from './sceneTime';
-import { CAMERA_SMOOTH, DRAG_SMOOTH } from '../motion';
+import { frogWorld } from './frogs/frogWorld';
+import { Resolution } from './Resolution';
+import { sceneNow, startScene } from './sceneTime';
+import { CAMERA_SMOOTH, DRAG_SMOOTH, LINGER } from '../motion';
 
 function Lights() {
   return (
@@ -79,6 +82,32 @@ function Controls() {
   );
 }
 
+const INPUTS = ['pointermove', 'pointerdown', 'pointerup', 'wheel', 'keydown'] as const;
+
+const recent = (t: number, at: number | undefined) => at !== undefined && t - at < LINGER;
+
+function frogsLive(): boolean {
+  if (!frogWorld.frogs.length) return false;
+  if (restless()) return true;
+  const t = sceneNow();
+  return frogWorld.frogs.some((f) => f.hop || f.rise || f.leave || f.turn || recent(t, f.cheerT0) || recent(t, f.hatchT0) || recent(t, f.landT0));
+}
+
+function KeepAwake() {
+  useFrame(({ invalidate }) => {
+    if (live()) invalidate();
+  });
+  useEffect(() => {
+    const stop = [useGame.subscribe(() => wake()), keepAlive(() => cameraRig.moving()), keepAlive(() => useGame.getState().busy), keepAlive(frogsLive)];
+    for (const type of INPUTS) window.addEventListener(type, touched, { passive: true });
+    return () => {
+      stop.forEach((s) => s());
+      for (const type of INPUTS) window.removeEventListener(type, touched);
+    };
+  }, []);
+  return null;
+}
+
 function Start() {
   const frames = useRef(0);
   useFrame(() => {
@@ -115,14 +144,13 @@ export function World() {
   return (
     <Canvas
       flat
+      frameloop="demand"
       dpr={dpr}
       camera={{ position: [3, 10, 12], fov: FOV, near: 0.1, far: 500 }}
       gl={{ antialias: true, alpha: true, stencil: true }}
     >
-      <PerformanceMonitor
-        factor={1}
-        onChange={({ factor }) => !figurePage && setDpr(factor === 1 ? top : Math.round((1 + (top - 1) * factor) * 4) / 4)}
-      />
+      <KeepAwake />
+      <Resolution onChange={(factor) => !figurePage && setDpr(factor === 1 ? top : Math.round((1 + (top - 1) * factor) * 4) / 4)} />
       <Lights />
       <Controls />
       <Framing />

@@ -5,6 +5,7 @@ import { useGame } from '../../game/store';
 import { planeKey } from '../../levels/inputs';
 import { field } from '../area/field';
 import { AtOrigin } from '../AtOrigin';
+import { wake } from '../awake';
 import { uploadInstances } from '../instances';
 import { origin } from '../origin';
 import { eggGeometry } from '../models';
@@ -38,6 +39,7 @@ const active: HatchFx[] = [];
 export const hatchFx = {
   push(fx: Omit<HatchFx, 't0' | 'dir'>) {
     active.push({ ...fx, t0: sceneNow(), dir: Math.random() * Math.PI * 2 });
+    wake();
     if (active.length > MAX) active.shift();
   },
   clear() {

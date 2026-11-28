@@ -95,6 +95,13 @@ the tests are the safety net.
 
 ## Rendering
 
+- **The world draws only while something moves** (`frameloop="demand"`).
+  A store change, a scene timer, a tile event or player input keeps it awake
+  for a moment (`scene/awake.ts`). Anything that moves for longer registers a
+  `keepAlive` reason: the camera rig in flight, a running sequence, a pulsing
+  tag. Frogs breathe until the player has been idle for `IDLE_REST`; the home
+  scene never rests, because its frogs hop on a loop. Resolution adapts from
+  frame rates measured only over unbroken runs of frames (`scene/Resolution.tsx`).
 - The floor is **one shader plane**, evaluated per pixel, so it is truly
   infinite.
 - **Slabs are one instanced grid centred on the camera**, so the area reaches

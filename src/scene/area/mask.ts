@@ -3,6 +3,7 @@ import type { Expr } from '../../lang/ast';
 import { planeExists, planeKey, type Inputs } from '../../levels/inputs';
 import type { CompiledLevel } from '../../levels/level';
 import { inputUniforms, levelGlsl, setInputUniforms } from '../floor/levelGlsl';
+import { wake } from '../awake';
 import { origin } from '../origin';
 import { FROM_SCALE, GLSL_MASK, MASK_SIZE } from './glsl';
 
@@ -189,7 +190,10 @@ class AreaMask {
     if (!p.started) {
       p.started = true;
       this.probe.material = p.material;
-      void gl.compileAsync(this.probeScene, this.camera).then(() => (p.ready = true));
+      void gl.compileAsync(this.probeScene, this.camera).then(() => {
+        p.ready = true;
+        wake();
+      });
     }
     if (!p.ready) return;
     this.pending = null;

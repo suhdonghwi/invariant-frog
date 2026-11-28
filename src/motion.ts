@@ -55,6 +55,9 @@ export const HOME_LAST_OUT = 0.6;
 export const PULSE = 1.6;
 export const FLASH = 1.2;
 
+export const LINGER = 2;
+export const IDLE_REST = 8;
+
 export const TYPE_KEY = 0.07;
 export const TYPE_SPACE = 0.03;
 
