@@ -111,6 +111,21 @@ the tests are the safety net.
 - **The GPU sees coordinates near a floating origin** (`scene/origin.ts`),
   since a 32-bit float has no fractions left near ten million.
 - Models are procedural, and shadows are soft blobs, not shadow maps.
+- **Canvases register only the three.js classes their JSX uses**
+  (`scene/Canvas.tsx`). A new intrinsic element such as `<lineSegments>` needs
+  its class added to the `extend` call there.
+
+## Loading
+
+- The inline boot script picks the language, sets `lang`, and on Korean
+  preloads the two Korean faces the first screen uses. It turns the splash into
+  a reload prompt when a script fails to load or the scene has not started
+  after 15 s.
+- The Korean fonts are subset to the Hangul the sources use
+  (`src/assets/fonts/hangul.txt`). The build fails when a string uses a glyph
+  outside the subset; `pnpm fonts` rebuilds it.
+- A chunk that fails to load after a deploy (`vite:preloadError`) reloads the
+  page, at most once in ten seconds.
 
 ## Styling
 
