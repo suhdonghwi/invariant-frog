@@ -12,8 +12,8 @@ import { eggGeometry } from '../models';
 import { sceneNow } from '../sceneTime';
 import { colorUniform, EGG_SHADOW_SIZE, eggShadowMaterial, GLSL_COMMON } from '../shaders/common';
 import { clamp01, smoothstep } from '../easing';
-import { HATCH_CLEAR, HATCH_GROW } from './motion';
-import { HATCH_CAP, HATCH_WOBBLE, MICRO } from '../../motion';
+import { HATCH_CLEAR } from './motion';
+import { HATCH_CAP, HATCH_GROW, HATCH_WOBBLE, MICRO } from '../../motion';
 
 export const HATCH_EMERGE = HATCH_WOBBLE + 0.02;
 const FROG_OUT = HATCH_EMERGE - HATCH_WOBBLE + HATCH_GROW * HATCH_CLEAR;

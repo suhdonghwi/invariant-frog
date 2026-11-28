@@ -1,5 +1,6 @@
 import { Html } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
+import { Check, X } from 'lucide-react';
 import { useCallback, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { field } from '../area/field';
@@ -8,6 +9,13 @@ import type { FrogSim } from '../frogs/frogWorld';
 export type TagTone = 'info' | 'good' | 'fail';
 
 type TagAnchor = { tile: [number, number] } | { frog: FrogSim };
+
+const MARK = 'mr-1 inline size-[0.9em] align-[-0.15em]';
+const TONE_PREFIX: Record<TagTone, ReactNode> = {
+  info: null,
+  good: <Check className={MARK} strokeWidth={4} />,
+  fail: <X className={MARK} strokeWidth={4} />,
+};
 
 const FROG_TOP = 0.53;
 const TILE_TAG_Y = 0.62;
@@ -131,6 +139,7 @@ export function SceneTag({
       <Html zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
         <div ref={holder} className="origin-bottom pb-1.5" style={start ? HOLDER : { ...HOLDER, visibility: 'hidden' }}>
           <div ref={measure} data-scene-tag className={`${TAG} ${TONE[tone]} ${leaving ? 'animate-tag-out' : 'animate-tag-in'}`}>
+            {TONE_PREFIX[tone]}
             {children}
           </div>
         </div>

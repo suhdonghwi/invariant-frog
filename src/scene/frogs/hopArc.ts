@@ -23,7 +23,7 @@ export function arcPoints([fx, fy, h0]: ArcEnd, [tx, ty, h1]: ArcEnd, segments: 
 }
 
 // LineMaterial's own dashes show hairline gaps at every bend, so each dash is its own segment.
-export function dashes(points: number[], omit?: readonly [number, number]): number[] {
+function dashes(points: number[], omit?: readonly [number, number]): number[] {
   const n = points.length / 3;
   const along = [0];
   for (let k = 1; k < n; k++)

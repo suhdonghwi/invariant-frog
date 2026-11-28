@@ -3,6 +3,7 @@ import { Aborted } from '../director/sequence';
 
 interface Props {
   fallback: (error: unknown) => ReactNode;
+  rejections?: boolean;
   children: ReactNode;
 }
 
@@ -23,7 +24,7 @@ export class ErrorBoundary extends Component<Props, { failed: boolean; error: un
   };
 
   componentDidMount() {
-    window.addEventListener('unhandledrejection', this.onRejection);
+    if (this.props.rejections) window.addEventListener('unhandledrejection', this.onRejection);
   }
 
   componentWillUnmount() {

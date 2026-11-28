@@ -7,9 +7,9 @@ import { tileOf, tilesNear } from '../levels/tiles';
 import { cameraRig } from '../scene/cameraRig';
 import { clamp01, smoothstep } from '../scene/easing';
 import { frogWorld, type FrogSim } from '../scene/frogs/frogWorld';
-import { ARC_DRAW, hopArcs } from '../scene/frogs/HopArcs';
+import { hopArcs } from '../scene/frogs/HopArcs';
 import { APPEAR } from '../scene/labels/Region';
-import { BEAT, ms } from '../motion';
+import { ARC_DRAW, BEAT, ms } from '../motion';
 import { after, sceneNow, sleep } from '../scene/sceneTime';
 import { sendFrogsHome } from './frogs';
 import { busyWhile, currentLevel } from './sequence';
@@ -32,17 +32,7 @@ export function previewHop(s: State, fade = 1, ring = true): FrogSim {
   const L = currentLevel();
   const f = raiseSeeThrough(s, fade);
   const [tx, ty] = tileOf(L, hop(L, s));
-  hopArcs.add({
-    frog: f.id,
-    fx: f.x,
-    fy: f.y,
-    tx,
-    ty,
-    plane: f.plane,
-    t0: sceneNow() + SEE_THROUGH_RISE + ARC_AFTER_RISE,
-    fade,
-    ring,
-  });
+  hopArcs.add({ frog: f, tx, ty, t0: sceneNow() + SEE_THROUGH_RISE + ARC_AFTER_RISE, ring });
   after(ms(SEE_THROUGH_RISE + ARC_AFTER_RISE + ARC_DRAW), () => ring && frogWorld.frogs.includes(f) && sfx.landing());
   return f;
 }

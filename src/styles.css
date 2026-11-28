@@ -139,16 +139,12 @@
     outline-color: var(--color-ring);
   }
   :focus-visible {
-    @apply focus-ring;
+    outline: 3px solid var(--color-ring);
+    outline-offset: 2px;
   }
   canvas:focus-visible {
     outline-offset: -3px;
   }
-}
-
-@utility focus-ring {
-  outline: 3px solid var(--color-ring);
-  outline-offset: 2px;
 }
 
 html:not([data-started]) *,

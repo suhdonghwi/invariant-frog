@@ -42,7 +42,7 @@ function pathOf(f: FrogSim, cache: Segments, used: Segments): Path {
     const a: ArcEnd = [from[0], from[1], field.groundAt(from[0], from[1])];
     const b: ArcEnd = [to[0], to[1], field.groundAt(to[0], to[1])];
     const key = `${a}|${b}`;
-    const points = cache.get(key) ?? arcPoints(a, b, SEGMENTS, SEGMENTS);
+    const points = cache.get(key) ?? arcPoints(a, b, SEGMENTS);
     used.set(key, points);
     add(from, to, points);
   });

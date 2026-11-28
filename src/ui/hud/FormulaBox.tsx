@@ -35,7 +35,6 @@ export function FormulaBox() {
   const [refused, setRefused] = useState<typeof formula | 'empty'>(null);
   const emptyRefused = refused === 'empty' && formulaText.trim() === '';
   const shownError = formula && !formula.ok && formula === refused ? formula.error : emptyRefused ? new LangError(tr.langErrors.empty, NO_SPAN) : null;
-  const input = useRef<HTMLTextAreaElement>(null);
   const [slow, setSlow] = useState(false);
   if (!checking && slow) setSlow(false);
   useEffect(() => {
@@ -75,7 +74,6 @@ export function FormulaBox() {
             {'\u200b'}
           </div>
           <textarea
-            ref={input}
             className={`${TEXT} w-full resize-none overflow-hidden border-0 bg-transparent text-transparent caret-ink outline-none selection:bg-brand/20 placeholder:text-transparent ${locked ? 'cursor-default' : ''}`}
             rows={1}
             value={formulaText}

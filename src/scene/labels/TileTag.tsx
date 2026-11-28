@@ -1,6 +1,5 @@
 import { useFrame } from '@react-three/fiber';
-import { Check, X } from 'lucide-react';
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { field } from '../area/field';
 import { useExitFade } from '../../hooks/presence';
@@ -10,24 +9,16 @@ import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeo
 import { SceneTag, type TagTone } from './SceneTag';
 import { BASE, reducedMotion } from '../../motion';
 
-const MARK = 'mr-1 inline size-[0.9em] align-[-0.15em]';
-export const TONE_PREFIX: Record<TagTone, ReactNode> = {
-  info: null,
-  good: <Check className={MARK} strokeWidth={4} />,
-  fail: <X className={MARK} strokeWidth={4} />,
-};
-
 interface TileTagProps {
   x: number;
   y: number;
   label: string;
   tone: TagTone;
   pulse?: boolean;
-  wash?: boolean;
   leaving?: boolean;
 }
 
-export function TileTag({ x, y, label, tone, pulse = false, wash = false, leaving = false }: TileTagProps) {
+export function TileTag({ x, y, label, tone, pulse = false, leaving = false }: TileTagProps) {
   const group = useRef<THREE.Group>(null);
   const ring = useRef<THREE.Mesh>(null);
   const washRef = useRef<THREE.Mesh>(null);
@@ -53,18 +44,15 @@ export function TileTag({ x, y, label, tone, pulse = false, wash = false, leavin
   return (
     <>
       <group ref={group}>
-        {wash && (
-          <mesh ref={washRef} geometry={washGeometry} renderOrder={8}>
-            <meshBasicMaterial color={WASH_COLORS[tone]} transparent opacity={0} depthWrite={false} />
-          </mesh>
-        )}
+        <mesh ref={washRef} geometry={washGeometry} renderOrder={8}>
+          <meshBasicMaterial color={WASH_COLORS[tone]} transparent opacity={0} depthWrite={false} />
+        </mesh>
         <mesh ref={ring} geometry={ringGeometry} renderOrder={9}>
           <meshBasicMaterial color={RING_COLORS[tone]} transparent opacity={0} depthWrite={false} />
         </mesh>
       </group>
       {label !== '' && (
         <SceneTag anchor={{ tile: [x, y] }} tone={tone} leaving={leaving}>
-          {TONE_PREFIX[tone]}
           {label}
         </SceneTag>
       )}
