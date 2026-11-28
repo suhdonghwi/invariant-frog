@@ -194,9 +194,10 @@ inside a fixed endless strip.
 | One loop iteration | a **hop** | 점프 |
 | `requires` | the **precondition** | 사전 조건 |
 | States a frog can start from | **eggs** | 알 |
-| `ensures` | the **postcondition** | 사후 조건 |
+| `ensures` | the **postcondition** (level texts say this, never "the goal") | 사후 조건 |
 | Stop tiles where the postcondition holds | **goals** | 목표 |
 | Loop guard false | the loop **stops** here | 멈춘다 |
+| A tile where the loop stops | a **stop** | 멈추는 곳 |
 | The learner's formula | the **area**; it is the **loop invariant** | 영역, 루프 불변식 |
 | Raised tiles | **slabs** | 블록 |
 | A state placed to test the area's claim | a **see-through frog** | 반투명 개구리 |
@@ -205,6 +206,8 @@ inside a fixed endless strip.
 | Also passes Exit | **strong enough** | 충분히 강한 |
 | Fails Exit | **too weak** | 너무 약한 |
 | The button that proves | **Check** | 검사 |
+| What runs Check, in the third person | the **checker** | 검사기 |
+| One element of an array | a **cell** | 원소 |
 
 Rule names are **Initialization**, **Maintenance** and **Exit** (초기화, 유지,
 탈출). CLRS calls the third Termination, but in verification termination means
