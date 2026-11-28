@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { EGG_APPEAR, EGG_APPEAR_CAP, EGG_APPEAR_SPREAD, RISE, RISE_OVERSHOOT, SHORT, WAVE_CAP, WAVE_SPREAD } from '../../motion';
+import { EGG_APPEAR, EGG_APPEAR_CAP, EGG_APPEAR_SPREAD, RISE, RISE_OVERSHOOT, SHORT, WAVE_SPREAD } from '../../motion';
 
 export const MASK_SIZE = 352;
 export const SETTLE_POWER = 2.5;
@@ -12,6 +12,7 @@ uniform highp sampler2D uFrom;
 uniform vec2 uFromOrigin;
 uniform float uWaveAge;
 uniform vec2 uWaveCenter;
+uniform float uWaveReach;
 vec4 maskAt(vec2 tile) {
   ivec2 at = ivec2(floor(tile - uMaskOrigin + 0.5));
   if (at.x < 0 || at.y < 0 || at.x >= ${MASK_SIZE} || at.y >= ${MASK_SIZE}) return vec4(0.0);
@@ -23,7 +24,7 @@ float fromAt(vec2 tile, float to) {
   return texelFetch(uFrom, at, 0).r * ${FROM_SCALE.toFixed(6)};
 }
 float riseOf(vec4 m, vec2 tile) {
-  float a = (uWaveAge - min(length(tile - uWaveCenter) * ${WAVE_SPREAD.toFixed(4)}, ${WAVE_CAP.toFixed(3)})) / ${RISE.toFixed(3)};
+  float a = (uWaveAge - min(length(tile - uWaveCenter) / uWaveReach, 1.0) * ${WAVE_SPREAD.toFixed(3)}) / ${RISE.toFixed(3)};
   if (a >= 1.0) return m.r;
   float from = fromAt(tile, m.r);
   if (a <= 0.0) return from;

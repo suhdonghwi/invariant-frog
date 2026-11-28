@@ -2,7 +2,7 @@ import type { FastFn, FastState } from '../../lang/eval';
 import type { Inputs } from '../../levels/inputs';
 import type { CompiledLevel, Formula } from '../../levels/level';
 import { tilesNear, tileState, type TileWindow } from '../../levels/tiles';
-import { RISE, RISE_OVERSHOOT, WAVE_CAP, WAVE_END, WAVE_SPREAD } from '../../motion';
+import { RISE, RISE_OVERSHOOT, WAVE_END, WAVE_SPREAD } from '../../motion';
 import { SLAB_H } from '../constants';
 import { popIn, smoothstep } from '../easing';
 import { sceneNow } from '../sceneTime';
@@ -19,9 +19,10 @@ interface Wave {
   t0: number;
   cx: number;
   cy: number;
+  reach: number;
 }
 
-const still: Wave = { level: null, area: null, inputs: {}, from: null, t0: -Infinity, cx: 0, cy: 0 };
+const still: Wave = { level: null, area: null, inputs: {}, from: null, t0: -Infinity, cx: 0, cy: 0, reach: 1 };
 
 function target(w: Wave, x: number, y: number): number {
   if (!w.level) return 0;
@@ -32,7 +33,7 @@ function target(w: Wave, x: number, y: number): number {
 function riseAt(w: Wave, x: number, y: number, t: number): number {
   const to = target(w, x, y);
   if (!w.from) return to;
-  const a = (t - w.t0 - Math.min(Math.hypot(x - w.cx, y - w.cy) * WAVE_SPREAD, WAVE_CAP)) / RISE;
+  const a = (t - w.t0 - Math.min(Math.hypot(x - w.cx, y - w.cy) / w.reach, 1) * WAVE_SPREAD) / RISE;
   if (a >= 1) return to;
   const from = w.from(x, y);
   if (a <= 0) return from;
@@ -59,10 +60,10 @@ class AreaField {
     this.area = area;
   }
 
-  begin(level: CompiledLevel | null, area: Formula | null, inputs: Inputs, t: number, cx: number, cy: number) {
+  begin(level: CompiledLevel | null, area: Formula | null, inputs: Inputs, t: number, cx: number, cy: number, reach: number) {
     const was = this.wave;
     const from: Rise = was.level !== level ? () => 0 : !was.from || t >= was.t0 + WAVE_END ? (x, y) => target(was, x, y) : (x, y) => riseAt(was, x, y, t);
-    this.wave = { level, area: area?.fast ?? null, inputs, from, t0: t, cx, cy };
+    this.wave = { level, area: area?.fast ?? null, inputs, from, t0: t, cx, cy, reach };
   }
 
   heightAt(x: number, y: number): number {
