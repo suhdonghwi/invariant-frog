@@ -121,9 +121,9 @@ adding UI.
 
 ## Access
 
-- **Dialogs are modal dialogs.** Rules, Syntax and the level list open as
-  `<dialog>`: focus moves in, Tab stays inside, Esc and the backdrop close
-  them, and focus returns to the button that opened them.
+- **Dialogs are modal.** While Rules, Syntax or the level list is open, the
+  rest of the screen is inert: focus moves in, Tab stays inside, Esc and the
+  backdrop close it, and focus returns to the button that opened it.
 - **What the screen says is announced.** Every caption is read out through a
   status region that stays mounted; a formula error is tied to the box; each
   rule light's name carries its state ("Exit: fails").
