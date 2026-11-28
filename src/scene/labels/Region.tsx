@@ -9,10 +9,10 @@ import { AtOrigin } from '../AtOrigin';
 import { wake } from '../awake';
 import { SLAB_H } from '../constants';
 import { origin } from '../origin';
-import { sceneNow } from '../sceneTime';
+import { sceneNow, TIME_UNIFORM } from '../sceneTime';
 import { sfx } from '../../audio/sfx';
 import { LINGER, SHORT } from '../../motion';
-import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
+import { FADE_UNIFORMS, GLSL_FADE } from '../shaders/fade';
 import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 import { useTileWindow } from './useTileWindow';
 
@@ -77,7 +77,7 @@ function regionMaterial(alpha: number) {
     fragmentShader: fragment,
     transparent: true,
     depthWrite: false,
-    uniforms: { uTime: { value: 0 }, uT0: { value: 0 }, uOut: { value: 1 }, uAlpha: { value: alpha }, uTileShift: { value: new THREE.Vector2() }, ...fadeUniforms(), ...areaMask.uniforms },
+    uniforms: { uTime: TIME_UNIFORM, uT0: { value: 0 }, uOut: { value: 1 }, uAlpha: { value: alpha }, uTileShift: { value: new THREE.Vector2() }, ...FADE_UNIFORMS, ...areaMask.uniforms },
   });
 }
 
@@ -189,11 +189,9 @@ export function OutlineRegion() {
   useFrame(() => {
     const out = exit();
     for (const m of [ring, wash]) {
-      m.uniforms.uTime.value = sceneNow();
       m.uniforms.uT0.value = t0;
       m.uniforms.uOut.value = out;
       if (geoms) (m.uniforms.uTileShift.value as THREE.Vector2).set(geoms.at.x - origin.x, geoms.at.y - origin.y);
-      updateFade(m.uniforms);
     }
   });
 

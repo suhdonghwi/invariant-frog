@@ -3,12 +3,12 @@ import { holds } from '../../lang/eval';
 import { inputsOf, planeKey } from '../../levels/inputs';
 import { hop, running, type CompiledLevel } from '../../levels/level';
 import { tileOf } from '../../levels/tiles';
-import { BASE, ms, TICK } from '../../motion';
+import { BASE, HATCH_GROW, ms, TICK } from '../../motion';
 import { clamp01 } from '../easing';
 import { after, sceneNow } from '../sceneTime';
 import { goalEvents, landEvents } from '../tileEvents';
 import { HATCH_PRESS, TAKEOFF_PRESS } from '../area/landBounce';
-import { HATCH_GROW, TOUCH } from './motion';
+import { TOUCH } from './motion';
 import type { Slot } from './occupancy';
 
 export type FrogKind = 'real' | 'seeThrough';
@@ -99,9 +99,9 @@ class FrogWorld {
     return f;
   }
 
-  clear(kind?: FrogKind) {
-    this.frogs = kind ? this.frogs.filter((f) => f.kind !== kind) : [];
-    if ((!kind || kind === 'real') && this.hatched.size) {
+  clear() {
+    this.frogs = [];
+    if (this.hatched.size) {
       this.hatched.clear();
       this.returned.clear();
       this.hatchVersion++;

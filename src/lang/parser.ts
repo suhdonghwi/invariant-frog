@@ -31,19 +31,13 @@ const PROSE_OPS: Record<string, string> = { '≤': '<=', '≥': '>=', '≠': '!=
 export const KEYWORDS: ReadonlySet<string> = new Set(['input', 'var', 'requires', 'ensures', 'while', 'if', 'else', 'true', 'false', 'forall', 'exists']);
 export const BUILTINS: ReadonlySet<string> = new Set(Object.keys(BUILTIN_ARITY));
 
-export function tokenize(src: string, { lenient = false, comments = false } = {}): Token[] {
+export function tokenize(src: string, { lenient = false } = {}): Token[] {
   const toks: Token[] = [];
   let i = 0;
   while (i < src.length) {
     const c = src[i];
     if (/\s/.test(c)) { i++; continue; }
-    if (c === '/' && src[i + 1] === '/') {
-      if (comments) {
-        while (i < src.length && src[i] !== '\n') i++;
-        continue;
-      }
-      if (!lenient) throw new LangError(tr().doubleSlash, { from: i, to: i + 2 });
-    }
+    if (c === '/' && src[i + 1] === '/' && !lenient) throw new LangError(tr().doubleSlash, { from: i, to: i + 2 });
     if (/[0-9]/.test(c)) {
       const s = i;
       while (i < src.length && /[0-9]/.test(src[i])) i++;
@@ -79,8 +73,8 @@ export function tokenize(src: string, { lenient = false, comments = false } = {}
 class Parser {
   toks: Token[];
   pos = 0;
-  constructor(public src: string, { comments = false } = {}) {
-    this.toks = tokenize(src, { comments });
+  constructor(public src: string) {
+    this.toks = tokenize(src);
   }
 
   peek(): Token {
@@ -254,17 +248,14 @@ class Parser {
   }
 
   block(): Stmt[] {
-    if (this.isOp('{')) {
-      this.next();
-      const stmts: Stmt[] = [];
-      while (!this.isOp('}')) {
-        if (this.peek().kind === 'eof') throw new LangError("Missing '}'", this.peek().span);
-        stmts.push(this.stmt());
-      }
-      this.next();
-      return stmts;
+    this.expectOp('{');
+    const stmts: Stmt[] = [];
+    while (!this.isOp('}')) {
+      if (this.peek().kind === 'eof') throw new LangError("Missing '}'", this.peek().span);
+      stmts.push(this.stmt());
     }
-    return [this.stmt()];
+    this.next();
+    return stmts;
   }
   stmt(): Stmt {
     const start = this.peek().span.from;
@@ -283,20 +274,8 @@ class Parser {
     }
     if (this.isKw('while')) throw new LangError(ONE_LOOP, this.peek().span);
     const name = this.ident();
-    const v: Expr = { kind: 'var', name: name.text, span: name.span };
-    const one: Expr = { kind: 'num', value: 1n, span: name.span };
-    let value: Expr;
-    if (this.isOp('++') || this.isOp('--')) {
-      const op = this.next().text === '++' ? '+' : '-';
-      value = { kind: 'binary', op, left: v, right: one, span: name.span };
-    } else if (this.isOp('+=') || this.isOp('-=')) {
-      const op = this.next().text === '+=' ? '+' : '-';
-      const rhs = this.expr();
-      value = { kind: 'binary', op, left: v, right: rhs, span: spanOf(v, rhs) };
-    } else {
-      this.expectOp('=');
-      value = this.expr();
-    }
+    this.expectOp('=');
+    const value = this.expr();
     const semi = this.expectOp(';');
     return { kind: 'assign', name: name.text, value, span: { from: start, to: semi.span.to } };
   }
@@ -304,29 +283,20 @@ class Parser {
   program(): Program {
     const inputs: InputDecl[] = [];
     const vars: VarDecl[] = [];
-    const input = () => {
-      const name = this.ident();
-      const decl: InputDecl = { name: name.text, span: name.span };
-      if (this.isOp('[')) {
-        this.next();
-        const len = this.ident();
-        const close = this.expectOp(']');
-        decl.length = len.text;
-        decl.span = { from: name.span.from, to: close.span.to };
-      }
-      inputs.push(decl);
-    };
     const requires: Expr[] = [];
     const ensures: Expr[] = [];
     let loop: Program['loop'] | null = null;
     while (this.peek().kind !== 'eof') {
       if (this.isKw('input')) {
         this.next();
-        input();
-        while (this.isOp(',')) {
+        const name = this.ident();
+        const decl: InputDecl = { name: name.text, span: name.span };
+        if (this.isOp('[')) {
           this.next();
-          input();
+          decl.length = this.ident().text;
+          decl.span = { from: name.span.from, to: this.expectOp(']').span.to };
         }
+        inputs.push(decl);
         this.expectOp(';');
       } else if (this.isKw('var')) {
         if (loop) throw new LangError('Declare variables before the loop', this.peek().span);
@@ -389,5 +359,5 @@ export function parseFormula(src: string): Expr {
 }
 
 export function parseProgram(src: string): Program {
-  return new Parser(src, { comments: true }).program();
+  return new Parser(src).program();
 }

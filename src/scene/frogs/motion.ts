@@ -84,7 +84,6 @@ const CHEER_KEYS = [
   [1, 0],
 ] as const;
 const TURN_DUR = SHORT;
-export { HATCH_GROW };
 export const HATCH_CLEAR = 0.5;
 const HATCH_SMALL = 0.5;
 const HATCH_JUMP = 0.3;

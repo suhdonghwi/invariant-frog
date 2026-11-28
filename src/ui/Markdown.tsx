@@ -10,19 +10,15 @@ const gap = (key: number) => (key > 0 ? 'mt-2.5 compact:mt-2' : '');
 
 function renderBlock(block: string, key: number): ReactNode {
   const lines = block.split('\n');
-  const bullet = /^\s*[-*]\s+/;
-  const numbered = /^\s*\d+[.)]\s+/;
-  const marker = [bullet, numbered].find((m) => lines.every((l) => m.test(l)));
-  if (marker) {
-    const Tag = marker === bullet ? 'ul' : 'ol';
+  if (lines.every((l) => BULLET.test(l))) {
     return (
-      <Tag key={key} className={`${marker === bullet ? 'list-disc' : 'list-decimal'} pl-5.5 ${gap(key)}`}>
+      <ul key={key} className={`list-disc pl-5.5 ${gap(key)}`}>
         {lines.map((l, j) => (
-          <li key={j} className={LI}>
-            {renderInline(l.replace(marker, ''))}
+          <li key={j} className="marker:text-muted [&+li]:mt-0.5">
+            {renderInline(l.replace(BULLET, ''))}
           </li>
         ))}
-      </Tag>
+      </ul>
     );
   }
   return (
@@ -37,34 +33,15 @@ function renderBlock(block: string, key: number): ReactNode {
   );
 }
 
-const LI = 'marker:text-muted [&+li]:mt-0.5';
-
-const INLINE = /`[^`]+`|\*\*.+?\*\*|\*(?!\s)[^*]+?\*(?!\w)|_(?!\s)[^_]+?_(?!\w)/g;
-const NOT_AFTER: Record<string, RegExp> = { '*': /[\w*]/, _: /\w/ };
-
-function splitInline(text: string): string[] {
-  const parts: string[] = [];
-  let last = 0;
-  INLINE.lastIndex = 0;
-  for (let m; (m = INLINE.exec(text)); ) {
-    const guard = m[0][1] === '*' ? undefined : NOT_AFTER[m[0][0]];
-    if (guard?.test(text[m.index - 1] ?? '')) {
-      INLINE.lastIndex = m.index + 1;
-      continue;
-    }
-    parts.push(text.slice(last, m.index), m[0]);
-    last = INLINE.lastIndex;
-  }
-  parts.push(text.slice(last));
-  return parts;
-}
+const BULLET = /^\s*-\s+/;
+const INLINE = /(`[^`]+`|\*\*.+?\*\*)/;
 
 function wrapPoints(src: string): string[] {
   return (src.match(/.+?(?:(?:&&|\|\|) +|$)/g) ?? [src]).map((c) => c.trimEnd()).filter(Boolean);
 }
 
 function renderInline(text: string): ReactNode[] {
-  return splitInline(text).map((part, i) => {
+  return text.split(INLINE).map((part, i) => {
     if (!part) return null;
     if (part.length > 2 && part.startsWith('`') && part.endsWith('`'))
       return (
@@ -85,8 +62,6 @@ function renderInline(text: string): ReactNode[] {
           {renderInline(part.slice(2, -2))}
         </strong>
       );
-    if (part.length > 2 && ((part.startsWith('*') && part.endsWith('*')) || (part.startsWith('_') && part.endsWith('_'))))
-      return <em key={i}>{renderInline(part.slice(1, -1))}</em>;
     return <Fragment key={i}>{part}</Fragment>;
   });
 }

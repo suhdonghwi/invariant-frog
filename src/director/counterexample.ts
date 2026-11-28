@@ -1,16 +1,14 @@
 import { sfx } from '../audio/sfx';
 import { ruleQuery } from '../checker/rules';
 import type { Counterexample } from '../checker/types';
-import { captionOf, type CaptionSpec } from '../game/captions';
-import { useGame, type CaptionTone } from '../game/store';
+import { useGame, type Caption, type CaptionTone } from '../game/store';
 import { t as messages } from '../i18n/i18n';
 import { mk, type Expr, type State } from '../lang/ast';
 import { inputsOf, planeKey, showInputs } from '../levels/inputs';
 import { showState } from '../levels/level';
 import { tileOf } from '../levels/tiles';
-import { BEAT, ms } from '../motion';
+import { ARC_DRAW, BEAT, ms } from '../motion';
 import { cameraRig } from '../scene/cameraRig';
-import { ARC_DRAW } from '../scene/frogs/HopArcs';
 import { after, sceneNow, sleep } from '../scene/sceneTime';
 import { traceHop } from './codeTrace';
 import { sendFrogsHome } from './frogs';
@@ -25,7 +23,7 @@ export interface CounterexampleOptions {
   tone?: CaptionTone;
   extra?: string;
   seeThroughExtra?: string;
-  action?: () => CaptionSpec['action'];
+  action?: () => Caption['action'];
 }
 
 const fmt = (s: State) => '`' + showState(currentLevel(), s) + '`';
@@ -55,7 +53,7 @@ export function offerOtherBoard(cex: Counterexample, opts: CounterexampleOptions
   const there = showInputs(L, planeOf(cex));
   sfx.fail();
   useGame.setState({
-    caption: captionOf({ text: say.elsewhere(showInputs(L, useGame.getState().inputs), there), tone: 'fail', action: { label: say.showThere(there), onClick: () => void playCounterexample(cex, { ...opts, note: opts.note ?? '' }) } }),
+    caption: { text: say.elsewhere(showInputs(L, useGame.getState().inputs), there), tone: 'fail', action: { label: say.showThere(there), onClick: () => void playCounterexample(cex, { ...opts, note: opts.note ?? '' }) } },
   });
 }
 
@@ -116,7 +114,7 @@ export async function counterexample(tok: Token, cex: Counterexample, opts: Coun
   sfx.seeThrough();
   if (cex.rule === 'maintenance' && cex.next) {
     const { state, next } = cex;
-    const frog = previewHop(state, 1, next, false);
+    const frog = previewHop(state, 1, false);
     after(ms(SEE_THROUGH_RISE + ARC_AFTER_RISE), () => tok.alive && traceHop(L, state, next, ARC_DRAW));
     await sleep(ms(SEE_THROUGH_RISE + ARC_AFTER_RISE + ARC_DRAW));
     if (!tok.alive) return;
@@ -137,5 +135,5 @@ function finish(cex: Counterexample, opts: CounterexampleOptions, said: string) 
   const aside = mode === 'level' && pitfallMessage ? pitfallMessage : undefined;
   const action = opts.action?.();
   const tone = opts.tone ?? 'fail';
-  useGame.setState({ caption: captionOf({ text, aside, tone, action, replay: () => void playCounterexample(cex, opts) }) });
+  useGame.setState({ caption: { text, aside, tone, action, replay: () => void playCounterexample(cex, opts) } });
 }

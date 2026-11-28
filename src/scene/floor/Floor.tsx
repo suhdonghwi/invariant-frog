@@ -10,10 +10,10 @@ import { cameraRig } from '../cameraRig';
 import { origin, originUniforms } from '../origin';
 import { SLAB_H } from '../constants';
 import { hover } from '../hover';
-import { sceneNow } from '../sceneTime';
+import { sceneNow, TIME_UNIFORM } from '../sceneTime';
 import { axisNameUniforms, getDigitTexture, setAxisNames } from '../shaders/axisLabels';
 import { colorUniform } from '../shaders/common';
-import { fadeUniforms, updateFade } from '../shaders/fade';
+import { FADE_UNIFORMS, fadeRadius } from '../shaders/fade';
 import { goalUniforms } from '../shaders/goal';
 import { floorFragment, floorVertex } from './floorShader';
 import { LONG } from '../../motion';
@@ -62,7 +62,7 @@ export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true,
         uAt: { value: new THREE.Vector3() },
         ...originUniforms(),
         uHoverOn: { value: 0 },
-        ...fadeUniforms(),
+        ...FADE_UNIFORMS,
         uOpacity: { value: 0 },
         uShowStop: { value: 0 },
         uShowGoal: { value: 0 },
@@ -72,7 +72,7 @@ export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true,
         uDigits: { value: getDigitTexture() },
         ...axisNameUniforms(),
         ...goalUniforms(),
-        uTime: { value: 0 },
+        uTime: TIME_UNIFORM,
         uGap: colorUniform('gap'),
         uVoid: colorUniform('void'),
         uTile: colorUniform('tile'),
@@ -102,12 +102,11 @@ export function Floor({ level, inputs, fadeIn = 0, interactive, showStop = true,
     const u = m.material.uniforms;
     const now = sceneNow();
     setInputUniforms(u, level, inputs, planeExists(level, inputs));
-    const R = updateFade(u);
+    const R = fadeRadius();
     const t = cameraRig.target();
     m.position.set(Math.round(t.x) - origin.x, 0, Math.round(t.z) + origin.y);
     (u.uAt.value as THREE.Vector3).copy(m.position);
     m.scale.setScalar(R * 2.2);
-    u.uTime.value = now;
     u.uShowStop.value = amounts.stop.at(showStop ? 1 : 0, now);
     u.uShowGoal.value = amounts.goal.at(showGoal ? 1 : 0, now);
     u.uShowAxes.value = amounts.axes.at(showAxes ? 1 : 0, now);

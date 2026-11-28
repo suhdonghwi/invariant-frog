@@ -11,6 +11,7 @@ function sceneMs(): number {
 }
 
 export const sceneNow = () => sceneMs() / 1000;
+export const TIME_UNIFORM = { value: 0 };
 
 type Timer = { due: number; fn: () => void; handle: number | null };
 const timers = new Set<Timer>();

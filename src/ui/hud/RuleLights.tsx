@@ -9,7 +9,7 @@ export function RuleLights() {
   const awake = useGame((s) => s.reveal.awake);
   const verdicts = useGame((s) => s.verdicts);
   const pending = useGame((s) => s.pending);
-  const locked = useGame((s) => s.busy || s.checking || s.tutorial.next !== null);
+  const locked = useGame((s) => s.busy || s.checking || s.tutorial.nextAction !== null);
   const spot = useGame((s) => s.tutorial.spotlight);
   const tr = useT();
   if (!lights.length) return null;

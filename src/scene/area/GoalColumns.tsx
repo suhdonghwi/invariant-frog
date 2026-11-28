@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { AtOrigin } from '../AtOrigin';
 import { COLORS, SLAB_H } from '../constants';
 import { origin } from '../origin';
-import { sceneNow } from '../sceneTime';
+import { sceneNow, TIME_UNIFORM } from '../sceneTime';
 import { goalEvents } from '../tileEvents';
 import { stencilSkip } from '../shaders/common';
 import { GLSL_GOAL_PULSE } from '../shaders/goal';
@@ -80,7 +80,7 @@ export function GoalColumns() {
           depthWrite: false,
           side: THREE.DoubleSide,
           uniforms: {
-            uTime: { value: 0 },
+            uTime: TIME_UNIFORM,
             uColor: { value: new THREE.Color(COLORS.goal) },
             uAppearT0: { value: sceneNow() },
             uTileShift: { value: new THREE.Vector2() },
@@ -97,7 +97,6 @@ export function GoalColumns() {
   useFrame(() => {
     const m = mesh.current;
     if (!m) return;
-    m.material.uniforms.uTime.value = sceneNow();
     (m.material.uniforms.uTileShift.value as THREE.Vector2).set(m.geometry.userData.at.x - origin.x, m.geometry.userData.at.y - origin.y);
   });
   return (

@@ -7,8 +7,6 @@ import { wake } from '../awake';
 import { origin } from '../origin';
 import { FROM_SCALE, GLSL_MASK, MASK_SIZE } from './glsl';
 
-export { MASK_SIZE };
-
 const SNAP = 32;
 export const MASK_REACH = MASK_SIZE / 2 - SNAP / 2;
 

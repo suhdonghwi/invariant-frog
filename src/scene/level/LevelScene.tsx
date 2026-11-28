@@ -22,7 +22,7 @@ export function LevelScene() {
   const valid = useGame((s) => s.valid);
   const formula = useGame((s) => s.formula);
   useEffect(() => {
-    if (useGame.getState().mode === 'tutorial') void cameraRig.resetAngle(false);
+    if (useGame.getState().mode === 'tutorial') cameraRig.resetAngle();
     else cameraRig.opening(level, false);
   }, [level]);
 

@@ -50,7 +50,7 @@ export function plan(from: Pose, to: Pose, v0: Pose = STILL, reduced = false): F
   const shown = CUT_VIEWS * low;
   const cut = span / low > CUT_FROM ? { dx: ((target.x - from.x) / span) * shown, dy: ((target.y - from.y) / span) * shown } : null;
   const dur = cut ? CUT : Math.min(FLIGHT_MAX, FLIGHT_MIN + PER_DOUBLING * Math.log2(1 + w));
-  return { from, to: target, v0, dur, lift: reduced ? 0 : liftFor(from, target, cut ? shown : span), cut };
+  return { from, to: target, v0, dur, lift: liftFor(from, target, cut ? shown : span), cut };
 }
 
 function liftFor(from: Pose, to: Pose, span: number): number {

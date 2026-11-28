@@ -93,9 +93,7 @@ export function pauseRun() {
 }
 
 function pickEgg(s: State) {
-  const g = useGame.getState();
-  if (g.busy) return;
-  if (g.mode === 'level') {
+  if (useGame.getState().mode === 'level') {
     void sendFrogsHome();
     useGame.setState({ running: false, failMark: null, callouts: [], region: null });
   }

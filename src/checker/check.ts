@@ -5,7 +5,7 @@ import { compileFormula, type CompiledLevel, type Formula, type Pitfall } from '
 import { failureOnARun, smallestOnPlane } from './nearby';
 import { breaksRule, counterexample, ruleQuery } from './rules';
 import { CheckControl } from './budget';
-import { compareFormulas, equivalent, solve } from './smt';
+import { equivalent, solve } from './smt';
 import { RULES, type Rule, type RuleVerdict, type Verdicts } from './types';
 
 interface CheckOptions {
@@ -63,36 +63,31 @@ async function checkAlone(ctx: Context<'main'>, level: CompiledLevel, inv: Formu
             : { status: 'undecided' };
   }
 
-  const firstEquivalent = async <T>(items: T[], formula: (x: T) => string, cap = Infinity) => {
-    for (const x of items) {
-      const f = compileFormula(level, formula(x));
-      const ok = f.ok && (await equivalent(ctx, level, inv.expr, f.expr, () => Math.min(cap, left())));
-      control.guard();
-      if (ok) return x;
-    }
+  const same = async (text: string, cap = Infinity) => {
+    const f = compileFormula(level, text);
+    const ok = f.ok && (await equivalent(ctx, level, inv.expr, f.expr, () => Math.min(cap, left())));
+    control.guard();
+    return ok;
+  };
+  const firstSame = async <T>(items: T[], text: (x: T) => string, cap?: number) => {
+    for (const x of items) if (await same(text(x), cap)) return x;
   };
 
   const undecided = rules.filter((r) => verdicts[r]?.status === 'undecided');
   const failed = rules.some((r) => verdicts[r]?.status === 'fail' || verdicts[r]?.status === 'long');
-  if (undecided.length > 0 && !failed && (await firstEquivalent(level.solutions, (s) => s)) !== undefined) {
+  if (undecided.length > 0 && !failed && (await firstSame(level.solutions, (s) => s)) !== undefined) {
     for (const r of undecided) verdicts[r] = { status: 'pass', how: 'equivalent' } satisfies RuleVerdict;
   }
-  const pitfall = failed ? await firstEquivalent(level.pitfalls ?? [], (p) => p.formula, PITFALL_MS) : undefined;
+  const pitfall = failed ? await firstSame(level.pitfalls ?? [], (p) => p.formula, PITFALL_MS) : undefined;
   const proved = rules.every((r) => verdicts[r]?.status === 'pass');
-  const others = proved ? await otherSolutions(ctx, level, inv, control) : undefined;
+  let others: string[] | undefined;
+  if (proved) {
+    others = [];
+    for (const s of level.solutions) {
+      if (squash(s) !== squash(inv.text) && !(await same(s, PITFALL_MS))) others.push(s);
+    }
+  }
   return { verdicts, pitfall, others };
 }
 
 const squash = (s: string) => s.replace(/\s+/g, '');
-
-async function otherSolutions(ctx: Context<'main'>, level: CompiledLevel, inv: Formula, control: CheckControl): Promise<string[]> {
-  const others: string[] = [];
-  for (const s of level.solutions) {
-    if (squash(s) === squash(inv.text)) continue;
-    const f = compileFormula(level, s);
-    const same = f.ok ? await compareFormulas(ctx, level, inv.expr, f.expr, () => Math.min(PITFALL_MS, control.left())) : 'unknown';
-    control.guard();
-    if (same !== 'same') others.push(s);
-  }
-  return others;
-}

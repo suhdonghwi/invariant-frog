@@ -32,8 +32,8 @@ const GAIN: Record<Role, number> = {
   cleared: 0.45,
 };
 
-const takes = new Map<string, AudioBuffer[]>();
-const roleOf = (path: string) => path.slice(path.lastIndexOf('/') + 1, -'.m4a'.length).replace(/-\d+$/, '');
+const sounds = new Map<string, AudioBuffer>();
+const roleOf = (path: string) => path.slice(path.lastIndexOf('/') + 1, -'.m4a'.length);
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -52,10 +52,7 @@ export function prepareSound() {
       fetch(url)
         .then((r) => r.arrayBuffer())
         .then((b) => c.decodeAudioData(b))
-        .then((buf) => {
-          const role = roleOf(path);
-          takes.set(role, [...(takes.get(role) ?? []), buf]);
-        })
+        .then((buf) => sounds.set(roleOf(path), buf))
         .catch(() => {});
     }
   }
@@ -83,10 +80,10 @@ function live(): AudioContext | null {
 
 function play(role: Role, { gain = 1, rate = 1, at = 0 }: { gain?: number; rate?: number; at?: number } = {}) {
   const c = live();
-  const bufs = takes.get(role);
-  if (!c || !bufs?.length) return;
+  const buf = sounds.get(role);
+  if (!c || !buf) return;
   const src = c.createBufferSource();
-  src.buffer = bufs[Math.floor(Math.random() * bufs.length)];
+  src.buffer = buf;
   src.playbackRate.value = rate;
   const g = c.createGain();
   g.gain.value = GAIN[role] * gain;

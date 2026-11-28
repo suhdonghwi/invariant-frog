@@ -79,7 +79,7 @@ export function CodePanel() {
           <CodeListing level={level} hasInputs={hasInputs} />
         </div>
       </div>
-      <InputsSection key={level.id} folded={!open} />
+      <InputsSection folded={!open} />
       <ResizeHandle cardRef={card} size={size} hidden={!open} />
     </div>
   );

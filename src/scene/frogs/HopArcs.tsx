@@ -16,19 +16,14 @@ import { frogWorld, leaveFade, type FrogSim } from './frogWorld';
 import { HopLine } from './HopLine';
 import { ARC_DRAW } from '../../motion';
 
-export { ARC_DRAW };
 const MAX = 80;
 
 interface Arc {
-  frog: number;
-  fx: number;
-  fy: number;
+  frog: FrogSim;
   tx: number;
   ty: number;
-  plane: string;
   t0: number;
-  fade: number;
-  ring?: boolean;
+  ring: boolean;
 }
 
 const useHopArcs = create<{ arcs: Arc[] }>(() => ({ arcs: [] }));
@@ -83,17 +78,16 @@ function SeeThroughHop({ arc, plane }: { arc: Arc; plane: string }) {
   return (
     <HopLine
       path={() => {
-        if (arc.plane !== plane) return null;
-        const frog = frogWorld.frogs.find((f) => f.id === arc.frog);
-        if (!frog) return null;
+        const { frog } = arc;
+        if (frog.plane !== plane || !frogWorld.frogs.includes(frog)) return null;
         const t = sceneNow();
-        const fx = frog.drawn ? frog.drawn.x : arc.fx;
-        const fy = frog.drawn ? -frog.drawn.z : arc.fy;
+        const fx = frog.drawn ? frog.drawn.x : frog.x;
+        const fy = frog.drawn ? -frog.drawn.z : frog.y;
         return {
-          from: [fx, fy, field.groundAt(arc.fx, arc.fy)],
+          from: [fx, fy, field.groundAt(frog.x, frog.y)],
           to: [arc.tx, arc.ty, field.groundAt(arc.tx, arc.ty)],
           drawn: (t - arc.t0) / ARC_DRAW,
-          opacity: arc.fade * leaveFade(frog, t),
+          opacity: (frog.fade ?? 1) * leaveFade(frog, t),
         };
       }}
     />
@@ -108,30 +102,25 @@ export function HopArcs() {
   const parts = useMemo(() => ({ ring: instancedParts(ringGeometry, MAX), wash: instancedParts(washGeometry, MAX) }), []);
   useEffect(() => () => [parts.ring, parts.wash].forEach((p) => (p.g.dispose(), p.mat.dispose())), [parts]);
 
-  const byId = useRef(new Map<number, FrogSim>());
-
   useFrame(() => {
     const r = rings.current;
     const w = washes.current;
     if (!r || !w) return;
     const t = sceneNow();
-    const frogs = byId.current;
-    frogs.clear();
-    for (const f of frogWorld.frogs) frogs.set(f.id, f);
     let { arcs } = useHopArcs.getState();
-    if (arcs.some((a) => !frogs.has(a.frog))) {
-      arcs = arcs.filter((a) => frogs.has(a.frog));
+    if (arcs.some((a) => !frogWorld.frogs.includes(a.frog))) {
+      arcs = arcs.filter((a) => frogWorld.frogs.includes(a.frog));
       useHopArcs.setState({ arcs });
     }
     let nr = 0;
-    for (const a of arcs) {
-      if (a.plane !== plane || a.ring === false) continue;
-      const shown = clamp01((t - a.t0 - ARC_DRAW) / APPEAR);
+    for (const { frog, t0, ring } of arcs) {
+      if (frog.plane !== plane || !ring) continue;
+      const shown = clamp01((t - t0 - ARC_DRAW) / APPEAR);
       if (shown <= 0) continue;
       const { scale, alpha } = ringPop(shown);
-      const h0 = field.groundAt(a.fx, a.fy);
-      m.compose(pos.set(a.fx - origin.x, h0 + 0.012, origin.y - a.fy), q, scl.set(scale, 1, scale));
-      const fade = alpha * a.fade * leaveFade(frogs.get(a.frog), t);
+      const h0 = field.groundAt(frog.x, frog.y);
+      m.compose(pos.set(frog.x - origin.x, h0 + 0.012, origin.y - frog.y), q, scl.set(scale, 1, scale));
+      const fade = alpha * (frog.fade ?? 1) * leaveFade(frog, t);
       for (const [mesh, p, opacity, c] of [
         [r, parts.ring, RING_ALPHA, RING],
         [w, parts.wash, WASH_ALPHA, WASH],
@@ -154,7 +143,7 @@ export function HopArcs() {
   return (
     <>
       {list.map((a) => (
-        <SeeThroughHop key={a.frog} arc={a} plane={plane} />
+        <SeeThroughHop key={a.frog.id} arc={a} plane={plane} />
       ))}
       <AtOrigin>
         <instancedMesh ref={washes} args={[parts.wash.g, parts.wash.mat, MAX]} count={0} frustumCulled={false} renderOrder={8} />

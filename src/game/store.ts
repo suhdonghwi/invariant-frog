@@ -57,9 +57,9 @@ export interface Caption {
   text: string;
   aside?: string;
   tone: CaptionTone;
-  action?: { label: string; disabled?: boolean };
-  replay?: boolean;
-  choices?: { label: string; tone?: 'yes' | 'no' }[];
+  action?: { label: string; onClick: () => void; disabled?: boolean };
+  replay?: () => void;
+  choices?: { label: string; onClick: () => void; tone?: 'yes' | 'no' }[];
 }
 
 interface Hint {
@@ -97,7 +97,6 @@ export interface Game {
   failMark: { x: number; y: number; label: string; t0: number; frog?: number; fail?: Expr } | null;
 
   openLevel(def: LevelDef, mode: 'level' | 'tutorial'): void;
-  backToMenu(view?: 'home' | 'levels'): void;
   setFormula(text: string): void;
   setReveal(r: Partial<Reveal>): void;
 }
@@ -121,9 +120,9 @@ export interface Region {
 }
 
 export interface TutorialState {
-  canGoBack: boolean;
-  awaitingCheck: boolean;
-  next: { label: string } | null;
+  back: (() => void) | null;
+  check: (() => void) | null;
+  nextAction: { label: string; onClick: () => void } | null;
   allow: { step: boolean; run: boolean; eggs: boolean; formula: boolean };
   spotLines: number[];
   spotlight: 'code' | 'step' | 'run' | 'formula' | 'check' | 'lights' | null;
@@ -133,9 +132,9 @@ export interface TutorialState {
 export const ALLOW_NONE: TutorialState['allow'] = { step: false, run: false, eggs: false, formula: false };
 
 export const NO_TUTORIAL: TutorialState = {
-  canGoBack: false,
-  awaitingCheck: false,
-  next: null,
+  back: null,
+  check: null,
+  nextAction: null,
   allow: ALLOW_NONE,
   spotLines: [],
   spotlight: null,
@@ -193,25 +192,12 @@ export const useGame = create<Game>((set, get) => ({
       reveal: mode === 'tutorial' ? EMPTY_REVEAL : FULL_REVEAL,
     });
   },
-  backToMenu(view = 'home') {
-    set({ mode: 'menu', menuView: view, level: null, inputs: {}, caption: null, running: false, busy: false, valid: null, formula: null, formulaText: '' });
-  },
   setFormula(text) {
     const { level } = get();
     if (!level) return;
-    if (text.trim() === '') {
-      set({ formulaText: text, formula: null, valid: null, verdicts: {}, pitfallMessage: null, failMark: null });
-      return;
-    }
-    const formula = compileFormula(level, text);
-    set({
-      formulaText: text,
-      formula,
-      valid: formula.ok ? formula : get().valid,
-      verdicts: {},
-      pitfallMessage: null,
-      failMark: null,
-    });
+    const formula = text.trim() === '' ? null : compileFormula(level, text);
+    const valid = !formula ? null : formula.ok ? formula : get().valid;
+    set({ formulaText: text, formula, valid, verdicts: {}, pitfallMessage: null, failMark: null });
   },
   setReveal(r) {
     set({ reveal: { ...get().reveal, ...r } });

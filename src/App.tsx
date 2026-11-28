@@ -19,7 +19,7 @@ const Figure =
 export function App() {
   if (!hasWebGL2) return <Trouble reason="webgl" />;
   return (
-    <ErrorBoundary fallback={(error) => <Trouble reason={isWebGLError(error) ? 'webgl' : 'crash'} />}>
+    <ErrorBoundary rejections fallback={(error) => <Trouble reason={isWebGLError(error) ? 'webgl' : 'crash'} />}>
       <Game />
     </ErrorBoundary>
   );
