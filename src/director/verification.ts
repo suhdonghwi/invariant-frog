@@ -80,7 +80,7 @@ async function verifyRules(tok: Token, res: CheckResult, rules: Rule[], onFail: 
       if (!tok.alive) return null;
       continue;
     }
-    const tag = await showHolds(rule);
+    const tag = await showHolds(tok, rule);
     if (!tok.alive) return null;
     reveal(rule, res);
     if (tag) useGame.setState({ callouts: [tag] });
@@ -142,17 +142,19 @@ async function bringIntoView(tiles: Region['tiles']): Promise<Spot | null> {
   return { x: picked.spot.x, y: picked.spot.y };
 }
 
-async function showHolds(rule: Rule): Promise<Callout | null> {
+async function showHolds(tok: Token, rule: Rule): Promise<Callout | null> {
   const text = messages().verdicts.holdsTag[rule];
   const spot = await bringIntoView(rule === 'maintenance' ? hopTiles : rule === 'initialization' ? eggRegion('good').tiles : endingsRegion('good').tiles);
+  if (!tok.alive) return null;
   if (rule === 'maintenance') {
     const f = await proofWave(spot ?? undefined);
-    return f ? { x: f.x, y: f.y, frog: f.id, text, tone: 'good' } : null;
+    return f && tok.alive ? { x: f.x, y: f.y, frog: f.id, text, tone: 'good' } : null;
   }
   const region = rule === 'initialization' ? eggRegion('good') : endingsRegion('good');
   const id = `check-${rule}-${++shown}`;
   useGame.setState({ region: { ...region, id, tick: true } });
   await sleep(ms(TICK));
+  if (!tok.alive) return null;
   await sleep(ms(sweepLength(id) + BEAT - TICK));
-  return spot ? { ...spot, text, tone: 'good' } : null;
+  return spot && tok.alive ? { ...spot, text, tone: 'good' } : null;
 }

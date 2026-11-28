@@ -9,7 +9,7 @@ import { frogWorld, HOP_GAP_MS, type FrogSim } from '../scene/frogs/frogWorld';
 import { sleep } from '../scene/sceneTime';
 import { firstEggTiles, hatch, HATCHED_MS, hopOn, RUN_BEATS, sceneBusy, sendFrogsHome, soleEgg, whileStepping } from './frogs';
 import { eggRegion } from './regions';
-import { begin, currentLevel, events } from './sequence';
+import { begin, currentLevel, events, watchSequence } from './sequence';
 
 const EGG_POINT_REACH = 12;
 
@@ -56,32 +56,36 @@ export async function stepFrogs(scripted = false) {
   const g = useGame.getState();
   if (sceneBusy(g)) return;
   if (!scripted && g.mode === 'tutorial' && !g.tutorial.allow.step) return;
+  const tok = watchSequence();
   const L = currentLevel();
   const f = currentFrog() ?? (await hatchSoleEgg());
+  if (!tok.alive) return;
   if (!f || !running(L, f.state)) return nothingToHop(f);
   useGame.setState({ failMark: null, callouts: g.mode === 'level' ? [] : g.callouts });
   await whileStepping(() => hopOn(L, f));
-  events.emit('stepped');
+  if (tok.alive) events.emit('stepped');
 }
 
 export async function runFrogs() {
   const g = useGame.getState();
   if (sceneBusy(g)) return;
   if (g.mode === 'tutorial' && !g.tutorial.allow.run) return;
+  const tok = begin();
   const L = currentLevel();
   const f = currentFrog() ?? (await hatchSoleEgg());
+  if (!tok.alive) return;
   if (!f || !running(L, f.state)) return nothingToHop(f);
-  const tok = begin();
   useGame.setState({ failMark: null, running: true });
   void sendFrogsHome('test');
-  for (let beats = 0; tok.alive && useGame.getState().running && beats < RUN_BEATS && !f.leave && running(L, f.state); beats++) {
-    await whileStepping(() => hopOn(L, f));
-    await sleep(HOP_GAP_MS);
+  try {
+    for (let beats = 0; tok.alive && useGame.getState().running && beats < RUN_BEATS && !f.leave && running(L, f.state); beats++) {
+      await whileStepping(() => hopOn(L, f));
+      await sleep(HOP_GAP_MS);
+    }
+  } finally {
+    if (tok.alive) useGame.setState({ running: false });
   }
-  if (tok.alive) {
-    useGame.setState({ running: false });
-    if (f.stopped) events.emit('runDone');
-  }
+  if (tok.alive && f.stopped) events.emit('runDone');
 }
 
 export function pauseRun() {

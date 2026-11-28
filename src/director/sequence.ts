@@ -25,6 +25,17 @@ export function createScope() {
     cancel() {
       current++;
     },
+    watch(): Token {
+      const id = current;
+      return {
+        get alive() {
+          return id === current;
+        },
+        guard() {
+          if (id !== current) throw new Aborted();
+        },
+      };
+    },
   };
 }
 
@@ -32,6 +43,7 @@ const sequences = createScope();
 const checks = createScope();
 
 export const begin = sequences.begin;
+export const watchSequence = sequences.watch;
 export const beginCheck = checks.begin;
 export const abandonCheck = checks.cancel;
 
