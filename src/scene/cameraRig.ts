@@ -1,7 +1,7 @@
 import type { CameraControls } from '@react-three/drei';
 import * as THREE from 'three';
 import type { CompiledLevel } from '../levels/level';
-import { EXIT_MS, reducedMotion } from '../motion';
+import { ARRIVE_CAP, EXIT_MS, ms, reducedMotion } from '../motion';
 import { clarity, HIGHEST, plan, sample, STILL, travel, velocity, type Flight, type Pose } from './flight';
 import { followKeyboard, freeRect, overlaps, softBlocks, type Rect } from './freeRect';
 import { sceneNow, sceneStarted, sleep } from './sceneTime';
@@ -50,7 +50,7 @@ const TOO_FAR = 1.5;
 const FIT_SLACK = 1.04;
 const ASPECT_PROBE = 20;
 const ARRIVE_LEAD = 0.12;
-const ARRIVE_CAP_MS = 2400;
+const ARRIVE_CAP_MS = ms(ARRIVE_CAP);
 const LAYOUT_BEAT_MS = 60;
 const STAY = 0.01;
 const SETTLE_MS = EXIT_MS + 100;
@@ -375,11 +375,26 @@ export const cameraRig = {
     }
     return { cx: Math.round(c.x), cy: Math.round(c.y), R: Math.min(cap, Math.ceil(R)) };
   },
+  reachFrom(x: number, y: number, cap: number): number {
+    if (!controls) return cap;
+    const v = endView();
+    place(v.x, v.y, v.d, currentAngle());
+    let R = 1;
+    for (const [sx, sy] of [[0, 0], [size.width, 0], [0, size.height], [size.width, size.height]]) {
+      const g = ground(sx, sy);
+      if (!g) return cap;
+      R = Math.max(R, Math.hypot(g.x - x, g.y - y));
+    }
+    return Math.min(cap, R);
+  },
   shows([x, y]: Tile): boolean {
     if (!controls) return false;
     const v = endView();
     place(v.x, v.y, v.d, currentAngle());
     return inside(bounds({ focus: [[x, y]] }), safeRect());
+  },
+  moving(): boolean {
+    return !!flight || !!pending || !layout.settled;
   },
   holds(shot: Shot): boolean {
     if (!controls || !tilesOf(shot).length) return false;
@@ -395,7 +410,7 @@ export const cameraRig = {
     if (!smooth || !sceneStarted()) return apply(shot, false);
     let done = () => {};
     const settled = new Promise<void>((resolve) => (done = resolve));
-    pending = { shot, since: performance.now(), lead, done, settled };
+    pending = { shot, since: ms(sceneNow()), lead, done, settled };
     return settled;
   },
   async arrive(shot: Shot) {
@@ -413,7 +428,7 @@ export const cameraRig = {
       return;
     }
     steer();
-    const now = performance.now();
+    const now = ms(sceneNow());
     const key = keyOf(safeRect());
     if (key !== layout.key) {
       const shown = sceneStarted();

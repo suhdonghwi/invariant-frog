@@ -94,6 +94,9 @@ export function Frogs() {
   const lastT = useRef<number | undefined>(undefined);
   const badgeRefs = useRef<(THREE.Sprite | null)[]>([]);
 
+  const shown = useRef<FrogSim[]>([]);
+  const tiles = useRef(new Map<string, FrogSim[]>());
+
   useFrame(() => {
     const b = body.current;
     const gh = ghosts.current;
@@ -101,10 +104,12 @@ export function Frogs() {
     const sh = shadows.current;
     if (!b || !gh || !gd || !sh) return;
     const t = sceneNow();
-    const visible = frogWorld.frogs.filter((f) => f.plane === plane);
+    const visible = shown.current;
+    visible.length = 0;
+    for (const f of frogWorld.frogs) if (f.plane === plane) visible.push(f);
     const walkers = trailFrogs(plane);
     occupancy.update(visible, walkers);
-    const groups = byTile(visible);
+    const groups = byTile(visible, tiles.current);
     let n = 0;
     let nReal = 0;
     let nGhost = 0;

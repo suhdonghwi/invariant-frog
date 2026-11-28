@@ -6,11 +6,12 @@ import { useExitFade, useLingering } from '../../hooks/presence';
 import { areaMask } from '../area/mask';
 import { GLSL_HEIGHT, instanced } from '../area/glsl';
 import { AtOrigin } from '../AtOrigin';
+import { wake } from '../awake';
 import { SLAB_H } from '../constants';
 import { origin } from '../origin';
 import { sceneNow } from '../sceneTime';
 import { sfx } from '../../audio/sfx';
-import { SHORT } from '../../motion';
+import { LINGER, SHORT } from '../../motion';
 import { fadeUniforms, GLSL_FADE, updateFade } from '../shaders/fade';
 import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 import { useTileWindow } from './useTileWindow';
@@ -133,7 +134,9 @@ function sweep(tiles: RegionTile[], camera: THREE.Camera): Sweep {
 
 function useTicks(region: Region | null, plan: Sweep | null, t0: number) {
   const play = useEffectEvent(() => {
-    if (!region?.tick || !plan) return;
+    if (!region || !plan) return;
+    wake(LINGER + plan.span);
+    if (!region.tick) return;
     lastSweep = { id: region.id, span: plan.span };
     const late = sceneNow() - t0;
     sfx.ticks(plan.ticks.map((at) => at - late));

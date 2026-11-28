@@ -1,13 +1,14 @@
 import { useFrame } from '@react-three/fiber';
 import { Check, X } from 'lucide-react';
-import { useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { field } from '../area/field';
 import { useExitFade } from '../../hooks/presence';
+import { keepAlive } from '../awake';
 import { sceneNow } from '../sceneTime';
 import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 import { SceneTag, type TagTone } from './SceneTag';
-import { reducedMotion } from '../../motion';
+import { BASE, reducedMotion } from '../../motion';
 
 const MARK = 'mr-1 inline size-[0.9em] align-[-0.15em]';
 export const TONE_PREFIX: Record<TagTone, ReactNode> = {
@@ -32,6 +33,7 @@ export function TileTag({ x, y, label, tone, pulse = false, wash = false, leavin
   const washRef = useRef<THREE.Mesh>(null);
   const t0 = useRef(sceneNow());
   const exit = useExitFade(leaving);
+  useEffect(() => (pulse ? keepAlive(() => !reducedMotion()) : undefined), [pulse]);
 
   useFrame(() => {
     const g = group.current;
@@ -39,7 +41,7 @@ export function TileTag({ x, y, label, tone, pulse = false, wash = false, leavin
     const t = sceneNow() - t0.current;
     g.position.set(x, field.groundAt(x, y) + 0.012, -y);
     const out = exit();
-    const pop = Math.min(1, t / 0.3) * out;
+    const pop = Math.min(1, t / BASE) * out;
     const beat = pulse && !reducedMotion() ? 0.5 + 0.5 * Math.sin(t * 4.2) : 1;
     if (ring.current) {
       ring.current.scale.setScalar(0.9 + 0.1 * pop + (pulse ? 0.035 * beat : 0));

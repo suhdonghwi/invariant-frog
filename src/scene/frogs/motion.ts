@@ -1,4 +1,4 @@
-import { SHORT } from '../../motion';
+import { CHEER, HATCH_GROW, MICRO, SHORT } from '../../motion';
 import { field } from '../area/field';
 import { bump, clamp01, popIn, smoothstep } from '../easing';
 import type { FrogSim } from './frogWorld';
@@ -49,7 +49,7 @@ const SQUASH_KEYS = [
   [TOUCH + LANDING * 0.6, -0.15],
   [1, LANDED_SQUASH],
 ] as const;
-const SETTLE = 0.1;
+const SETTLE = MICRO;
 const SETTLE_KEYS = [
   [0, LANDED_SQUASH],
   [0.45, 0.03],
@@ -74,7 +74,6 @@ function hopAt(u: number, h0: number, h1: number, H: number) {
   if (u < 1) return { g: 1 - ((vx * LANDING) / 3) * settling, h: h1 + e1 * settling };
   return { g: 1, h: h1 };
 }
-const CHEER_DUR = 0.62;
 const CHEER_KEYS = [
   [0, 0],
   [0.12, 0],
@@ -85,13 +84,13 @@ const CHEER_KEYS = [
   [1, 0],
 ] as const;
 const TURN_DUR = SHORT;
-export const HATCH_GROW = 0.28;
+export { HATCH_GROW };
 export const HATCH_CLEAR = 0.5;
 const HATCH_SMALL = 0.5;
 const HATCH_JUMP = 0.3;
 export const hopHeight = (dist: number) => 0.24 + 0.12 * dist;
 const RISE_DEPTH = 0.85;
-const BLINK = { dur: 0.17, shortest: 2, longest: 6, twice: 0.2, between: 0.1 };
+const BLINK = { dur: SHORT, shortest: 2, longest: 6, twice: 0.2, between: 0.1 };
 
 function blinkAt(f: FrogSim, t: number) {
   const b = (f.blink ??= { t0: t + (f.phase % 1) * BLINK.longest, twice: false });
@@ -151,7 +150,7 @@ export function pose(f: FrogSim, t: number): Pose {
     else squash += keyed(v, SETTLE_KEYS);
   }
   if (f.cheerT0 !== undefined && !f.hop) {
-    const u = (t - f.cheerT0) / CHEER_DUR;
+    const u = (t - f.cheerT0) / CHEER;
     if (u >= 1 || calm) f.cheerT0 = undefined;
     else if (u > 0) {
       h += 0.22 * bump(clamp01((u - 0.3) / 0.55));

@@ -71,7 +71,8 @@ the tests are the safety net.
   nothing needs its own leave or start rule. A dialog is not a native modal
   `<dialog>` for this reason: the top layer is outside the screen.
 - **Every duration and pause is a token** from `motion.ts`, mirrored in CSS as
-  `--duration-*`.
+  `--duration-*`. The scene's own durations (flights, hatching, ripples, the
+  home loop) are named there too, built from the base tokens where they match.
 
 ## Sequences
 
@@ -98,10 +99,19 @@ the tests are the safety net.
 
 ## Rendering
 
+- **The world draws only while something moves** (`frameloop="demand"`).
+  A store change, a scene timer, a tile event or player input keeps it awake
+  for a moment (`scene/awake.ts`). Anything that moves for longer registers a
+  `keepAlive` reason: the camera rig in flight, a running sequence, a pulsing
+  tag. Frogs breathe until the player has been idle for `IDLE_REST`; the home
+  scene never rests, because its frogs hop on a loop. Resolution adapts from
+  frame rates measured only over unbroken runs of frames (`scene/Resolution.tsx`).
 - The floor is **one shader plane**, evaluated per pixel, so it is truly
   infinite.
 - **Slabs are one instanced grid centred on the camera**, so the area reaches
   the horizon at any zoom.
+- **Eggs take their detail from their size on screen**, and only eggs inside a
+  slightly widened view are drawn.
 - **The GPU sees coordinates near a floating origin** (`scene/origin.ts`),
   since a 32-bit float has no fractions left near ten million.
 - Models are procedural, and shadows are soft blobs, not shadow maps.

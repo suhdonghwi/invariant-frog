@@ -16,7 +16,7 @@ import { traceHop } from './codeTrace';
 import { joinHopBatch, landInBatch } from './hopBatch';
 import { begin, busyWhile, currentLevel, events } from './sequence';
 
-export const HATCH_MS = (HATCH_EMERGE + HATCH_GROW) * 1000;
+export const HATCH_MS = ms(HATCH_EMERGE + HATCH_GROW);
 export const HATCHED_MS = HATCH_MS + ms(BEAT);
 export const RUN_BEATS = 80;
 const TEST_EGGS = 10;

@@ -1,4 +1,5 @@
 import { clamp01, smootherstep, swell } from './easing';
+import { CAMERA_FADE, CUT, FLIGHT_MAX, FLIGHT_MIN } from '../motion';
 
 export interface Pose {
   x: number;
@@ -12,16 +13,12 @@ const KEYS = ['x', 'y', 'd', 'az', 'po'] as const;
 
 export const STILL: Pose = { x: 0, y: 0, d: 0, az: 0, po: 0 };
 
-export const FLIGHT_MIN = 0.42;
-export const FLIGHT_MAX = 1.15;
 const PER_DOUBLING = 0.3;
 const LIFT_FROM = 1.2;
 const VIEWS_AT_PEAK = 2.5;
 export const HIGHEST = 60;
 const CUT_FROM = 40;
 const CUT_VIEWS = 2;
-const CUT_DUR = 1.4;
-const FADE_DUR = 0.7;
 const VEILED = 0.04;
 const CLEARED = 0.5;
 
@@ -46,13 +43,13 @@ export function travel(from: Pose, to: Pose): number {
 
 export function plan(from: Pose, to: Pose, v0: Pose = STILL, reduced = false): Flight {
   const target = { ...to, az: from.az + wrap(to.az - from.az) };
-  if (reduced) return { from, to: target, v0: STILL, dur: FADE_DUR, lift: 0, cut: { dx: 0, dy: 0 }, fade: true };
+  if (reduced) return { from, to: target, v0: STILL, dur: CAMERA_FADE, lift: 0, cut: { dx: 0, dy: 0 }, fade: true };
   const w = travel(from, target);
   const span = Math.hypot(target.x - from.x, target.y - from.y);
   const low = Math.max(1e-3, from.d, target.d);
   const shown = CUT_VIEWS * low;
   const cut = span / low > CUT_FROM ? { dx: ((target.x - from.x) / span) * shown, dy: ((target.y - from.y) / span) * shown } : null;
-  const dur = cut ? CUT_DUR : Math.min(FLIGHT_MAX, FLIGHT_MIN + PER_DOUBLING * Math.log2(1 + w));
+  const dur = cut ? CUT : Math.min(FLIGHT_MAX, FLIGHT_MIN + PER_DOUBLING * Math.log2(1 + w));
   return { from, to: target, v0, dur, lift: reduced ? 0 : liftFor(from, target, cut ? shown : span), cut };
 }
 

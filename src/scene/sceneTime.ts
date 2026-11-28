@@ -14,11 +14,17 @@ export const sceneNow = () => sceneMs() / 1000;
 
 type Timer = { due: number; fn: () => void; handle: number | null };
 const timers = new Set<Timer>();
+let tick = () => {};
+
+export function onSceneTick(fn: () => void) {
+  tick = fn;
+}
 
 function arm(tm: Timer) {
   tm.handle = window.setTimeout(() => {
     timers.delete(tm);
     tm.fn();
+    tick();
   }, Math.max(0, tm.due - sceneMs()));
 }
 
@@ -61,6 +67,7 @@ export function startScene() {
   html.dataset.started = '';
   delete html.dataset.leaving;
   update();
+  tick();
 }
 
 let leaving = false;

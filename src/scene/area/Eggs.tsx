@@ -1,4 +1,4 @@
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { AtOrigin } from '../AtOrigin';
@@ -91,21 +91,66 @@ interface SlotAnim {
 
 const PER_FROG_ATTRS = ['aHide', 'aBack', 'aSlot', 'aSlotAnim'] as const;
 
-const DETAILED_WITHIN = 40;
-const DETAILED_UNTIL = 56;
 const NEVER_BACK = -100;
+const EGG_WIDTH = 0.38;
+const DETAIL_PX = 14;
+const VIEW_STEP = THREE.MathUtils.degToRad(8);
+const VIEW_SHIFT = 2;
+const EGG_REACH = 1;
+
+const look = new THREE.Vector3();
+const cull = new THREE.PerspectiveCamera();
+const frustum = new THREE.Frustum();
+const clip = new THREE.Matrix4();
+const egg = new THREE.Sphere(new THREE.Vector3(), VIEW_SHIFT + EGG_REACH);
+
+function useViewKey(): string {
+  const [key, setKey] = useState('');
+  useFrame(({ camera }) => {
+    const d = camera.getWorldDirection(look);
+    const t = cameraRig.target();
+    const next = [Math.atan2(d.x, d.z) / VIEW_STEP, Math.asin(d.y) / VIEW_STEP, t.x / VIEW_SHIFT, t.z / VIEW_SHIFT].map(Math.round).join();
+    if (next !== key) setKey(next);
+  });
+  return key;
+}
+
+function widen(camera: THREE.PerspectiveCamera) {
+  const half = THREE.MathUtils.degToRad(camera.fov / 2);
+  const tall = Math.tan(Math.min(1.5, half + VIEW_STEP));
+  const wide = Math.tan(Math.min(1.5, Math.atan(Math.tan(half) * camera.aspect) + VIEW_STEP));
+  cull.fov = THREE.MathUtils.radToDeg(2 * Math.atan(tall));
+  cull.aspect = wide / tall;
+  cull.near = camera.near;
+  cull.far = camera.far;
+  cull.updateProjectionMatrix();
+  camera.updateMatrixWorld();
+  cull.matrixWorld.copy(camera.matrixWorld);
+  cull.matrixWorldInverse.copy(camera.matrixWorldInverse);
+  frustum.setFromProjectionMatrix(clip.multiplyMatrices(cull.projectionMatrix, cull.matrixWorldInverse));
+}
+
+function partition(tiles: [number, number][], camera: THREE.PerspectiveCamera, height: number, view: string) {
+  const near: [number, number][] = [];
+  const far: [number, number][] = [];
+  if (!view) return { near, far };
+  widen(camera);
+  const detailWithin = (camera.projectionMatrix.elements[5] * height * EGG_WIDTH) / (2 * DETAIL_PX);
+  for (const t of tiles) {
+    egg.center.set(t[0], 0, -t[1]);
+    if (!frustum.intersectsSphere(egg)) continue;
+    (egg.center.distanceTo(camera.position) <= detailWithin ? near : far).push(t);
+  }
+  return { near, far };
+}
 
 export function Eggs() {
-  const { tiles, cx, cy, distance } = useMaskTiles(EGG);
-  const { near, far } = useMemo(() => {
-    const near: [number, number][] = [];
-    const far: [number, number][] = [];
-    const R = Math.max(0, Math.min(DETAILED_WITHIN, DETAILED_UNTIL - distance));
-    const R2 = R * R;
-    for (const t of tiles) (R > 0 && (t[0] - cx) ** 2 + (t[1] - cy) ** 2 <= R2 ? near : far).push(t);
-    return { near, far };
-  }, [tiles, cx, cy, distance]);
-  const shapes = useMemo(() => ({ detailed: eggGeometry(), plain: eggGeometry(5, 8) }), []);
+  const { tiles } = useMaskTiles(EGG);
+  const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
+  const height = useThree((s) => s.size.height);
+  const view = useViewKey();
+  const { near, far } = useMemo(() => partition(tiles, camera, height, view), [tiles, camera, height, view]);
+  const shapes = useMemo(() => ({ detailed: eggGeometry(12, 16), plain: eggGeometry(5, 8) }), []);
   useEffect(() => () => (shapes.detailed.dispose(), shapes.plain.dispose()), [shapes]);
   const [slots] = useState(() => new Map<string, SlotAnim>());
   return (

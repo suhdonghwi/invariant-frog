@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { origin } from './origin';
+import { wake } from './awake';
 import { sceneNow } from './sceneTime';
 import { reducedMotion } from '../motion';
 
@@ -26,6 +27,7 @@ export class TileEvents {
   }
 
   push(x: number, y: number, plane: string, t = sceneNow(), weight = 1) {
+    wake();
     if (reducedMotion()) return;
     if (this.events.some((e) => e.x === x && e.y === y && e.plane === plane && e.weight === weight && Math.abs(t - e.t) < 0.15)) return;
     this.events.push({ x, y, plane, t, weight });

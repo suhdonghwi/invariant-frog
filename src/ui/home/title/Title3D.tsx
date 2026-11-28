@@ -8,11 +8,12 @@ import { frogGeometry, frogMaterial, outlineMaterial } from '../../../scene/mode
 import { sceneNow, sceneStarted } from '../../../scene/sceneTime';
 import { LINE1, LINE2 } from './glyphs';
 import { cameraFor, FOV, LINE_GAP, TITLE_ASPECT, WAVE, type TitleAlign } from './layout';
-import { entrance, STAGGER, waveAt, Word } from './Word';
+import { entrance, ENTRANCE, STAGGER, waveAt, Word } from './Word';
 
 const PHASE2 = 1.4;
 const FROG_SCALE = 1.12;
 const FROG_AT = (LINE1.length + LINE2.length) * STAGGER + 0.05;
+const ENTERED = FROG_AT + ENTRANCE;
 
 const dummy = new THREE.Object3D();
 let frogGeom: THREE.BufferGeometry | undefined;
@@ -54,8 +55,9 @@ function TitleScene({ align, wave }: { align: TitleAlign; wave: number }) {
   const { camera, size } = useThree();
   const clock = useRef({ t: -0.15 });
 
-  useFrame((_, dt) => {
+  useFrame(({ invalidate }, dt) => {
     if (sceneStarted()) clock.current.t += Math.min(dt, 1 / 30);
+    if (!sceneStarted() || clock.current.t < ENTERED) invalidate();
     const cam = camera as THREE.PerspectiveCamera;
     cam.position.copy(cameraFor(L, cam.fov, size.width / size.height));
     cam.lookAt(cam.position.x, cam.position.y, 0);
@@ -84,7 +86,7 @@ export function Title3D({
   return (
     <div className={width} style={{ aspectRatio: TITLE_ASPECT, '--title-aspect': TITLE_ASPECT } as CSSProperties}>
       <ErrorBoundary fallback={() => <PlainTitle align={align} />}>
-        <Canvas flat dpr={[1, MAX_DPR]} gl={{ alpha: true, antialias: true }} camera={{ position: [0, 0, 30], fov: FOV, near: 0.1, far: 200 }}>
+        <Canvas flat frameloop={still ? 'demand' : 'always'} dpr={[1, MAX_DPR]} gl={{ alpha: true, antialias: true }} camera={{ position: [0, 0, 30], fov: FOV, near: 0.1, far: 200 }}>
           <hemisphereLight args={['#ffffff', '#cfd6e2', 2.1]} />
           <directionalLight position={[4, 10, 6]} intensity={1.6} color="#ffffff" />
           <directionalLight position={[-6, 4, -4]} intensity={0.35} color="#ffffff" />

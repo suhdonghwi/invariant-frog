@@ -16,46 +16,69 @@ const SEGMENTS = 16;
 
 type Tile = readonly [number, number];
 
-const onGround = ([x, y]: Tile): ArcEnd => [x, y, field.groundAt(x, y)];
-
-function arc(from: Tile, to: Tile, upTo = 1): number[] {
-  return arcPoints(onGround(from), onGround(to), SEGMENTS, Math.round(SEGMENTS * clamp01(upTo)));
-}
-
 const same = (a: Tile, b: Tile) => a[0] === b[0] && a[1] === b[1];
 
-function pathOf(f: FrogSim): { points: number[]; omit?: [number, number] } {
+type Segments = Map<string, number[]>;
+
+interface Path {
+  parts: number[][];
+  omit?: [number, number];
+  moving: boolean;
+}
+
+function pathOf(f: FrogSim, cache: Segments, used: Segments): Path {
   const trail = f.trail!;
   const skip = hoverHop.current;
-  const points: number[] = [];
+  const parts: number[][] = [];
+  let count = 0;
   let omit: [number, number] | undefined;
-  const add = (from: Tile, to: Tile, upTo = 1) => {
-    const start = points.length / 3;
-    points.push(...arc(from, to, upTo));
-    if (skip && same(from, skip.from) && same(to, skip.to)) omit = [start, points.length / 3 - 1];
+  const add = (from: Tile, to: Tile, points: number[]) => {
+    if (skip && same(from, skip.from) && same(to, skip.to)) omit = [count, count + points.length / 3 - 1];
+    parts.push(points);
+    count += points.length / 3;
   };
-  trail.slice(1).forEach((to, k) => add(trail[k], to));
-  if (f.hop) add([f.hop.fx, f.hop.fy], [f.hop.tx, f.hop.ty], (sceneNow() - f.hop.t0) / f.hop.dur);
-  return { points, omit };
+  trail.slice(1).forEach((to, k) => {
+    const from = trail[k];
+    const a: ArcEnd = [from[0], from[1], field.groundAt(from[0], from[1])];
+    const b: ArcEnd = [to[0], to[1], field.groundAt(to[0], to[1])];
+    const key = `${a}|${b}`;
+    const points = cache.get(key) ?? arcPoints(a, b, SEGMENTS, SEGMENTS);
+    used.set(key, points);
+    add(from, to, points);
+  });
+  if (f.hop) {
+    const { fx, fy, tx, ty } = f.hop;
+    const upTo = Math.round(SEGMENTS * clamp01((sceneNow() - f.hop.t0) / f.hop.dur));
+    add([fx, fy], [tx, ty], arcPoints([fx, fy, field.groundAt(fx, fy)], [tx, ty, field.groundAt(tx, ty)], SEGMENTS, upTo));
+  }
+  return { parts, omit, moving: !!f.hop };
 }
+
+const unchanged = (a: Path | null, b: Path) => !!a && !a.moving && !b.moving && a.omit?.join() === b.omit?.join() && a.parts.length === b.parts.length && a.parts.every((p, k) => p === b.parts[k]);
 
 function TrailLine({ index }: { index: number }) {
   const size = useThree((s) => s.size);
   const plane = useGame((s) => planeKey(s.inputs));
   const line = useArcLine(COLORS.trail);
   const lineRef = useRef<LineSegments2>(null);
+  const cache = useRef<Segments>(new Map());
+  const drawn = useRef<Path | null>(null);
 
   useFrame(() => {
     const line = lineRef.current;
     if (!line) return;
     const f = trailFrogs(plane)[index];
-    const path = f ? pathOf(f) : { points: [] };
-    line.visible = !!f && path.points.length >= 6;
-    if (!f || !line.visible) return;
-    const key = `${path.points.join()}|${path.omit}`;
-    if (key !== line.userData.key) {
-      line.userData.key = key;
-      setArc(line, path.points, path.omit);
+    const used: Segments = new Map();
+    const path = f ? pathOf(f, cache.current, used) : null;
+    cache.current = used;
+    line.visible = !!path && path.parts.reduce((n, p) => n + p.length, 0) >= 6;
+    if (!f || !path || !line.visible) {
+      drawn.current = null;
+      return;
+    }
+    if (!unchanged(drawn.current, path)) {
+      drawn.current = path;
+      setArc(line, path.parts.flat(), path.omit);
     }
     line.material.opacity = 0.9 * leaveFade(f, sceneNow());
     fitArcLine(line, size);

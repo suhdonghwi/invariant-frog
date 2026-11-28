@@ -5,6 +5,7 @@ const GLYPHS = '0123456789-=abcdefghijklmnopqrstuvwxyz';
 const CELL = 0.14;
 const advance: number[] = [...GLYPHS].map(() => CELL * 0.8);
 const LABEL_SIZE = 0.84;
+const MAX_DIGITS = 7;
 
 export const GLSL_AXIS_LABELS = /* glsl */ `
 uniform sampler2D uDigits;
@@ -23,7 +24,8 @@ vec2 glyphMask(int glyph, float dx, float vy, vec4 d) {
 }
 vec2 labelMask(vec2 f, vec4 df, ivec3 name, int nameLen, vec4 mid, float nameW, int v, float row) {
   int a = v < 0 ? -v : v;
-  int digits = a >= 100 ? 3 : (a >= 10 ? 2 : 1);
+  int digits = 1;
+  for (int p = 10; p <= ${(10 ** (MAX_DIGITS - 1)).toString()}; p *= 10) digits += a >= p ? 1 : 0;
   int numLen = digits + (v < 0 ? 1 : 0);
   float pw = nameLen > 0 ? nameW : 0.0;
   float w = pw + uDigitW * float(numLen);
@@ -44,7 +46,8 @@ vec2 labelMask(vec2 f, vec4 df, ivec3 name, int nameLen, vec4 mid, float nameW, 
   int glyph = 10;
   if (!(v < 0 && j == 0)) {
     int pos = numLen - 1 - j;
-    int p10 = pos == 0 ? 1 : (pos == 1 ? 10 : 100);
+    int p10 = 1;
+    for (int i = 0; i < ${MAX_DIGITS - 1}; i++) p10 *= i < pos ? 10 : 1;
     glyph = a / p10 - (a / (p10 * 10)) * 10;
   }
   return glyphMask(glyph, (x - float(j) - 0.5) * uDigitW, vy, d);

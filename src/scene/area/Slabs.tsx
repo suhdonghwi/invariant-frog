@@ -44,8 +44,9 @@ varying float vRise;
 void main() {
   vec2 tile = uGrid + aOffset;
   vec4 m = maskAt(tile);
-  float h = heightOf(m);
-  if (riseOf(m) < 0.002) {
+  float rise = riseOf(m, tile);
+  float h = settle(rise);
+  if (rise < 0.002) {
     gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
     return;
   }
@@ -59,7 +60,7 @@ void main() {
   vF = vec2(position.x, -position.z);
   vFlags = vec2(m.b, mod(floor(m.a * 3.0 + 0.5), 2.0));
   vTile = tile;
-  vRise = riseOf(m);
+  vRise = rise;
   gl_Position = projectionMatrix * modelViewMatrix * w;
 }
 `;
@@ -143,7 +144,7 @@ varying float vH;
 void main() {
   vec2 tile = uGrid + aOffset;
   vUv = uv;
-  vH = heightOf(maskAt(tile));
+  vH = heightOf(maskAt(tile), tile);
   if (vH < 0.002) {
     gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
     return;

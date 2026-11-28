@@ -72,7 +72,7 @@ bool gOver;
 const metered = (decls: string, expr: string, over: 'true' | 'false') =>
   `${decls} gLeft = ${EVAL_BUDGET}; gOver = false; bool r = ${expr}; return gOver ? ${over} : r;`;
 
-export function levelGlsl(level: CompiledLevel, areas?: { area: Expr | null; before: Expr | null }): string {
+export function levelGlsl(level: CompiledLevel, areas?: { area: Expr | null }): string {
   const c = new Compiler(level);
   const uniforms = level.offAxis
     .map((n) => (level.arrays[n] ? `uniform int ${arrayUniform(n)}[${MAX_LEN}];` : `uniform int ${inputUniform(n)};`))
@@ -84,7 +84,6 @@ export function levelGlsl(level: CompiledLevel, areas?: { area: Expr | null; bef
   const stop = c.expr(level.guard);
   const goal = c.expr(level.post);
   const area = areas?.area ? c.expr(areas.area) : 'false';
-  const before = areas?.before ? c.expr(areas.before) : 'false';
   const egg = areas ? c.expr(level.eggAt) : 'false';
   const decls = [`int ${ident(level.view.x)} = t.x;`, `int ${ident(level.view.y)} = t.y;`, ...level.offAxis.filter((n) => !level.arrays[n]).map((n) => `int ${ident(n)} = ${inputUniform(n)};`)].join(' ');
   return `
@@ -96,7 +95,7 @@ ${c.fns.join('\n')}
 bool L_exists(ivec2 t) { ${metered(decls, exists, 'false')} }
 bool L_stop(ivec2 t) { ${metered(decls, `!(${stop})`, 'true')} }
 bool L_goal(ivec2 t) { ${metered(decls, goal, 'false')} }
-${areas ? `bool L_area(ivec2 t) { ${metered(decls, area, 'false')} }\nbool L_before(ivec2 t) { ${metered(decls, before, 'false')} }\nbool L_egg(ivec2 t) { ${metered(decls, egg, 'false')} }` : ''}
+${areas ? `bool L_area(ivec2 t) { ${metered(decls, area, 'false')} }\nbool L_egg(ivec2 t) { ${metered(decls, egg, 'false')} }` : ''}
 `;
 }
 

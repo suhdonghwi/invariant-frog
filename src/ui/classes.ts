@@ -1,11 +1,13 @@
+import { BASE, ms } from '../motion';
+
 export const CARD = 'rounded-2xl border border-line bg-card shadow-card backdrop-blur-md';
 
 export const CARD_LABEL = 'mb-1.5 font-display text-xs font-semibold uppercase tracking-[0.08em] text-faint';
 
 export const PILL = 'flex items-center rounded-full border border-line bg-card p-1 shadow-card backdrop-blur-md';
 
-export const FOLD = 'duration-340 ease-fold motion-reduce:transition-none';
-export const FOLD_MS = 340;
+export const FOLD = 'duration-(--duration-base) ease-fold motion-reduce:transition-none';
+export const FOLD_MS = ms(BASE);
 export const FOLD_EASE = 'cubic-bezier(0.2,0.8,0.2,1)';
 
 type Variant = 'plain' | 'quiet' | 'glass' | 'toy' | 'primary';

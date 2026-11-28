@@ -1,6 +1,7 @@
 import { landEvents } from '../tileEvents';
+import { LAND_BOUNCE } from '../../motion';
 
-const LAND = { depth: 0.13, dur: 0.85, freq: 21, decay: 5.5 };
+const LAND = { depth: 0.13, dur: LAND_BOUNCE, freq: 21, decay: 5.5 };
 export const LAND_BULGE = 0.35;
 export const TAKEOFF_PRESS = 0.4;
 export const HATCH_PRESS = 0.5;

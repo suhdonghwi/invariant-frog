@@ -104,6 +104,9 @@
   --duration-base: 340ms;
   --duration-long: 500ms;
   --duration-exit: 150ms;
+  --duration-beat: 250ms;
+  --duration-pulse: 1.6s;
+  --duration-flash: 1.2s;
 
   --animate-fade: fade var(--duration-short) var(--ease-entrance);
   --animate-rise: rise var(--duration-short) var(--ease-entrance);
@@ -111,7 +114,7 @@
   --animate-pop: pop var(--duration-base) var(--ease-entrance);
   --animate-slide-in: slide-in var(--duration-long) var(--ease-entrance) both;
   --animate-tag-in: tag-in var(--duration-short) var(--ease-entrance);
-  --animate-input-changed: pop var(--duration-base) var(--ease-entrance), input-changed 1.2s ease-out;
+  --animate-input-changed: pop var(--duration-base) var(--ease-entrance), input-changed var(--duration-flash) ease-out;
   --animate-fade-out: fade-out var(--duration-exit) ease-in forwards;
   --animate-pop-out: pop-out var(--duration-exit) ease-in forwards;
   --animate-sink-out: sink-out var(--duration-exit) ease-in forwards;
@@ -158,7 +161,7 @@ html:not([data-started]) *::after {
 }
 html[data-started] .world {
   opacity: 1;
-  transition: opacity 0.3s ease-out;
+  transition: opacity var(--duration-base) ease-out;
 }
 html[data-leaving] .screen {
   animation: var(--animate-fade-out);
@@ -179,20 +182,20 @@ html[data-leaving] .screen {
   border-radius: inherit;
   pointer-events: none;
   animation:
-    fade 0.3s var(--ease-entrance),
-    spotlight 1.6s ease-in-out infinite;
+    fade var(--duration-base) var(--ease-entrance),
+    spotlight var(--duration-pulse) ease-in-out infinite;
 }
 .spotlight-soft::after {
   animation:
-    fade 0.3s var(--ease-entrance),
-    spotlight-soft 1.6s ease-in-out infinite;
+    fade var(--duration-base) var(--ease-entrance),
+    spotlight-soft var(--duration-pulse) ease-in-out infinite;
 }
 .spotlight-glow:not(:disabled) {
-  animation: check-pulse 1.6s ease-in-out infinite;
+  animation: check-pulse var(--duration-pulse) ease-in-out infinite;
 }
 .spotlight-glow::after {
   inset: 0 0 -3px 0;
-  animation: check-halo 1.6s ease-in-out infinite;
+  animation: check-halo var(--duration-pulse) ease-in-out infinite;
 }
 .spotlight-glow:disabled::after {
   display: none;

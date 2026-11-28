@@ -5,6 +5,7 @@ import { useGame } from '../../game/store';
 import { planeKey } from '../../levels/inputs';
 import { field } from '../area/field';
 import { AtOrigin } from '../AtOrigin';
+import { wake } from '../awake';
 import { uploadInstances } from '../instances';
 import { origin } from '../origin';
 import { eggGeometry } from '../models';
@@ -12,12 +13,12 @@ import { sceneNow } from '../sceneTime';
 import { colorUniform, EGG_SHADOW_SIZE, eggShadowMaterial, GLSL_COMMON } from '../shaders/common';
 import { clamp01, smoothstep } from '../easing';
 import { HATCH_CLEAR, HATCH_GROW } from './motion';
+import { HATCH_CAP, HATCH_WOBBLE, MICRO } from '../../motion';
 
-const HATCH_WOBBLE = 0.07;
 export const HATCH_EMERGE = HATCH_WOBBLE + 0.02;
 const FROG_OUT = HATCH_EMERGE - HATCH_WOBBLE + HATCH_GROW * HATCH_CLEAR;
-const CAP_LIFE = 0.3;
-const CAP_HOLD = 0.12;
+const CAP_LIFE = HATCH_CAP;
+const CAP_HOLD = MICRO;
 const CUP_HOLD = FROG_OUT * 0.7;
 const CUP_LIFE = FROG_OUT + 0.08;
 const MAX = 256;
@@ -38,6 +39,7 @@ const active: HatchFx[] = [];
 export const hatchFx = {
   push(fx: Omit<HatchFx, 't0' | 'dir'>) {
     active.push({ ...fx, t0: sceneNow(), dir: Math.random() * Math.PI * 2 });
+    wake();
     if (active.length > MAX) active.shift();
   },
   clear() {
