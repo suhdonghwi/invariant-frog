@@ -78,6 +78,7 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
   const gl = useThree((s) => s.gl);
   const camera = useThree((s) => s.camera);
   const inputs = useGame((s) => s.inputs);
+  const inputsOf = useGame((s) => s.level);
   const cells = useMemo(() => new VisibleCells(), []);
   useEffect(() => {
     failMask.show(level, fail);
@@ -128,7 +129,7 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
     if (!ring.current || !wash.current) return;
     const u = ring.current.material.uniforms;
     const target = cameraRig.target();
-    failMask.draw(gl, target.x, -target.z, inputs, sceneNow());
+    failMask.draw(gl, target.x, -target.z, inputsOf, inputs, sceneNow());
     const reach = Math.min(MASK_REACH, Math.ceil(fadeRadius()));
     (u.uGrid.value as THREE.Vector2).set(Math.round(target.x) - origin.x, Math.round(-target.z) - origin.y);
     const box = figureClip.box;

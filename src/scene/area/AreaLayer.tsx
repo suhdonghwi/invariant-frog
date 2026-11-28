@@ -56,7 +56,7 @@ function useArea(level: CompiledLevel, inputs: Inputs, area: Formula | null) {
     landEvents.sync(planeKey(inputs));
     const now = sceneNow();
     const reach = cameraRig.reachFrom(t.x, -t.z, MASK_REACH);
-    if (areaMask.draw(gl, t.x, -t.z, inputs, now, reach)) field.begin(areaMask.level, areaMask.tag as Formula | null, inputs, now, t.x, -t.z, reach);
+    if (areaMask.draw(gl, t.x, -t.z, level, inputs, now, reach)) field.begin(areaMask.level, areaMask.tag as Formula | null, inputs, now, t.x, -t.z, reach);
   }, -1);
 }
 
