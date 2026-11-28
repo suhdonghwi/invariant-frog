@@ -14,6 +14,7 @@ export interface Counterexample {
 export type RuleVerdict =
   | { status: 'pass'; how: 'proved' | 'equivalent' }
   | { status: 'fail'; cex: Counterexample }
+  | { status: 'long' }
   | { status: 'undecided' };
 
 export type Verdicts = Record<Rule, RuleVerdict>;

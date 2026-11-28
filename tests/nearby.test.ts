@@ -104,6 +104,15 @@ describe('check', () => {
     const m = (await check('sum-to-n', 'i <= 3')).maintenance!;
     expect(m.status === 'fail' && toNum(m.cex.state)).toEqual({ n: 4, i: 3, s: 6 });
   });
+  it('a counterexample never shows an array shorter than its length', async () => {
+    const v = await check('biggest-so-far', 'i <= 32 && forall 0 <= k < i: A[k] <= m');
+    for (const r of Object.values(v)) {
+      if (r.status !== 'fail') continue;
+      const s = r.cex.state;
+      expect((s.A as bigint[]).length).toBe(Number(s.n));
+    }
+    expect(v.maintenance!.status).toBe('long');
+  });
   const HARD = '0 <= i <= n && (n * n - 61 * i * i != 1 || i == 0)';
   it('a rule still open when the budget runs out is undecided', async () => {
     const lvl = level('countdown');
