@@ -1,4 +1,5 @@
 import { afterAll, describe, expect, it } from 'vitest';
+import { CheckCancelled, CheckControl } from '../src/checker/budget';
 import { checkFormula } from '../src/checker/check';
 import { failureOnARun, smallestOnPlane } from '../src/checker/nearby';
 import { RULES, type Counterexample, type Rule } from '../src/checker/types';
@@ -102,5 +103,23 @@ describe('check', () => {
   it('a failure on a run is the one Check shows', async () => {
     const m = (await check('sum-to-n', 'i <= 3')).maintenance!;
     expect(m.status === 'fail' && toNum(m.cex.state)).toEqual({ n: 4, i: 3, s: 6 });
+  });
+  const HARD = '0 <= i <= n && (n * n - 61 * i * i != 1 || i == 0)';
+  it('a rule still open when the budget runs out is undecided', async () => {
+    const lvl = level('countdown');
+    const start = performance.now();
+    const v = (await checkFormula(await nodeZ3(), lvl, formula(lvl, HARD), startInputs(lvl), { control: new CheckControl(600) })).verdicts;
+    expect(performance.now() - start).toBeLessThan(3000);
+    expect(v.maintenance!.status).toBe('undecided');
+  });
+  it('a cancelled check stops at once and frees the solver', async () => {
+    const lvl = level('countdown');
+    const control = new CheckControl();
+    const run = checkFormula(await nodeZ3(), lvl, formula(lvl, HARD), startInputs(lvl), { control });
+    setTimeout(() => control.cancel(), 300);
+    const start = performance.now();
+    await expect(run).rejects.toBeInstanceOf(CheckCancelled);
+    expect(performance.now() - start).toBeLessThan(1500);
+    expect(Object.values(await check('countdown', 'i >= 0')).map((r) => r.status)).toEqual(['pass', 'pass', 'pass']);
   });
 });
