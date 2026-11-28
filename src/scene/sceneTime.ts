@@ -60,16 +60,24 @@ export function startScene() {
   const html = document.documentElement;
   html.dataset.started = '';
   delete html.dataset.leaving;
+  for (const d of reseated) {
+    if (!d.isConnected || !d.open) continue;
+    d.close();
+    d.showModal();
+  }
+  reseated = [];
   update();
 }
 
 let leaving = false;
+let reseated: HTMLDialogElement[] = [];
 
 export function switchScene(go: () => void): boolean {
   if (leaving || !started) return false;
   leaving = true;
   document.documentElement.dataset.leaving = '';
-  for (const d of document.querySelectorAll<HTMLDialogElement>('dialog[open]')) {
+  reseated = [...document.querySelectorAll<HTMLDialogElement>('dialog[open]')];
+  for (const d of reseated) {
     d.close();
     d.show();
   }
