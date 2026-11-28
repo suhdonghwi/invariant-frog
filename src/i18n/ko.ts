@@ -135,9 +135,6 @@ export const ko: Messages = {
     pickEgg: '먼저 알을 고르세요',
     frogStopped: '이 개구리는 멈췄습니다',
     otherAnswers: () => '이런 답도 정답입니다.',
-    dafny: '같은 증명을 Dafny로',
-    copy: '복사',
-    copied: '복사했습니다',
   },
 
   verdicts: {
@@ -211,7 +208,6 @@ export const ko: Messages = {
     caseName: (typed, name) => `이름은 대소문자를 구별합니다. \`${typed}\` 대신 \`${name}\`를 쓰세요.`,
     chainedPlain: (op, joined) => `\`${op}\`는 이어 쓸 수 없습니다. \`${joined}\`를 쓰려던 건가요?`,
     quantBody: (name, q) => `\`${name}\`는 \`:\` 뒤 첫 번째 비교 안에서만 쓸 수 있습니다. 더 쓰려면 본문을 괄호로 묶으세요: \`${q} … : (… && …)\``,
-    fixTo: '이렇게 바꾸기:',
   },
 
   tutorial: {

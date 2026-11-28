@@ -6,7 +6,6 @@ import { resetFrogs, resetLevel } from '../director/reset';
 import { caption } from '../director/sequence';
 import { checkAndPlay } from '../director/verification';
 import { t } from '../i18n/i18n';
-import { toDafny } from '../lang/dafny';
 import { levels, tutorialLevel } from '../levels/catalog';
 import { planeKey, startInputs, type Inputs } from '../levels/inputs';
 import type { LevelDef } from '../levels/level';
@@ -118,7 +117,6 @@ export async function check(): Promise<'refused' | void> {
     return;
   }
   const level = g.level;
-  const proof = toDafny(level, g.formula.expr) ?? undefined;
   markCleared(level.id);
   const others = otherAnswers(out.others ?? []);
   const next = levels[levels.findIndex((l) => l.id === level.id) + 1];
@@ -127,7 +125,6 @@ export async function check(): Promise<'refused' | void> {
     caption: captionOf({
       text: others ? `${t().level.proved}\n\n${others}` : t().level.proved,
       tone: 'success',
-      proof,
       action: next
         ? { label: t().level.next(localizeLevel(next).title), onClick: () => openLevel(next) }
         : { label: t().level.backToLevels, onClick: () => goMenu('levels') },

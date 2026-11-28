@@ -135,9 +135,6 @@ export const en = {
     pickEgg: 'pick an egg first',
     frogStopped: 'this frog has stopped',
     otherAnswers: (count: number): string => (count > 1 ? 'Other answers that work:' : 'Another answer that works:'),
-    dafny: 'The same proof in Dafny',
-    copy: 'Copy',
-    copied: 'Copied',
   },
 
   verdicts: {
@@ -212,7 +209,6 @@ export const en = {
     chainedPlain: (op: string, joined: string) => `\`${op}\` can’t be chained. Did you mean \`${joined}\`?`,
     quantBody: (name: string, q: string) =>
       `\`${name}\` exists only in the first comparison after the \`:\`. To use it in more, put the body in parentheses: \`${q} … : (… && …)\`.`,
-    fixTo: 'Change to',
   },
 
   tutorial: {

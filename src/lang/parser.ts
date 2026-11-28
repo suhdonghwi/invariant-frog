@@ -6,18 +6,13 @@ const tr = () => t().langErrors;
 
 const ONE_LOOP = 'Only one loop is supported';
 
-export interface Fix {
-  span: Span;
-  text: string;
-}
-
 export class LangError extends Error {
-  constructor(message: string, public span: Span, public fix?: Fix) {
+  constructor(message: string, public span: Span) {
     super(message);
   }
 }
 
-export const applyFix = (src: string, fix: Fix) => src.slice(0, fix.span.from) + fix.text + src.slice(fix.span.to);
+export class Slip extends LangError {}
 
 type TokKind = 'num' | 'ident' | 'op' | 'bad' | 'eof';
 export interface Token {
@@ -151,7 +146,7 @@ class Parser {
       if (ops.every((op) => op === '==' || op === '!=') && operands.every((o) => o.kind === 'var' || o.kind === 'num')) {
         const text = (o: Expr) => this.src.slice(o.span.from, o.span.to);
         const joined = ops.map((op, k) => `${text(operands[k])} ${op} ${text(operands[k + 1])}`).join(' && ');
-        throw new LangError(tr().chainedPlain(eq, joined), span, { span, text: joined });
+        throw new Slip(tr().chainedPlain(eq, joined), span);
       }
       throw new LangError(tr().chainedEquality(eq), span);
     }
@@ -389,7 +384,7 @@ export function parseFormula(src: string): Expr {
     return e;
   } catch (e) {
     if (!(e instanceof LangError)) throw e;
-    throw stretchToLastToken(src, e.fix ? e : (findSlip(src) ?? e));
+    throw stretchToLastToken(src, e instanceof Slip ? e : (findSlip(src) ?? e));
   }
 }
 
