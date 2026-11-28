@@ -17,7 +17,7 @@ import { origin } from '../origin';
 import { sceneNow, TIME_UNIFORM } from '../sceneTime';
 import { FADE_UNIFORMS, fadeRadius, GLSL_FADE } from '../shaders/fade';
 import { APPEAR, GLSL_RING_POP } from './Region';
-import { RING_ALPHA, RING_COLORS, ringGeometry, SLAB_RING_COLORS, SLAB_WASH_COLORS, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
+import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 
 
 const vertex = /* glsl */ `
@@ -33,7 +33,6 @@ uniform float uT0;
 attribute vec2 aOffset;
 varying vec3 vWorld;
 varying float vA;
-varying float vH;
 bool failing(vec2 tile) {
   ivec2 at = ivec2(floor(tile - uFailOrigin + 0.5));
   if (at.x < 0 || at.y < 0 || at.x >= ${MASK_SIZE} || at.y >= ${MASK_SIZE}) return false;
@@ -48,10 +47,8 @@ void main() {
   }
   float a = clamp((uTime - uT0) / ${APPEAR.toFixed(2)}, 0.0, 1.0);
   float s = ringPopScale(a);
-  float h = heightOf(maskAt(tile), tile);
-  vec4 w = vec4(position * vec3(s, 1.0, s) + vec3(tile.x, h * ${SLAB_H.toFixed(3)} + 0.012, -tile.y), 1.0);
+  vec4 w = vec4(position * vec3(s, 1.0, s) + vec3(tile.x, heightOf(maskAt(tile), tile) * ${SLAB_H.toFixed(3)} + 0.012, -tile.y), 1.0);
   vWorld = w.xyz;
-  vH = clamp(h, 0.0, 1.0);
   vA = ringPopAlpha(a);
   gl_Position = projectionMatrix * modelViewMatrix * w;
 }
@@ -59,15 +56,13 @@ void main() {
 
 const fragment = /* glsl */ `
 uniform vec3 uColor;
-uniform vec3 uSlabColor;
 uniform float uAlpha;
 uniform float uOut;
 varying vec3 vWorld;
 varying float vA;
-varying float vH;
 ${GLSL_FADE}
 void main() {
-  gl_FragColor = vec4(applyFade(mix(uColor, uSlabColor, vH), vWorld), uAlpha * vA * uOut);
+  gl_FragColor = vec4(applyFade(uColor, vWorld), uAlpha * vA * uOut);
   #include <colorspace_fragment>
 }
 `;
@@ -105,15 +100,15 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
     [],
   );
   const materials = useMemo(() => {
-    const make = (alpha: number, color: string, slabColor: string) =>
+    const make = (alpha: number, color: string) =>
       new THREE.ShaderMaterial({
         vertexShader: vertex,
         fragmentShader: fragment,
         transparent: true,
         depthWrite: false,
-        uniforms: { ...shared, ...areaMask.uniforms, uAlpha: { value: alpha }, uColor: { value: new THREE.Color(color) }, uSlabColor: { value: new THREE.Color(slabColor) } },
+        uniforms: { ...shared, ...areaMask.uniforms, uAlpha: { value: alpha }, uColor: { value: new THREE.Color(color) } },
       });
-    return { ring: make(RING_ALPHA, RING_COLORS.fail, SLAB_RING_COLORS.fail), wash: make(WASH_ALPHA, WASH_COLORS.fail, SLAB_WASH_COLORS.fail) };
+    return { ring: make(RING_ALPHA, RING_COLORS.fail), wash: make(WASH_ALPHA, WASH_COLORS.fail) };
   }, [shared]);
   useEffect(() => () => (materials.ring.dispose(), materials.wash.dispose()), [materials]);
   const geoms = useMemo(() => {

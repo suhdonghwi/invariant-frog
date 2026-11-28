@@ -1,13 +1,8 @@
 import * as THREE from 'three';
-import { COLORS } from '../constants';
 import type { TagTone } from './SceneTag';
 
-const ON_SLAB: Record<TagTone, string> = { info: '#2b3445', good: '#086e22', fail: '#ac172b' };
-
-export const RING_COLORS: Record<TagTone, string> = { info: '#64748b', good: COLORS.trail, fail: COLORS.fail };
-export const WASH_COLORS: Record<TagTone, string> = { info: '#64748b', good: '#34d058', fail: COLORS.fail };
-export const SLAB_RING_COLORS = ON_SLAB;
-export const SLAB_WASH_COLORS = ON_SLAB;
+export const RING_COLORS: Record<TagTone, string> = { info: '#334155', good: '#007722', fail: '#be0019' };
+export const WASH_COLORS = RING_COLORS;
 export const RING_ALPHA = 1;
 export const WASH_ALPHA = 0.3;
 

@@ -13,7 +13,7 @@ import { sceneNow, TIME_UNIFORM } from '../sceneTime';
 import { sfx } from '../../audio/sfx';
 import { LINGER, SHORT } from '../../motion';
 import { FADE_UNIFORMS, GLSL_FADE } from '../shaders/fade';
-import { RING_ALPHA, RING_COLORS, ringGeometry, SLAB_RING_COLORS, SLAB_WASH_COLORS, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
+import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 import { useTileWindow } from './useTileWindow';
 
 export const APPEAR = SHORT;
@@ -40,7 +40,6 @@ const vertex = /* glsl */ `
 ${GLSL_HEIGHT}
 ${GLSL_RING_POP}
 attribute vec3 aColor;
-attribute vec3 aSlabColor;
 attribute float aDelay;
 uniform float uT0;
 varying vec3 vColor;
@@ -50,10 +49,9 @@ void main() {
   float a = clamp((uTime - uT0 - aDelay) / ${APPEAR.toFixed(2)}, 0.0, 1.0);
   float s = ringPopScale(a);
   vec2 tile = tileAt();
-  float h = heightNow();
-  vec4 w = vec4(position * vec3(s, 1.0, s) + vec3(tile.x, h * ${SLAB_H.toFixed(3)} + 0.012, -tile.y), 1.0);
+  vec4 w = vec4(position * vec3(s, 1.0, s) + vec3(tile.x, heightNow() * ${SLAB_H.toFixed(3)} + 0.012, -tile.y), 1.0);
   vWorld = w.xyz;
-  vColor = mix(aColor, aSlabColor, clamp(h, 0.0, 1.0));
+  vColor = aColor;
   vA = ringPopAlpha(a);
   gl_Position = projectionMatrix * modelViewMatrix * w;
 }
@@ -148,8 +146,6 @@ function useTicks(region: Region | null, plan: Sweep | null, t0: number) {
 const colors = (tones: Record<string, string>) => Object.fromEntries(Object.entries(tones).map(([k, v]) => [k, new THREE.Color(v)]));
 const RING = colors(RING_COLORS);
 const WASH = colors(WASH_COLORS);
-const SLAB_RING = colors(SLAB_RING_COLORS);
-const SLAB_WASH = colors(SLAB_WASH_COLORS);
 
 export function OutlineRegion() {
   const { value: region, leaving } = useLingering(useGame((s) => s.region));
@@ -176,8 +172,6 @@ export function OutlineRegion() {
     const tile = new Float32Array(n * 2);
     const ringColor = new Float32Array(n * 3);
     const washColor = new Float32Array(n * 3);
-    const slabRingColor = new Float32Array(n * 3);
-    const slabWashColor = new Float32Array(n * 3);
     const delay = new Float32Array(n);
     const delays = plan.sweep?.delays;
     tiles.forEach((t, i) => {
@@ -185,13 +179,10 @@ export function OutlineRegion() {
       const [r, w] = [RING[t.tone], WASH[t.tone]];
       ringColor.set([r.r, r.g, r.b], i * 3);
       washColor.set([w.r, w.g, w.b], i * 3);
-      const [sr, sw] = [SLAB_RING[t.tone], SLAB_WASH[t.tone]];
-      slabRingColor.set([sr.r, sr.g, sr.b], i * 3);
-      slabWashColor.set([sw.r, sw.g, sw.b], i * 3);
       delay[i] = delays?.[i] ?? 0;
     });
-    const attrs = (color: Float32Array, slabColor: Float32Array) => ({ aTile: [tile, 2], aColor: [color, 3], aSlabColor: [slabColor, 3], aDelay: [delay, 1] }) as const;
-    return { ring: instanced(ringGeometry, n, attrs(ringColor, slabRingColor)), wash: instanced(washGeometry, n, attrs(washColor, slabWashColor)), at: { x: origin.x, y: origin.y } };
+    const attrs = (color: Float32Array) => ({ aTile: [tile, 2], aColor: [color, 3], aDelay: [delay, 1] }) as const;
+    return { ring: instanced(ringGeometry, n, attrs(ringColor)), wash: instanced(washGeometry, n, attrs(washColor)), at: { x: origin.x, y: origin.y } };
   }, [plan]);
   useEffect(() => () => (geoms?.ring.dispose(), geoms?.wash.dispose()), [geoms]);
 
