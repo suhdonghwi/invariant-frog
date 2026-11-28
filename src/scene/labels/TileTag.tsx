@@ -6,7 +6,7 @@ import { field } from '../area/field';
 import { useExitFade } from '../../hooks/presence';
 import { keepAlive } from '../awake';
 import { sceneNow } from '../sceneTime';
-import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
+import { RING_ALPHA, RING_COLORS, ringGeometry, SLAB_RING_COLORS, SLAB_WASH_COLORS, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 import { SceneTag, type TagTone } from './SceneTag';
 import { BASE, reducedMotion } from '../../motion';
 
@@ -19,12 +19,15 @@ interface TileTagProps {
   leaving?: boolean;
 }
 
+const color = (tile: string, slab: string) => ({ tile: new THREE.Color(tile), slab: new THREE.Color(slab) });
+
 export function TileTag({ x, y, label, tone, pulse = false, leaving = false }: TileTagProps) {
   const group = useRef<THREE.Group>(null);
   const ring = useRef<THREE.Mesh>(null);
   const washRef = useRef<THREE.Mesh>(null);
   const t0 = useRef(sceneNow());
   const exit = useExitFade(leaving);
+  const [colors] = useState(() => ({ ring: color(RING_COLORS[tone], SLAB_RING_COLORS[tone]), wash: color(WASH_COLORS[tone], SLAB_WASH_COLORS[tone]) }));
   const [inRegion] = useState(() => !!useGame.getState().region?.tiles({ cx: x, cy: y, R: 0 }).length);
   useEffect(() => (pulse ? keepAlive(() => !reducedMotion()) : undefined), [pulse]);
 
@@ -36,11 +39,18 @@ export function TileTag({ x, y, label, tone, pulse = false, leaving = false }: T
     const out = exit();
     const pop = Math.min(1, t / BASE) * out;
     const beat = pulse && !reducedMotion() ? 0.5 + 0.5 * Math.sin(t * 4.2) : 1;
+    const h = THREE.MathUtils.clamp(field.heightAt(x, y), 0, 1);
     if (ring.current) {
       ring.current.scale.setScalar(0.9 + 0.1 * pop + (pulse ? 0.035 * beat : 0));
-      (ring.current.material as THREE.MeshBasicMaterial).opacity = pop * RING_ALPHA * (pulse ? 0.85 + 0.15 * beat : 1);
+      const m = ring.current.material as THREE.MeshBasicMaterial;
+      m.opacity = pop * RING_ALPHA * (pulse ? 0.85 + 0.15 * beat : 1);
+      m.color.lerpColors(colors.ring.tile, colors.ring.slab, h);
     }
-    if (washRef.current) (washRef.current.material as THREE.MeshBasicMaterial).opacity = pop * (pulse ? 0.12 + 0.1 * beat : WASH_ALPHA);
+    if (washRef.current) {
+      const m = washRef.current.material as THREE.MeshBasicMaterial;
+      m.opacity = pop * (pulse ? 0.12 + 0.1 * beat : WASH_ALPHA);
+      m.color.lerpColors(colors.wash.tile, colors.wash.slab, h);
+    }
   });
 
   return (

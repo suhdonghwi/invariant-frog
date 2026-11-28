@@ -10,7 +10,7 @@ import { AtOrigin } from '../AtOrigin';
 import { uploadInstances } from '../instances';
 import { origin } from '../origin';
 import { APPEAR, ringPop } from '../labels/Region';
-import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from '../labels/markStyle';
+import { RING_ALPHA, RING_COLORS, ringGeometry, SLAB_RING_COLORS, SLAB_WASH_COLORS, WASH_ALPHA, WASH_COLORS, washGeometry } from '../labels/markStyle';
 import { sceneNow } from '../sceneTime';
 import { frogWorld, leaveFade, type FrogSim } from './frogWorld';
 import { HopLine } from './HopLine';
@@ -73,6 +73,9 @@ const pos = new THREE.Vector3();
 const scl = new THREE.Vector3();
 const RING = new THREE.Color(RING_COLORS.good);
 const WASH = new THREE.Color(WASH_COLORS.good);
+const SLAB_RING = new THREE.Color(SLAB_RING_COLORS.good);
+const SLAB_WASH = new THREE.Color(SLAB_WASH_COLORS.good);
+const mixed = new THREE.Color();
 
 function SeeThroughHop({ arc, plane }: { arc: Arc; plane: string }) {
   return (
@@ -121,12 +124,14 @@ export function HopArcs() {
       const h0 = field.groundAt(frog.x, frog.y);
       m.compose(pos.set(frog.x - origin.x, h0 + 0.012, origin.y - frog.y), q, scl.set(scale, 1, scale));
       const fade = alpha * (frog.fade ?? 1) * leaveFade(frog, t);
-      for (const [mesh, p, opacity, c] of [
-        [r, parts.ring, RING_ALPHA, RING],
-        [w, parts.wash, WASH_ALPHA, WASH],
+      const h = clamp01(field.heightAt(frog.x, frog.y));
+      for (const [mesh, p, opacity, c, slab] of [
+        [r, parts.ring, RING_ALPHA, RING, SLAB_RING],
+        [w, parts.wash, WASH_ALPHA, WASH, SLAB_WASH],
       ] as const) {
         mesh.setMatrixAt(nr, m);
-        p.color.setXYZ(nr, c.r, c.g, c.b);
+        mixed.lerpColors(c, slab, h);
+        p.color.setXYZ(nr, mixed.r, mixed.g, mixed.b);
         p.alpha.setX(nr, opacity * fade);
       }
       nr++;

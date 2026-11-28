@@ -46,9 +46,10 @@ area is the only saturated surface. Other colours are reserved: real frogs
 green, the checker's frogs pale blue, goals amber, and red only for failures.
 Each idea has one channel, and channels stack without changing each other:
 the area is height and blue, the stop region is stripes, a goal is a pool.
-A ringed tile takes its tag's colour on screen (slate for a plain pointer).
-The paper's figures (`?figure`) use the same ring in darker colours with a
-stronger wash, so a ringed slab stays apart from the rest in grayscale print.
+A ringed tile takes its tag's colour (slate for a plain pointer) on the floor
+and a deep shade of it on a slab, where a bright ring would match the slab's
+lightness and blur; the colour follows the slab as it rises or sinks. The
+paper's grayscale figures use the same rings.
 
 Goals are drawn only in the stop region, because Exit reads the postcondition
 only there. Drawn everywhere, they would invite the learner to copy the

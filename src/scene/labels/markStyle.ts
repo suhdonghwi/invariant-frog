@@ -1,26 +1,15 @@
 import * as THREE from 'three';
 import { COLORS } from '../constants';
-import { figurePage } from '../figureClip';
 import type { TagTone } from './SceneTag';
 
-const SCREEN = {
-  ring: { info: '#64748b', good: COLORS.trail, fail: COLORS.fail },
-  wash: { info: '#64748b', good: '#34d058', fail: COLORS.fail },
-  washAlpha: 0.3,
-};
+const ON_SLAB: Record<TagTone, string> = { info: '#2b3445', good: '#086e22', fail: '#ac172b' };
 
-const PRINT = {
-  ring: { info: '#2b3445', good: '#166534', fail: '#a3121a' },
-  wash: { info: '#2b3445', good: '#34d058', fail: COLORS.fail },
-  washAlpha: 0.45,
-};
-
-const STYLE = figurePage ? PRINT : SCREEN;
-
-export const RING_COLORS: Record<TagTone, string> = STYLE.ring;
-export const WASH_COLORS: Record<TagTone, string> = STYLE.wash;
+export const RING_COLORS: Record<TagTone, string> = { info: '#64748b', good: COLORS.trail, fail: COLORS.fail };
+export const WASH_COLORS: Record<TagTone, string> = { info: '#64748b', good: '#34d058', fail: COLORS.fail };
+export const SLAB_RING_COLORS = ON_SLAB;
+export const SLAB_WASH_COLORS = ON_SLAB;
 export const RING_ALPHA = 1;
-export const WASH_ALPHA = STYLE.washAlpha;
+export const WASH_ALPHA = 0.3;
 
 const OUTER = 0.96;
 const INNER = 0.84;
