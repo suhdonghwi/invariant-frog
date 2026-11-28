@@ -26,10 +26,27 @@ const preloadFonts: Plugin = {
   },
 };
 
+const KOREAN_FONTS = [/TmoneyRoundWind-ExtraBold-[\w-]+\.woff2$/, /NanumSquareRound-Regular-[\w-]+\.woff2$/];
+const koreanFonts: Plugin = {
+  name: 'korean-fonts',
+  transformIndexHtml: {
+    order: 'post',
+    handler: (html, { bundle }) =>
+      html.replace(
+        '%KOREAN_FONTS%',
+        JSON.stringify(
+          Object.keys(bundle ?? {})
+            .filter((file) => KOREAN_FONTS.some((re) => re.test(file)))
+            .map((file) => '/' + file),
+        ),
+      ),
+  },
+};
+
 const VENDOR = /[\\/]node_modules[\\/](three|@react-three[\\/][^\\/]+|camera-controls|react|react-dom|scheduler)[\\/]/;
 
 export default defineConfig({
-  plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss(), titleGlyphs(), siteUrl, preloadFonts],
+  plugins: [react(), babel({ presets: [reactCompilerPreset()] }), tailwindcss(), titleGlyphs(), siteUrl, preloadFonts, koreanFonts],
   build: { rolldownOptions: { output: { codeSplitting: { groups: [{ name: 'vendor', test: VENDOR }] } } } },
   server: { headers: isolation },
   preview: { headers: isolation },

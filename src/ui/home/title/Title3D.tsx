@@ -1,7 +1,8 @@
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { useMemo, useRef, type CSSProperties } from 'react';
 import * as THREE from 'three';
 import { layouts } from 'virtual:title-glyphs';
+import { Canvas } from '../../../scene/Canvas';
 import { COLORS, MAX_DPR } from '../../../scene/constants';
 import { ErrorBoundary } from '../../ErrorBoundary';
 import { frogGeometry, frogMaterial, outlineMaterial } from '../../../scene/models';

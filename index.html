@@ -96,6 +96,25 @@
             1.2px 11.5px 4px rgb(40 50 70 / 0.12);
         }
       }
+      #boot[data-failed] {
+        pointer-events: auto;
+      }
+      #boot[data-failed] span {
+        display: none;
+      }
+      #boot button {
+        padding: 8px 18px;
+        border: 0;
+        border-radius: 999px;
+        background: #3b82f6;
+        box-shadow: 0 3px 0 #2563d4;
+        color: #fff;
+        font: 600 15px 'Nunito Variable', ui-rounded, system-ui, sans-serif;
+        cursor: pointer;
+      }
+      #boot noscript p + p {
+        margin-top: 4px;
+      }
       @media (prefers-reduced-motion: reduce) {
         #boot i {
           animation: none;
@@ -105,12 +124,51 @@
   </head>
   <body>
     <div id="root"></div>
-    <div id="boot" role="status"><div><span><i></i><i></i><i></i></span><p>Loading…</p></div></div>
+    <div id="boot" role="status">
+      <div>
+        <span><i></i><i></i><i></i></span>
+        <p>Loading…</p>
+        <noscript>
+          <style>
+            #boot p:not(noscript p) { display: none; }
+            #boot i { animation: none; }
+          </style>
+          <p>Invariant Frog needs JavaScript to run.</p>
+          <p lang="ko">이 게임을 하려면 자바스크립트를 켜야 합니다.</p>
+        </noscript>
+      </div>
+    </div>
     <script>
-      try {
-        const lang = localStorage.getItem('invariant-frog:lang') ?? (navigator.language.toLowerCase().startsWith('ko') ? 'ko' : 'en');
-        if (lang === 'ko') document.querySelector('#boot p').textContent = '불러오는 중…';
-      } catch {}
+      (() => {
+        let ko = false;
+        try {
+          ko = (localStorage.getItem('invariant-frog:lang') ?? (navigator.language.toLowerCase().startsWith('ko') ? 'ko' : 'en')) === 'ko';
+        } catch {}
+        const boot = document.getElementById('boot');
+        const text = boot.querySelector('p');
+        if (ko) {
+          document.documentElement.lang = 'ko';
+          text.textContent = '불러오는 중…';
+          for (const href of %KOREAN_FONTS%) {
+            const link = document.createElement('link');
+            Object.assign(link, { rel: 'preload', as: 'font', type: 'font/woff2', crossOrigin: '', href });
+            document.head.append(link);
+          }
+        }
+        const failed = () => {
+          if ('started' in document.documentElement.dataset || 'failed' in boot.dataset) return;
+          boot.dataset.failed = '';
+          boot.setAttribute('role', 'alert');
+          text.textContent = ko ? '게임을 불러오지 못했습니다.' : 'The game didn’t load.';
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = ko ? '새로 고침' : 'Reload';
+          button.addEventListener('click', () => location.reload());
+          text.after(button);
+        };
+        addEventListener('error', (e) => (e.target instanceof HTMLScriptElement || e.target instanceof HTMLLinkElement) && failed(), true);
+        setTimeout(failed, 15000);
+      })();
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
