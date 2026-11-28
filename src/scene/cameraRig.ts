@@ -450,8 +450,8 @@ export const cameraRig = {
     if (pending) await pending.settled;
     await fly({ d: distance });
   },
-  async resetAngle(smooth = true) {
-    await glide(ANGLE, smooth);
+  resetAngle() {
+    snap(ANGLE);
   },
   opening(level: CompiledLevel, smooth: boolean) {
     const shot: Shot = { focus: box(level.frame ?? OPENING) };
