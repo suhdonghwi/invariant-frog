@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "predev": "node scripts/copy-z3.mjs",
-    "prebuild": "node scripts/copy-z3.mjs",
+    "prebuild": "node scripts/copy-z3.mjs && node scripts/check-fonts.mjs",
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
