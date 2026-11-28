@@ -90,6 +90,9 @@ adding UI.
   view, and the camera follows when it leaves the view. Enter acts as a click
   on that tile (picking an egg), under the same tutorial limits; `+` and `−`
   zoom. The tile readout is announced.
+- **Zoom goes where the player points.** The wheel and a trackpad pinch move
+  the camera toward the tile under the cursor, never the page. A view control
+  in the top bar zooms in, zooms out and resets the view to the game's framing.
 - **Errors wait for Check.** A formula is never marked wrong while it is typed.
 - **An error names the slip.** Habits from other languages (`=`, `=<`, `and`,
   `;`, `^`, `2i`, `==>`) and a name in the wrong case get their own message, and
