@@ -89,6 +89,7 @@ class AreaMask {
     uFromOrigin: { value: new THREE.Vector2() },
     uWaveAge: { value: 1e6 },
     uWaveCenter: { value: new THREE.Vector2() },
+    uWaveReach: { value: 1 },
   };
   private target: THREE.WebGLRenderTarget | null = null;
   private from: [THREE.WebGLRenderTarget, THREE.WebGLRenderTarget] | null = null;
@@ -109,7 +110,7 @@ class AreaMask {
   private content = '';
   private at = { x: 0, y: 0 };
   private fromAt = { x: 0, y: 0 };
-  private wave = { t0: -1e6, x: 0, y: 0 };
+  private wave = { t0: -1e6, x: 0, y: 0, reach: 1 };
   private pixels = new Uint8Array(MASK_SIZE * MASK_SIZE * 4);
   private read = '';
   private readContent = '';
@@ -204,9 +205,10 @@ class AreaMask {
     this.uniforms.uMaskOrigin.value.set(this.at.x - origin.x, this.at.y - origin.y);
     this.uniforms.uFromOrigin.value.set(this.fromAt.x - origin.x, this.fromAt.y - origin.y);
     this.uniforms.uWaveCenter.value.set(this.wave.x - origin.x, this.wave.y - origin.y);
+    this.uniforms.uWaveReach.value = this.wave.reach;
   }
 
-  private snapshot(gl: THREE.WebGLRenderer, zero: boolean, now: number, x: number, y: number) {
+  private snapshot(gl: THREE.WebGLRenderer, zero: boolean, now: number, x: number, y: number, reach: number) {
     this.from ??= [maskTarget(), maskTarget()];
     const next = this.uniforms.uFrom.value === this.from[0].texture ? this.from[1] : this.from[0];
     this.snapUniforms.uSnapOrigin.value.set(this.at.x - origin.x, this.at.y - origin.y);
@@ -215,12 +217,12 @@ class AreaMask {
     gl.render(this.snapScene, this.camera);
     this.uniforms.uFrom.value = next.texture;
     this.fromAt = { ...this.at };
-    this.wave = { t0: now, x, y };
+    this.wave = { t0: now, x, y, reach };
     this.uniforms.uWaveAge.value = 0;
     this.place();
   }
 
-  draw(gl: THREE.WebGLRenderer, x: number, y: number, inputs: Inputs, now: number): boolean {
+  draw(gl: THREE.WebGLRenderer, x: number, y: number, inputs: Inputs, now: number, reach = MASK_REACH): boolean {
     this.compile(gl);
     this.target ??= maskTarget();
     this.uniforms.uMask.value = this.target.texture;
@@ -238,7 +240,7 @@ class AreaMask {
     const changed = content !== this.content;
     this.content = content;
     if (changed && this.options.wave) {
-      this.snapshot(gl, this.levels !== this.drawnLevels, now, x, y);
+      this.snapshot(gl, this.levels !== this.drawnLevels, now, x, y, reach);
       this.drawnLevels = this.levels;
     }
     this.at = { x: ox, y: oy };

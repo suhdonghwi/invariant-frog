@@ -375,6 +375,18 @@ export const cameraRig = {
     }
     return { cx: Math.round(c.x), cy: Math.round(c.y), R: Math.min(cap, Math.ceil(R)) };
   },
+  reachFrom(x: number, y: number, cap: number): number {
+    if (!controls) return cap;
+    const v = endView();
+    place(v.x, v.y, v.d, currentAngle());
+    let R = 1;
+    for (const [sx, sy] of [[0, 0], [size.width, 0], [0, size.height], [size.width, size.height]]) {
+      const g = ground(sx, sy);
+      if (!g) return cap;
+      R = Math.max(R, Math.hypot(g.x - x, g.y - y));
+    }
+    return Math.min(cap, R);
+  },
   shows([x, y]: Tile): boolean {
     if (!controls) return false;
     const v = endView();

@@ -208,7 +208,6 @@ export const en = {
     chainedPlain: (op: string, joined: string) => `\`${op}\` can’t be chained. Did you mean \`${joined}\`?`,
     quantBody: (name: string, q: string) =>
       `\`${name}\` exists only in the first comparison after the \`:\`. To use it in more, put the body in parentheses: \`${q} … : (… && …)\`.`,
-    fixTo: 'Change to',
   },
 
   tutorial: {

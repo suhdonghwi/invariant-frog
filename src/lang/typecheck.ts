@@ -34,7 +34,7 @@ function unknownName(name: string, span: Span, scope: Scope, bound: ReadonlyMap<
   const q = bound.get(name);
   if (q) return new LangError(E.quantBody(name, q), span);
   const same = [...scope.keys()].find((k) => k.toLowerCase() === name.toLowerCase());
-  if (same) return new LangError(E.caseName(name, same), span, { span, text: same });
+  if (same) return new LangError(E.caseName(name, same), span);
   return new LangError(E.unknownName(name, [...scope.keys()].join(', ')), span);
 }
 
