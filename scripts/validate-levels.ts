@@ -88,7 +88,7 @@ async function checkSolutions(level: CompiledLevel, inputs: Inputs) {
       continue;
     }
     const t = performance.now();
-    const r = await checkFormula(ctx, level, f, inputs, { timeout: 5000 });
+    const r = await checkFormula(ctx, level, f, inputs);
     const ms = Math.round(performance.now() - t);
     const bad = Object.entries(r.verdicts).filter(([, v]) => v.status !== 'pass' || v.how !== 'proved');
     if (bad.length) fail(`solution '${sol}': ${bad.map(([k, v]) => `${k}=${v.status}`).join(', ')}`);
@@ -103,7 +103,7 @@ async function checkPitfalls(level: CompiledLevel, inputs: Inputs) {
       fail(`pitfall '${p.formula}' does not compile: ${f.error.message}`);
       continue;
     }
-    const r = await checkFormula(ctx, level, f, inputs, { timeout: 5000 });
+    const r = await checkFormula(ctx, level, f, inputs);
     const failed = Object.entries(r.verdicts).flatMap(([k, v]) => (v.status === 'fail' ? [`${k} (at ${showState(level, v.cex.state)}${v.cex.far ? ', far' : ''})`] : []));
     const undecided = Object.entries(r.verdicts).filter(([, v]) => v.status === 'undecided').map(([k]) => k);
     if (failed.length === 0) fail(`pitfall '${p.formula}' does not fail`);

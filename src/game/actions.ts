@@ -1,6 +1,7 @@
 import { sfx } from '../audio/sfx';
 import { RULES } from '../checker/types';
 import { warmSolver } from '../checker/z3-browser';
+import { cancelCheck } from '../director/checkRun';
 import { resetFrogs, resetLevel } from '../director/reset';
 import { caption } from '../director/sequence';
 import { checkAndPlay } from '../director/verification';
@@ -13,7 +14,7 @@ import { cameraRig } from '../scene/cameraRig';
 import { switchScene } from '../scene/sceneTime';
 import { startTutorial, stopTutorial, tutorialCheck } from '../tutorial/tutorial';
 import { markCleared } from './progress';
-import { openingCaption, useGame } from './store';
+import { openingCaption, useGame, type CaptionTone } from './store';
 
 export function openLevel(def: LevelDef) {
   switchScene(() => {
@@ -86,6 +87,18 @@ function showHints(shown: number) {
       action: shown < hints.length ? { label: t().level.anotherHint, onClick: () => showHints(shown + 1) } : undefined,
     },
   });
+}
+
+const CHECK_TONES: ReadonlySet<CaptionTone> = new Set(['fail', 'muted']);
+
+export function editFormula(text: string) {
+  const g = useGame.getState();
+  if (g.mode === 'level') {
+    if (g.checking || g.busy) cancelCheck();
+    const { caption } = useGame.getState();
+    if (text !== g.formulaText && caption && CHECK_TONES.has(caption.tone)) useGame.setState({ caption: null });
+  }
+  useGame.getState().setFormula(text);
 }
 
 export async function check(): Promise<'refused' | void> {

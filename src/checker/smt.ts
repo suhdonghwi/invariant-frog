@@ -78,8 +78,10 @@ function toZ3(ctx: Ctx, e: Expr, env: Env): Z {
 
 type SolveResult = { kind: 'sat'; state: State } | { kind: 'unsat' } | { kind: 'unknown' };
 
+const MIN_SOLVER_MS = 20;
+
 interface SolveOptions {
-  timeout: number;
+  left: () => number;
   verify?: (s: State) => boolean;
 }
 
@@ -120,8 +122,10 @@ export async function solve(ctx: Ctx, level: CompiledLevel, dims: string[], quer
   const quantified = hasQuantifier(query);
   const arrayLens = Object.values(env.arrays).map((a) => a.len);
   const check = async (form: Expr, logic: string | undefined, bound: (solver: InstanceType<Ctx['Solver']>) => void): Promise<SolveResult> => {
+    const ms = Math.floor(opts.left());
+    if (ms < MIN_SOLVER_MS) return { kind: 'unknown' };
     const solver = logic ? new ctx.Solver(logic) : new ctx.Solver();
-    solver.set('timeout', opts.timeout);
+    solver.set('timeout', ms);
     solver.add(toZ3(ctx, form, env) as Bool<'main'>);
     bound(solver);
     const r = await whileSolving(() => solver.check());
@@ -155,9 +159,9 @@ export async function solve(ctx: Ctx, level: CompiledLevel, dims: string[], quer
   return { kind: 'unsat' };
 }
 
-export async function equivalent(ctx: Ctx, level: CompiledLevel, a: Expr, b: Expr, timeout: number): Promise<boolean> {
+export async function equivalent(ctx: Ctx, level: CompiledLevel, a: Expr, b: Expr, left: () => number): Promise<boolean> {
   const differ: Expr = { kind: 'binary', op: '!=', left: a, right: b, span: a.span };
   const query = mk.and(level.planeReq, differ);
-  const r = await solve(ctx, level, level.names, query, { timeout, verify: (s) => withinBudget(() => holds(query, s)) });
+  const r = await solve(ctx, level, level.names, query, { left, verify: (s) => withinBudget(() => holds(query, s)) });
   return r.kind === 'unsat';
 }

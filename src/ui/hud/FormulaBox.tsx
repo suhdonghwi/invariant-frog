@@ -1,6 +1,6 @@
 import { Check, LoaderCircle } from 'lucide-react';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { check } from '../../game/actions';
+import { check, editFormula } from '../../game/actions';
 import { useGame } from '../../game/store';
 import { useT } from '../../i18n/i18n';
 import { displayNames } from '../../levels/level';
@@ -73,13 +73,13 @@ export function FormulaBox() {
             value={formulaText}
             placeholder={placeholder}
             aria-label={tr.formula.area}
-            readOnly={locked || busy || checking}
+            readOnly={locked || (mode === 'tutorial' && (busy || checking))}
             tabIndex={locked ? -1 : 0}
             spellCheck={false}
             autoCapitalize="off"
             autoComplete="off"
             autoCorrect="off"
-            onChange={(e) => useGame.getState().setFormula(e.target.value.replace(/\r?\n/g, ' '))}
+            onChange={(e) => editFormula(e.target.value.replace(/\r?\n/g, ' '))}
             onKeyDown={onKeyDown}
           />
         </div>

@@ -82,9 +82,8 @@ export function playProof() {
 }
 
 export async function proofWave(around?: { x: number; y: number }): Promise<FrogSim | null> {
-  const L = currentLevel();
-  const { valid: inv, inputs } = useGame.getState();
-  if (!inv) return null;
+  const { level: L, valid: inv, inputs } = useGame.getState();
+  if (!L || !inv) return null;
   const { x: tx, y: ty } = around ?? cameraRig.viewCenter();
   const near = (x: number, y: number) => Math.hypot(x - tx, y - ty);
   const candidates = tilesNear(L, inputs, { cx: Math.round(tx), cy: Math.round(ty), R: PROOF_FAR }, (s, x, y) => {

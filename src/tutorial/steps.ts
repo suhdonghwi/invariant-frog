@@ -1,4 +1,5 @@
 import { sfx } from '../audio/sfx';
+import { useSolver } from '../checker/solverStatus';
 import { RULES, type Rule } from '../checker/types';
 import { stepFrogs } from '../director/controls';
 import { hatch, HATCHED_MS, placeFrog, sendFrogsHome, testEggs } from '../director/frogs';
@@ -71,7 +72,7 @@ const holds = () => t().verdicts.holdsTag;
 const mine = () => `\`${useGame.getState().formulaText.trim()}\``;
 
 async function passStage(gen: Token, rule: Rule, o: Omit<StageOptions, 'rules'>) {
-  await stage(gen, {
+  const passed = await stage(gen, {
     ...o,
     rules: upTo(rule),
     onFail: (r) => {
@@ -80,12 +81,14 @@ async function passStage(gen: Token, rule: Rule, o: Omit<StageOptions, 'rules'>)
     },
   });
   learnerFormula = useGame.getState().formulaText;
+  if (!passed) return;
   const text = { initialization: T().passedInitialization, maintenance: T().passedMaintenance, exit: T().passedExit }[rule];
   await beat(gen, text, { spot: 'lights', tone: 'success', keep: true });
   void sendFrogsHome('test');
 }
 
 async function witness(gen: Token, rule: Rule, pitfall: string, o: { question: string; afterDemo?: string; afterOwn?: string; ghost?: string }) {
+  if (useSolver.getState().status === 'failed') return;
   if (!witnessed.has(rule)) {
     const mine = useGame.getState().formulaText;
     useGame.getState().setFormula(pitfall);
@@ -102,7 +105,7 @@ async function witness(gen: Token, rule: Rule, pitfall: string, o: { question: s
 export const STEPS: Step[] = [
   {
     scene: { reveal: {} },
-    run: (gen) => beat(gen, T().hello, { label: T().letsGo, settle: 0 }),
+    run: (gen) => beat(gen, useSolver.getState().status === 'failed' ? `${T().hello}\n\n${t().home.checkerUnavailable}` : T().hello, { label: T().letsGo, settle: 0 }),
   },
   {
     scene: { reveal: {}, labels: [[0, 3]] },

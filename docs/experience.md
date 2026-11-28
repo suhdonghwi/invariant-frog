@@ -40,6 +40,19 @@ adding UI.
   design.md, *See-through frogs*). The caption says what fails in general,
   then gives the counterexample, putting the area first: "your area says a
   frog could be at …".
+- **Typing is the cancel.** In a level the formula box stays editable while a
+  check runs or its replay plays (a counterexample replayed from a red light
+  too). The first edit ends the check: the solver stops, frogs go home, tags
+  and rings leave with their exit animations, and the lights return to idle.
+  The Check button stays disabled while a check plays. The tutorial keeps its
+  box locked.
+- **A check that takes time says so.** A Check that arrives while the checker
+  is still loading says so. After two seconds of solving, the caption names the
+  rule being worked on and offers Cancel. A check has one time budget; a rule
+  still open when it runs out is undecided.
+- **A failure caption belongs to its formula.** In a level, editing the
+  formula drops a caption a check produced (failure or undecided); intro, hint
+  and success captions stay.
 - **The board changes only when the learner asks.** A failure on another input
   is offered with a button; nothing moves until it is pressed.
 - **The camera moves only when it must**: when what a moment is about is off
@@ -66,8 +79,10 @@ adding UI.
 - **Hovering a tile answers the checker's question**: a see-through frog shows
   the hop a frog there would make.
 - **Errors wait for Check.** A formula is never marked wrong while it is typed.
-- **Failures stay on the page.** No WebGL, a crash or a solver that won't start
-  is told in a plain card, never a blank page.
+- **Failures stay on the page.** No WebGL or a crash is told in a plain card,
+  never a blank page. A checker that can't run here is said on the home screen
+  and at the start of the tutorial, with the next step to take, and the
+  tutorial's checks then offer a way on instead of waiting.
 - **Reset puts the screen back as the level opened**; the area and its
   verdicts stay, since those are the learner's work.
 

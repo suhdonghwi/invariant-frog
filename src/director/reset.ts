@@ -5,11 +5,12 @@ import { hopArcs } from '../scene/frogs/HopArcs';
 import { hatchFx } from '../scene/frogs/Hatch';
 import { clearTrace } from './codeTrace';
 import { sendFrogsHome } from './frogs';
-import { abandonCheck, begin } from './sequence';
+import { abandonRun } from './checkRun';
+import { begin } from './sequence';
 
 export function interrupt() {
   begin();
-  abandonCheck();
+  abandonRun();
   clearTrace();
   frogWorld.clear();
   hatchFx.clear();

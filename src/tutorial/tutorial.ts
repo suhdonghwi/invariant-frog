@@ -83,7 +83,7 @@ function play(from: number, opening = false) {
     }
     onFinish();
   })().catch((e) => {
-    if (!(e instanceof Aborted)) console.error(e);
+    if (!(e instanceof Aborted)) throw e;
   });
 }
 
