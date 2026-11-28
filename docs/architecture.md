@@ -36,8 +36,16 @@ which feeds:
 - an **exact interpreter** (BigInt) for hops, eggs, and confirming what Z3
   found;
 - **Z3** for proofs. Bounded passes look for small counterexamples first; the
-  unbounded pass proves;
-- **GLSL** for the floor (32-bit ints, visual only).
+  unbounded pass proves. Every model Z3 returns is replayed in the interpreter
+  before it is shown, and arrays in a shown model are at most `MAX_LEN` long.
+  A rule that fails only for longer arrays is reported as such, without a
+  counterexample;
+- **GLSL** for the floor (visual only). It walks a quantifier the way the
+  interpreter's fast path does, with the same step budget (`EVAL_BUDGET`): a
+  tile whose formula runs out of steps is off the area in both. Division by a
+  literal rounds down exactly. Values are 32-bit: literals past ±2³¹−1 are
+  clamped and sums and products wrap, so a tile whose values overflow can be
+  drawn wrong.
 
 Change semantics in `lang/` and make every backend agree. `pnpm validate` and
 the tests are the safety net.
