@@ -10,7 +10,7 @@ import { after, sceneNow } from '../sceneTime';
 import { goalEvents, landEvents } from '../tileEvents';
 import { StartEggs, type StartEgg } from './StartEggs';
 import { useHomeCamera } from './useHomeCamera';
-import { reducedMotion } from '../../motion';
+import { BEAT, HOME_BEAT, HOME_EGG_GAP, HOME_EGG_HOLD, HOME_EGG_STAGGER, HOME_FLOOR_IN, HOME_LAST_OUT, ms, reducedMotion } from '../../motion';
 
 const DIAGONAL = compileLevel({
   id: 'home-diagonal',
@@ -26,10 +26,6 @@ ensures x == y && x >= 2 && x <= 9;`,
 
 const RING = { x0: 1, y0: 8, w: 7, h: 5 };
 const FROGS = 5;
-const EGG_IN = 0.25;
-const EGG_HOLD = 0.9;
-const EGG_STAGGER = 0.3;
-const BEAT = 950;
 
 function edgePath({ x0, y0, w, h }: typeof RING): [number, number][] {
   const p: [number, number][] = [];
@@ -62,18 +58,18 @@ export function HomeScene() {
     eggs.current = [];
     const frogs = pos.map((k, j) => {
       const [x, y] = PATH[k];
-      const hatch = t0 + EGG_IN + EGG_HOLD + j * EGG_STAGGER;
-      eggs.current.push({ x, y, appear: t0 + EGG_IN + j * 0.1, hatch });
-      timers.push(after((hatch - t0) * 1000, () => hatchFx.push({ x, y, plane: '', dx: 0, dy: 0, s: 1 })));
+      const hatch = t0 + BEAT + HOME_EGG_HOLD + j * HOME_EGG_STAGGER;
+      eggs.current.push({ x, y, appear: t0 + BEAT + j * HOME_EGG_GAP, hatch });
+      timers.push(after(ms(hatch - t0), () => hatchFx.push({ x, y, plane: '', dx: 0, dy: 0, s: 1 })));
       const f = frogWorld.add(DIAGONAL, 'real', { x: BigInt(x), y: BigInt(y) }, { hatchT0: hatch + HATCH_EMERGE });
       const [nx, ny] = PATH[(k + 1) % PATH.length];
       f.face = f.yaw = yawToward(x, y, nx, ny);
       return f;
     });
-    const lastOut = Math.max(...frogs.map((f) => f.hatchT0 ?? t0)) + 0.6;
+    const lastOut = Math.max(...frogs.map((f) => f.hatchT0 ?? t0)) + HOME_LAST_OUT;
     const beat = () => {
       if (reducedMotion()) return;
-      timers.push(after(BEAT, beat));
+      timers.push(after(ms(HOME_BEAT), beat));
       if (sceneNow() < lastOut) return;
       frogs.forEach((f, j) => {
         pos[j] = (pos[j] + 1) % PATH.length;
@@ -84,7 +80,7 @@ export function HomeScene() {
         });
       });
     };
-    timers.push(after(BEAT, beat));
+    timers.push(after(ms(HOME_BEAT), beat));
 
     return () => {
       timers.forEach((cancel) => cancel());
@@ -97,7 +93,7 @@ export function HomeScene() {
 
   return (
     <group>
-      <Floor level={DIAGONAL} inputs={NO_INPUTS} fadeIn={1.2} showAxes={false} />
+      <Floor level={DIAGONAL} inputs={NO_INPUTS} fadeIn={HOME_FLOOR_IN} showAxes={false} />
       <AreaLayer level={DIAGONAL} inputs={NO_INPUTS} area={AREA} dim={false} showStop showGoal showEggs={false} />
       <StartEggs eggs={eggs} />
       <Frogs />

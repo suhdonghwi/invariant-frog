@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { clarity, FLIGHT_MAX, FLIGHT_MIN, HIGHEST, plan, sample, STILL, velocity, type Pose } from '../src/scene/flight';
+import { FLIGHT_MAX, FLIGHT_MIN } from '../src/motion';
+import { clarity, HIGHEST, plan, sample, STILL, velocity, type Pose } from '../src/scene/flight';
 
 const at = (x: number, y: number, d = 14): Pose => ({ x, y, d, az: 0.26, po: 0.8 });
 

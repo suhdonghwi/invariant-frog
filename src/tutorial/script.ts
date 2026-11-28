@@ -7,7 +7,7 @@ import { checkAndPlay, revealAll } from '../director/verification';
 import { ALLOW_NONE, setTutorial, useGame, type CaptionTone, type Game, type TutorialState } from '../game/store';
 import { t as messages } from '../i18n/i18n';
 import { cameraRig } from '../scene/cameraRig';
-import { BEAT, LONG, ms } from '../motion';
+import { BEAT, LONG, MICRO, ms, TYPE_KEY, TYPE_SPACE } from '../motion';
 import { sleep } from '../scene/sceneTime';
 
 const generations = createScope();
@@ -29,9 +29,9 @@ export function setSkipStep(skip: (() => void) | null) {
   skipStep = skip;
 }
 
-const DOUBLE_CLICK_MS = 120;
-const TYPE_KEY_MS = 70;
-const TYPE_SPACE_MS = 30;
+const DOUBLE_CLICK_MS = ms(MICRO);
+const TYPE_KEY_MS = ms(TYPE_KEY);
+const TYPE_SPACE_MS = ms(TYPE_SPACE);
 const tooSoonAfter = (shownAt: number) => performance.now() - shownAt < DOUBLE_CLICK_MS;
 
 function earlyNext(label = messages().caption.next, last?: () => void) {

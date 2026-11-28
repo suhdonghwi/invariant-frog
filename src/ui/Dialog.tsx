@@ -28,7 +28,7 @@ export function Overlay({ open, onClose, label, card, children }: { open: boolea
         onClick={onClose}
       >
         <div
-          className={`max-h-full w-full rounded-3xl shadow-float ${card} ${leaving ? 'animate-pop-out' : 'animate-[pop_0.18s_var(--ease-entrance)]'}`}
+          className={`max-h-full w-full rounded-3xl shadow-float ${card} ${leaving ? 'animate-pop-out' : 'animate-[pop_var(--duration-short)_var(--ease-entrance)]'}`}
           onClick={(e) => e.stopPropagation()}
         >
           {children}

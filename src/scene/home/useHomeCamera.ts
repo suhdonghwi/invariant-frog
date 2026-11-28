@@ -5,13 +5,12 @@ import { useGame } from '../../game/store';
 import { cameraRig, type Shot } from '../cameraRig';
 import { easeInOut } from '../easing';
 import { sceneNow } from '../sceneTime';
-import { reducedMotion } from '../../motion';
+import { HOME_INTRO, reducedMotion } from '../../motion';
 
 const RING: Shot = { focus: [[1, 8], [7, 8], [1, 12], [7, 12]] };
 const ANGLE = { az: 0, po: 0.95 };
 const PADDING = 0.15;
 const SWAY = 0.025;
-const INTRO_SECONDS = 1.6;
 const OVERVIEW = new THREE.Vector3(0, 9, 7);
 const FALLBACK = { x: 4, y: 10, d: 20 };
 
@@ -44,7 +43,7 @@ export function useHomeCamera() {
     if (mode !== 'menu' || !intro.current) return;
     const t = sceneNow();
     restingPose(t, size);
-    const u = reducedMotion() ? 1 : Math.min(1, (t - intro.current.t0) / INTRO_SECONDS);
+    const u = reducedMotion() ? 1 : Math.min(1, (t - intro.current.t0) / HOME_INTRO);
     const e = easeInOut(u);
     eye.lerpVectors(intro.current.eye, eye, e);
     target.lerpVectors(intro.current.target, target, e);

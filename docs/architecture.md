@@ -67,7 +67,8 @@ the tests are the safety net.
 - **Each screen starts together**: scene time and CSS animations hold until
   the first frame is drawn and the fonts are in.
 - **Every duration and pause is a token** from `motion.ts`, mirrored in CSS as
-  `--duration-*`.
+  `--duration-*`. The scene's own durations (flights, hatching, ripples, the
+  home loop) are named there too, built from the base tokens where they match.
 
 ## Sequences
 

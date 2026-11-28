@@ -8,6 +8,7 @@ import { uploadInstances } from '../instances';
 import { eggGeometry } from '../models';
 import { sceneNow } from '../sceneTime';
 import { EGG_SHADOW_SIZE, eggShadowMaterial } from '../shaders/common';
+import { BASE } from '../../motion';
 
 export interface StartEgg {
   x: number;
@@ -46,7 +47,7 @@ export function StartEggs({ eggs }: { eggs: React.RefObject<StartEgg[]> }) {
       if (t < e.appear || t >= e.hatch || n >= MAX) continue;
       const ground = field.groundAt(e.x, e.y);
       dummy.position.set(e.x, ground, -e.y);
-      dummy.scale.setScalar(popIn((t - e.appear) / 0.32));
+      dummy.scale.setScalar(popIn((t - e.appear) / BASE));
       dummy.updateMatrix();
       mesh.setMatrixAt(n, dummy.matrix);
       dummy.position.y = ground + 0.006;

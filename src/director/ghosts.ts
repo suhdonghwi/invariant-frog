@@ -22,7 +22,7 @@ export const PROOF_PICTURE = GHOST_RISE + ARC_AFTER_RISE + ARC_DRAW + APPEAR + B
 export function raiseGhost(s: State, fade = 1): FrogSim {
   const L = currentLevel();
   const f = frogWorld.add(L, 'test', s, { rise: { t0: sceneNow(), dur: GHOST_RISE, turns: TURNS }, fade });
-  after(GHOST_RISE * 1000, () => {
+  after(ms(GHOST_RISE), () => {
     if (frogWorld.frogs.includes(f) && !running(L, f.state) && holds(L.post, f.state)) frogWorld.landOnGoal(f);
   });
   return f;

@@ -8,7 +8,7 @@ import { NO_SPAN } from '../../lang/ast';
 import { applyFix, LangError } from '../../lang/parser';
 import { BUTTON, button } from '../classes';
 import { Markdown } from '../Markdown';
-import { reducedMotion } from '../../motion';
+import { BASE, ms, reducedMotion } from '../../motion';
 import { HighlightedCode } from '../codeColors';
 import { RuleLights } from './RuleLights';
 
@@ -48,7 +48,7 @@ export function FormulaBox() {
     void check().then((r) => {
       if (r !== 'refused') return;
       setRefused(useGame.getState().formula ?? 'empty');
-      if (!reducedMotion()) box.current?.animate(SHAKE, { duration: 320, easing: 'ease-in-out' });
+      if (!reducedMotion()) box.current?.animate(SHAKE, { duration: ms(BASE), easing: 'ease-in-out' });
     });
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.nativeEvent.isComposing) {

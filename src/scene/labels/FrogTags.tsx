@@ -62,7 +62,7 @@ function Value({ value }: { value: string }) {
   return (
     <span className="inline-grid justify-items-center overflow-hidden align-bottom *:[grid-area:1/1]">
       {cur.old !== null && (
-        <span key={`o${cur.k}`} className="animate-[tag-old_0.28s_ease-in_forwards]">
+        <span key={`o${cur.k}`} className="animate-[tag-old_var(--duration-beat)_ease-in_forwards]">
           {cur.old}
         </span>
       )}

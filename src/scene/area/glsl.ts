@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { RISE, RISE_OVERSHOOT, SHORT, WAVE_CAP, WAVE_SPREAD } from '../../motion';
+import { EGG_APPEAR, EGG_APPEAR_CAP, EGG_APPEAR_SPREAD, RISE, RISE_OVERSHOOT, SHORT, WAVE_CAP, WAVE_SPREAD } from '../../motion';
 
 export const MASK_SIZE = 352;
 export const SETTLE_POWER = 2.5;
@@ -82,8 +82,8 @@ float easeOutBack(float a) {
   return a <= 0.0 ? 0.0 : 1.0 + c3 * (a - 1.0) * (a - 1.0) * (a - 1.0) + c1 * (a - 1.0) * (a - 1.0);
 }
 float appearNow() {
-  float delay = min(length(tileAt() - uAppearCenter) * 0.035, 0.7);
-  float a = clamp((uTime - uAppearT0 - delay) / 0.38, 0.0, 1.0);
+  float delay = min(length(tileAt() - uAppearCenter) * ${EGG_APPEAR_SPREAD.toFixed(3)}, ${EGG_APPEAR_CAP.toFixed(2)});
+  float a = clamp((uTime - uAppearT0 - delay) / ${EGG_APPEAR.toFixed(2)}, 0.0, 1.0);
   return easeOutBack(a);
 }
 `;

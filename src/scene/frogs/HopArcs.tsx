@@ -14,8 +14,9 @@ import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeo
 import { sceneNow } from '../sceneTime';
 import { frogWorld, leaveFade } from './frogWorld';
 import { HopLine } from './HopLine';
+import { ARC_DRAW } from '../../motion';
 
-export const ARC_DRAW = 0.45;
+export { ARC_DRAW };
 const MAX = 80;
 
 interface Arc {

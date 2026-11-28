@@ -12,12 +12,12 @@ import { sceneNow } from '../sceneTime';
 import { colorUniform, EGG_SHADOW_SIZE, eggShadowMaterial, GLSL_COMMON } from '../shaders/common';
 import { clamp01, smoothstep } from '../easing';
 import { HATCH_CLEAR, HATCH_GROW } from './motion';
+import { HATCH_CAP, HATCH_WOBBLE, MICRO } from '../../motion';
 
-const HATCH_WOBBLE = 0.07;
 export const HATCH_EMERGE = HATCH_WOBBLE + 0.02;
 const FROG_OUT = HATCH_EMERGE - HATCH_WOBBLE + HATCH_GROW * HATCH_CLEAR;
-const CAP_LIFE = 0.3;
-const CAP_HOLD = 0.12;
+const CAP_LIFE = HATCH_CAP;
+const CAP_HOLD = MICRO;
 const CUP_HOLD = FROG_OUT * 0.7;
 const CUP_LIFE = FROG_OUT + 0.08;
 const MAX = 256;

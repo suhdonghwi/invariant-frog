@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { EXIT_MS } from '../motion';
+import { EXIT, EXIT_MS } from '../motion';
 import { clamp01, easeIn } from '../scene/easing';
+import { sceneNow } from '../scene/sceneTime';
 
 export function usePresence(show: boolean): { mounted: boolean; leaving: boolean } {
   const [mounted, setMounted] = useState(show);
@@ -67,8 +68,8 @@ class ExitFade {
 
   at(leaving: boolean): number {
     if (!leaving) this.leftAt = null;
-    else if (this.leftAt === null) this.leftAt = performance.now();
-    return this.leftAt === null ? 1 : 1 - easeIn(clamp01((performance.now() - this.leftAt) / EXIT_MS));
+    else if (this.leftAt === null) this.leftAt = sceneNow();
+    return this.leftAt === null ? 1 : 1 - easeIn(clamp01((sceneNow() - this.leftAt) / EXIT));
   }
 }
 

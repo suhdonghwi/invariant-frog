@@ -11,6 +11,7 @@ import { figurePage } from './figureClip';
 import { Framing } from './Framing';
 import { grab } from './grab';
 import { startScene } from './sceneTime';
+import { CAMERA_SMOOTH, DRAG_SMOOTH } from '../motion';
 
 function Lights() {
   return (
@@ -72,8 +73,8 @@ function Controls() {
       minPolarAngle={0.25}
       maxPolarAngle={1.15}
       dollySpeed={0.6}
-      smoothTime={0.42}
-      draggingSmoothTime={0.1}
+      smoothTime={CAMERA_SMOOTH}
+      draggingSmoothTime={DRAG_SMOOTH}
     />
   );
 }

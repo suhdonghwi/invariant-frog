@@ -15,7 +15,7 @@ export function HomeOverlay() {
   const view = useGame((s) => s.menuView);
   const compact = useMedia(COMPACT_HOME);
   const picking = view === 'levels';
-  const dim = `transition-opacity duration-180 ${picking ? 'opacity-35' : ''}`;
+  const dim = `transition-opacity duration-(--duration-short) ${picking ? 'opacity-35' : ''}`;
   return (
     <>
       <div
@@ -27,7 +27,7 @@ export function HomeOverlay() {
       </div>
       <div
         data-frame
-        className={`fixed top-4 right-4 flex max-sm:top-2.5 max-sm:right-2.5 animate-[fade_0.4s_var(--ease-entrance)_0.6s_both] items-center gap-2 ${dim}`}
+        className={`fixed top-4 right-4 flex max-sm:top-2.5 max-sm:right-2.5 animate-[fade_var(--duration-base)_var(--ease-entrance)_0.6s_both] items-center gap-2 ${dim}`}
       >
         <CornerControls />
         <LangSwitch />
