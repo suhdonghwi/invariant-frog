@@ -160,7 +160,7 @@ html[data-started] .world {
   opacity: 1;
   transition: opacity 0.3s ease-out;
 }
-html[data-leaving] .screen {
+html[data-leaving] :is(.screen, dialog[open]) {
   animation: var(--animate-fade-out);
 }
 
