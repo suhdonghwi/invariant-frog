@@ -13,5 +13,8 @@ export const EXIT_MS = EXIT * 1000;
 
 export const ms = (seconds: number) => seconds * 1000;
 
-const REDUCE = '(prefers-reduced-motion: reduce)';
-export const reducedMotion = () => typeof matchMedia !== 'undefined' && matchMedia(REDUCE).matches;
+export const REDUCE = '(prefers-reduced-motion: reduce)';
+const query = typeof matchMedia !== 'undefined' ? matchMedia(REDUCE) : null;
+let reduce = query?.matches ?? false;
+query?.addEventListener('change', (e) => (reduce = e.matches));
+export const reducedMotion = () => reduce;

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { origin } from './origin';
 import { sceneNow } from './sceneTime';
+import { reducedMotion } from '../motion';
 
 export const MAX_EVENTS = 24;
 const NONE = -100;
@@ -25,6 +26,7 @@ export class TileEvents {
   }
 
   push(x: number, y: number, plane: string, t = sceneNow(), weight = 1) {
+    if (reducedMotion()) return;
     if (this.events.some((e) => e.x === x && e.y === y && e.plane === plane && e.weight === weight && Math.abs(t - e.t) < 0.15)) return;
     this.events.push({ x, y, plane, t, weight });
     if (this.events.length > this.size) this.events.shift();
