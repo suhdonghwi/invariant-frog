@@ -26,7 +26,15 @@ export function markCleared(id: string) {
   save(next);
 }
 
-export function resetCleared() {
+export function resetCleared(): string[] {
+  const { cleared } = useProgress.getState();
   useProgress.setState({ cleared: [] });
   save([]);
+  return cleared;
+}
+
+export function restoreCleared(ids: string[]) {
+  const next = [...new Set([...ids, ...useProgress.getState().cleared])];
+  useProgress.setState({ cleared: next });
+  save(next);
 }
