@@ -14,15 +14,15 @@ import { after, sceneNow, sleep } from '../scene/sceneTime';
 import { sendFrogsHome } from './frogs';
 import { busyWhile, currentLevel } from './sequence';
 
-export const GHOST_RISE = 0.6;
+export const SEE_THROUGH_RISE = 0.6;
 const TURNS = 2;
 export const ARC_AFTER_RISE = 0.1;
-export const PROOF_PICTURE = GHOST_RISE + ARC_AFTER_RISE + ARC_DRAW + APPEAR + BEAT;
+export const PROOF_PICTURE = SEE_THROUGH_RISE + ARC_AFTER_RISE + ARC_DRAW + APPEAR + BEAT;
 
-export function raiseGhost(s: State, fade = 1): FrogSim {
+export function raiseSeeThrough(s: State, fade = 1): FrogSim {
   const L = currentLevel();
-  const f = frogWorld.add(L, 'test', s, { rise: { t0: sceneNow(), dur: GHOST_RISE, turns: TURNS }, fade });
-  after(ms(GHOST_RISE), () => {
+  const f = frogWorld.add(L, 'seeThrough', s, { rise: { t0: sceneNow(), dur: SEE_THROUGH_RISE, turns: TURNS }, fade });
+  after(ms(SEE_THROUGH_RISE), () => {
     if (frogWorld.frogs.includes(f) && !running(L, f.state) && holds(L.post, f.state)) frogWorld.landOnGoal(f);
   });
   return f;
@@ -30,7 +30,7 @@ export function raiseGhost(s: State, fade = 1): FrogSim {
 
 export function previewHop(s: State, fade = 1, to: State = hop(currentLevel(), s), ring = true): FrogSim {
   const L = currentLevel();
-  const f = raiseGhost(s, fade);
+  const f = raiseSeeThrough(s, fade);
   const [tx, ty] = tileOf(L, to);
   hopArcs.add({
     frog: f.id,
@@ -39,11 +39,11 @@ export function previewHop(s: State, fade = 1, to: State = hop(currentLevel(), s
     tx,
     ty,
     plane: f.plane,
-    t0: sceneNow() + GHOST_RISE + ARC_AFTER_RISE,
+    t0: sceneNow() + SEE_THROUGH_RISE + ARC_AFTER_RISE,
     fade,
     ring,
   });
-  after(ms(GHOST_RISE + ARC_AFTER_RISE + ARC_DRAW), () => ring && frogWorld.frogs.includes(f) && sfx.landing());
+  after(ms(SEE_THROUGH_RISE + ARC_AFTER_RISE + ARC_DRAW), () => ring && frogWorld.frogs.includes(f) && sfx.landing());
   return f;
 }
 
@@ -93,8 +93,8 @@ export async function proofWave(around?: { x: number; y: number }): Promise<Frog
   });
   const hops = spreadHops(candidates.sort((a, b) => a.d - b.d));
   const fadeAt = (d: number) => 1 - smoothstep(clamp01((d - PROOF_NEAR) / (PROOF_FAR - PROOF_NEAR)));
-  sfx.ghost();
-  const ghosts = hops.map((h) => previewHop(h.from, fadeAt(h.d)));
+  sfx.seeThrough();
+  const frogs = hops.map((h) => previewHop(h.from, fadeAt(h.d)));
   await sleep(ms(PROOF_PICTURE));
-  return ghosts[0] ?? null;
+  return frogs[0] ?? null;
 }

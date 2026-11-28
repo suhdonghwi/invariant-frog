@@ -12,7 +12,7 @@ import { runChecker } from './checkRun';
 import { clearTrace } from './codeTrace';
 import { counterexample, offerOtherBoard, onOtherBoard, type CounterexampleOptions } from './counterexample';
 import { sendFrogsHome } from './frogs';
-import { proofWave } from './ghosts';
+import { proofWave } from './seeThrough';
 import { eggRegion, endingsRegion } from './regions';
 import { busyWhile, caption, currentLevel, type Token } from './sequence';
 import { MAX_LEN } from '../levels/inputs';
@@ -36,7 +36,7 @@ interface Outcome {
 }
 
 export async function checkAndPlay(rules: Rule[], onFail?: (rule: Rule) => CounterexampleOptions, owner?: Token): Promise<Outcome | null> {
-  void sendFrogsHome('test');
+  void sendFrogsHome('seeThrough');
   const res = await runChecker(rules);
   owner?.guard();
   return res && playVerification(res, rules, onFail);
@@ -97,7 +97,7 @@ async function verifyRules(tok: Token, res: CheckResult, rules: Rule[], onFail: 
       await sleep(ms(HOLD));
       if (!tok.alive) return null;
       useGame.setState({ region: null, callouts: [] });
-      void sendFrogsHome('test');
+      void sendFrogsHome('seeThrough');
       await sleep(ms(BEAT));
       if (!tok.alive) return null;
     }

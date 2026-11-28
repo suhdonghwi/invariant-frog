@@ -204,7 +204,7 @@ export interface StageOptions {
   ask: string;
   rules: Rule[];
   nudge: string;
-  ghost?: Partial<Record<Rule, string>>;
+  seeThrough?: Partial<Record<Rule, string>>;
   region?: Game['region'];
   onFail?: (rule: Rule) => void;
 }
@@ -230,7 +230,7 @@ export async function stage(gen: Token, o: StageOptions): Promise<boolean> {
       (failing) => ({
         note: failing !== stageRule ? messages().tutorial.lostRule : undefined,
         extra: messages().tutorial.fixAndCheck,
-        ghostExtra: o.ghost?.[failing],
+        seeThroughExtra: o.seeThrough?.[failing],
       }),
       gen,
     );
@@ -254,13 +254,13 @@ export async function demo(
   gen: Token,
   formula: string,
   rules: Rule[],
-  opts: { ghostExtra?: string; restore?: string; guessedRight?: boolean } = {},
+  opts: { seeThroughExtra?: string; restore?: string; guessedRight?: boolean } = {},
 ): Promise<void> {
   const g = useGame.getState();
   const mine = opts.restore ?? g.formulaText;
   useGame.setState({ busy: true, callouts: [], region: null });
   try {
-    void sendFrogsHome('test');
+    void sendFrogsHome('seeThrough');
     say(messages().tutorial.trying(formula), null, 'muted');
     if (g.formulaText.trim() !== formula) {
       setTutorial({ spotlight: 'formula' });
@@ -279,7 +279,7 @@ export async function demo(
   }
   const verdict = opts.guessedRight === undefined ? undefined : opts.guessedRight ? messages().tutorial.guessedRight : messages().tutorial.guessedWrong;
   const tone = opts.guessedRight ? 'success' : 'fail';
-  const out = await checkAndPlay(rules, () => ({ prefix: verdict, tone, ghostExtra: opts.ghostExtra, area: messages().verdicts.theArea, action: nextAfterCounterexample }), gen);
+  const out = await checkAndPlay(rules, () => ({ prefix: verdict, tone, seeThroughExtra: opts.seeThroughExtra, area: messages().verdicts.theArea, action: nextAfterCounterexample }), gen);
   gen.guard();
   if (out?.failing) await holdCaption(gen);
   void sendFrogsHome();

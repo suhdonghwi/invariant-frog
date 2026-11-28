@@ -79,7 +79,7 @@ const scl = new THREE.Vector3();
 const RING = new THREE.Color(RING_COLORS.good);
 const WASH = new THREE.Color(WASH_COLORS.good);
 
-function GhostHop({ arc, plane }: { arc: Arc; plane: string }) {
+function SeeThroughHop({ arc, plane }: { arc: Arc; plane: string }) {
   return (
     <HopLine
       path={() => {
@@ -115,12 +115,12 @@ export function HopArcs() {
     const w = washes.current;
     if (!r || !w) return;
     const t = sceneNow();
-    const ghosts = byId.current;
-    ghosts.clear();
-    for (const f of frogWorld.frogs) ghosts.set(f.id, f);
+    const frogs = byId.current;
+    frogs.clear();
+    for (const f of frogWorld.frogs) frogs.set(f.id, f);
     let { arcs } = useHopArcs.getState();
-    if (arcs.some((a) => !ghosts.has(a.frog))) {
-      arcs = arcs.filter((a) => ghosts.has(a.frog));
+    if (arcs.some((a) => !frogs.has(a.frog))) {
+      arcs = arcs.filter((a) => frogs.has(a.frog));
       useHopArcs.setState({ arcs });
     }
     let nr = 0;
@@ -131,7 +131,7 @@ export function HopArcs() {
       const { scale, alpha } = ringPop(shown);
       const h0 = field.groundAt(a.fx, a.fy);
       m.compose(pos.set(a.fx - origin.x, h0 + 0.012, origin.y - a.fy), q, scl.set(scale, 1, scale));
-      const fade = alpha * a.fade * leaveFade(ghosts.get(a.frog), t);
+      const fade = alpha * a.fade * leaveFade(frogs.get(a.frog), t);
       for (const [mesh, p, opacity, c] of [
         [r, parts.ring, RING_ALPHA, RING],
         [w, parts.wash, WASH_ALPHA, WASH],
@@ -154,7 +154,7 @@ export function HopArcs() {
   return (
     <>
       {list.map((a) => (
-        <GhostHop key={a.frog} arc={a} plane={plane} />
+        <SeeThroughHop key={a.frog} arc={a} plane={plane} />
       ))}
       <AtOrigin>
         <instancedMesh ref={washes} args={[parts.wash.g, parts.wash.mat, MAX]} count={0} frustumCulled={false} renderOrder={8} />

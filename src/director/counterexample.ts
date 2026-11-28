@@ -14,7 +14,7 @@ import { after, sceneNow, sleep } from '../scene/sceneTime';
 import { traceHop } from './codeTrace';
 import { sendFrogsHome } from './frogs';
 import type { FrogSim } from '../scene/frogs/frogWorld';
-import { ARC_AFTER_RISE, GHOST_RISE, previewHop, raiseGhost } from './ghosts';
+import { ARC_AFTER_RISE, SEE_THROUGH_RISE, previewHop, raiseSeeThrough } from './seeThrough';
 import { busyWhile, currentLevel, type Token } from './sequence';
 
 export interface CounterexampleOptions {
@@ -23,7 +23,7 @@ export interface CounterexampleOptions {
   area?: string;
   tone?: CaptionTone;
   extra?: string;
-  ghostExtra?: string;
+  seeThroughExtra?: string;
   action?: () => Caption['action'];
 }
 
@@ -112,21 +112,21 @@ export async function counterexample(tok: Token, cex: Counterexample, opts: Coun
     finish(cex, opts, text);
     return;
   }
-  sfx.ghost();
+  sfx.seeThrough();
   if (cex.rule === 'maintenance' && cex.next) {
     const { state, next } = cex;
     const frog = previewHop(state, 1, next, false);
-    after(ms(GHOST_RISE + ARC_AFTER_RISE), () => tok.alive && traceHop(L, state, next, ARC_DRAW));
-    await sleep(ms(GHOST_RISE + ARC_AFTER_RISE + ARC_DRAW));
+    after(ms(SEE_THROUGH_RISE + ARC_AFTER_RISE), () => tok.alive && traceHop(L, state, next, ARC_DRAW));
+    await sleep(ms(SEE_THROUGH_RISE + ARC_AFTER_RISE + ARC_DRAW));
     if (!tok.alive) return;
     markFailure(cex.rule, x, y, say.landsOutsideTag(area), frog);
   } else {
-    const frog = raiseGhost(cex.state);
-    await sleep(ms(GHOST_RISE + BEAT));
+    const frog = raiseSeeThrough(cex.state);
+    await sleep(ms(SEE_THROUGH_RISE + BEAT));
     if (!tok.alive) return;
     markFailure(cex.rule, x, y, say.offGoalTag, frog);
   }
-  finish(cex, opts, opts.ghostExtra ? `${text}\n\n${opts.ghostExtra}` : text);
+  finish(cex, opts, opts.seeThroughExtra ? `${text}\n\n${opts.seeThroughExtra}` : text);
 }
 
 function finish(cex: Counterexample, opts: CounterexampleOptions, said: string) {
