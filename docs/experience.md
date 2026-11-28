@@ -80,8 +80,8 @@ adding UI.
   the hop a frog there would make.
 - **Errors wait for Check.** A formula is never marked wrong while it is typed.
 - **An error names the slip.** Habits from other languages (`=`, `=<`, `and`,
-  `;`, `^`, `2i`, `==>`) and a name in the wrong case get their own message, and
-  where one rewrite fixes it, a button applies it. An empty box and an
+  `;`, `^`, `2i`, `==>`) and a name in the wrong case get their own message. An
+  empty box and an
   unfinished formula say so, and the underline sits on the last token.
 - **Failures stay on the page.** No WebGL or a crash is told in a plain card,
   never a blank page. A checker that can't run here is said on the home screen
