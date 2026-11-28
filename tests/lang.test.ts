@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { hasQuantifier, show } from '../src/lang/ast';
 import { compileFast, evaluate, euclidMod, floorDiv, OverBudget, step } from '../src/lang/eval';
-import { LangError, parseFormula, parseProgram } from '../src/lang/parser';
+import { applyFix, LangError, parseFormula, parseProgram } from '../src/lang/parser';
 import { checkCondition, checkProgram, type Scope } from '../src/lang/typecheck';
 import { unroll } from '../src/lang/unroll';
 
@@ -180,5 +180,81 @@ describe('integer semantics', () => {
     expect(floorDiv(-3n, 2n)).toBe(-2n);
     for (let a = -10n; a <= 10n; a++) expect(3n * floorDiv(a, 3n) + euclidMod(a, 3n)).toBe(a);
     expect(evaluate(parseFormula('(-1 + 0) % 2 == 1'), {})).toBe(true);
+  });
+});
+
+function slip(src: string, scope?: Scope): LangError {
+  try {
+    const e = parseFormula(src);
+    if (scope) checkCondition(e, scope, src, 'an area');
+  } catch (err) {
+    if (err instanceof LangError) return err;
+    throw err;
+  }
+  throw new Error(`${src} should fail`);
+}
+
+function fixed(src: string, scope?: Scope): string | undefined {
+  const e = slip(src, scope);
+  return e.fix && applyFix(src, e.fix);
+}
+
+describe('slips', () => {
+  const scope: Scope = new Map([
+    ['i', 'int'],
+    ['n', 'int'],
+    ['A', 'array'],
+  ]);
+  it('turns a lone = into ==', () => {
+    expect(slip('i = n').message).toMatch(/==/);
+    expect(fixed('i = n')).toBe('i == n');
+  });
+  it('flips =< and =>', () => {
+    expect(fixed('i =< n')).toBe('i <= n');
+    expect(fixed('i => 0')).toBe('i >= 0');
+  });
+  it('spells out word operators', () => {
+    expect(fixed('i >= 0 and i <= n')).toBe('i >= 0 && i <= n');
+    expect(fixed('i >= 0 OR i <= n')).toBe('i >= 0 || i <= n');
+    expect(fixed('not i > n')).toBe('!(i > n)');
+  });
+  it('doubles a single & or |', () => {
+    expect(fixed('i >= 0 & i <= n')).toBe('i >= 0 && i <= n');
+    expect(fixed('i >= 0 | i <= n')).toBe('i >= 0 || i <= n');
+  });
+  it('joins with && instead of ;', () => {
+    expect(fixed('i >= 0; i <= n')).toBe('i >= 0 && i <= n');
+    expect(fixed('i >= 0;')).toBe('i >= 0');
+  });
+  it('writes out powers and implicit products', () => {
+    expect(fixed('i ^ 2 <= n')).toBe('i * i <= n');
+    expect(fixed('i ** 3 <= n')).toBe('i * i * i <= n');
+    expect(fixed('2i <= n')).toBe('2 * i <= n');
+  });
+  it('explains implication without a fix', () => {
+    const e = slip('i > 0 ==> n > 0');
+    expect(e.message).toMatch(/\|\|/);
+    expect(e.fix).toBeUndefined();
+  });
+  it('drops an unmatched )', () => {
+    expect(fixed('i <= n)')).toBe('i <= n');
+  });
+  it('splits a chain of plain equalities', () => {
+    expect(fixed('i == n == 0')).toBe('i == n && n == 0');
+  });
+  it('matches a name in the wrong case', () => {
+    expect(fixed('I <= N', scope)).toBe('i <= N');
+  });
+  it('says a bound name lives only inside its quantifier', () => {
+    const src = 'forall 0 <= k < i: A[k] <= n && A[k] >= 0';
+    expect(slip(src, scope).message).toMatch(/parentheses/);
+  });
+  it('underlines the last token when input ends early', () => {
+    const e = slip('i >= ');
+    expect(e.span.to - e.span.from).toBeGreaterThan(0);
+  });
+  it('reads ≤ ≥ ≠ as <= >= !=', () => {
+    expect(show(parseFormula('0 ≤ i ≤ n && i ≠ 3'))).toBe('0 <= i && i <= n && i != 3');
+    expect(show(parseFormula('i ≥ 0'))).toBe('i >= 0');
   });
 });

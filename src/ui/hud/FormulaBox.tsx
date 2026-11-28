@@ -4,7 +4,10 @@ import { check, editFormula } from '../../game/actions';
 import { useGame } from '../../game/store';
 import { useT } from '../../i18n/i18n';
 import { displayNames } from '../../levels/level';
-import { BUTTON } from '../classes';
+import { NO_SPAN } from '../../lang/ast';
+import { applyFix, LangError } from '../../lang/parser';
+import { BUTTON, button } from '../classes';
+import { Markdown } from '../Markdown';
 import { HighlightedCode } from '../codeColors';
 import { RuleLights } from './RuleLights';
 
@@ -27,8 +30,10 @@ export function FormulaBox() {
   const spot = useGame((s) => s.tutorial.spotlight);
   const tr = useT();
   const box = useRef<HTMLDivElement>(null);
-  const [refused, setRefused] = useState<typeof formula>(null);
-  const shownError = formula && !formula.ok && formula === refused ? formula.error : null;
+  const [refused, setRefused] = useState<typeof formula | 'empty'>(null);
+  const emptyRefused = refused === 'empty' && formulaText.trim() === '';
+  const shownError = formula && !formula.ok && formula === refused ? formula.error : emptyRefused ? new LangError(tr.langErrors.empty, NO_SPAN) : null;
+  const input = useRef<HTMLTextAreaElement>(null);
   const [slow, setSlow] = useState(false);
   if (!checking && slow) setSlow(false);
   useEffect(() => {
@@ -40,7 +45,7 @@ export function FormulaBox() {
   const submit = () =>
     void check().then((r) => {
       if (r !== 'refused') return;
-      setRefused(useGame.getState().formula);
+      setRefused(useGame.getState().formula ?? 'empty');
       box.current?.animate(SHAKE, { duration: 320, easing: 'ease-in-out' });
     });
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -68,6 +73,7 @@ export function FormulaBox() {
             {'\u200b'}
           </div>
           <textarea
+            ref={input}
             className={`${TEXT} w-full resize-none overflow-hidden border-0 bg-transparent text-transparent caret-ink outline-none selection:bg-brand/20 placeholder:text-transparent ${locked ? 'cursor-default' : ''}`}
             rows={1}
             value={formulaText}
@@ -84,9 +90,22 @@ export function FormulaBox() {
           />
         </div>
         {shownError && (
-          <span className="order-last mr-1.5 mb-1 basis-full animate-fade rounded-lg bg-[#fff1f0] px-2.5 py-1 text-xs leading-normal text-[#b42318]">
-            {shownError.message}
-          </span>
+          <div className="order-last mr-1.5 mb-1 flex basis-full animate-fade flex-wrap items-center gap-x-2 gap-y-1 rounded-lg bg-[#fff1f0] px-2.5 py-1 text-xs leading-normal text-[#b42318]">
+            <div className="min-w-0 flex-1">
+              <Markdown text={shownError.message} />
+            </div>
+            {shownError.fix && (
+              <button
+                className={`${button('plain', 'none')} gap-1 px-2.5 py-0.5 text-xs font-medium`}
+                onClick={() => {
+                  editFormula(applyFix(formulaText, shownError.fix!));
+                  input.current?.focus();
+                }}
+              >
+                {tr.langErrors.fixTo} <code className="font-mono font-normal"><HighlightedCode src={applyFix(formulaText, shownError.fix).trim()} /></code>
+              </button>
+            )}
+          </div>
         )}
         <div className="order-last -ml-1.5 mb-0.5 basis-full empty:hidden compact:-ml-1">
           <RuleLights />
