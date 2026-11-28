@@ -166,6 +166,8 @@ export function Frogs() {
     uploadInstances(nReal, b.instanceMatrix, blinks);
     uploadInstances(nGhost, gh.instanceMatrix, gd.instanceMatrix, gh.instanceColor, fades, clears);
     uploadInstances(n, sh.instanceMatrix);
+    // three caches an instanced mesh's bounding sphere, first computed while it was empty
+    b.boundingSphere = gh.boundingSphere = null;
   });
 
   return (
