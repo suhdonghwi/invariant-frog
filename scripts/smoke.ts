@@ -18,9 +18,12 @@ const base = server.resolvedUrls!.local[0];
 const browser = await chromium.launch({ channel: 'chrome', chromiumSandbox: true, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const errors: string[] = [];
 
+// Z3's Emscripten build logs this when a slow machine makes the main thread wait for a worker
+const HARMLESS = [/^Failed to load resource/, /^Blocking on the main thread is very dangerous/];
+
 function watch(page: Page) {
   page.on('console', (m) => {
-    if (m.type() === 'error' && !m.text().startsWith('Failed to load resource')) errors.push(`console: ${m.text()}`);
+    if (m.type() === 'error' && !HARMLESS.some((re) => re.test(m.text()))) errors.push(`console: ${m.text()}`);
   });
   page.on('pageerror', (e) => errors.push(`page: ${e.message}`));
   page.on('response', (r) => {
