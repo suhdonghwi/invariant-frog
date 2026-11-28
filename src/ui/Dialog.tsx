@@ -17,7 +17,7 @@ export function Overlay({ open, onClose, label, card, children }: { open: boolea
     <dialog
       ref={modal}
       aria-label={label}
-      className="fixed inset-0 m-0 size-full max-h-none max-w-none overflow-visible bg-transparent p-0 backdrop:bg-transparent"
+      className="fixed inset-0 z-50 m-0 size-full max-h-none max-w-none overflow-visible bg-transparent p-0 backdrop:bg-transparent"
       onCancel={(e) => {
         e.preventDefault();
         onClose();
