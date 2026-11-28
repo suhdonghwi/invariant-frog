@@ -8,6 +8,7 @@ import { eggsNear, tileState } from '../levels/tiles';
 import { cameraRig, type Shot } from '../scene/cameraRig';
 import { LONG, ms } from '../motion';
 import { sleep, switchScene } from '../scene/sceneTime';
+import { setBack } from './controller';
 import { newGeneration, setSkipStep, settled } from './script';
 import { BOARD, learnerFormula, resetProgress, st, STEPS, type Scene } from './steps';
 
@@ -75,7 +76,7 @@ function play(from: number, opening = false) {
       else if (i > from) void cameraRig.frame(shotOf(STEPS[i].scene));
       stepIndex = i;
       stepCaption = useGame.getState().caption;
-      setTutorial({ back: i > 0 ? goBack : null });
+      setBack(i > 0 ? goBack : null);
       setSkipStep(i + 1 < STEPS.length ? skipAhead : null);
       await STEPS[i].run(gen);
       gen.guard();

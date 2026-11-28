@@ -15,6 +15,7 @@ import { cameraRig } from '../scene/cameraRig';
 import { switchScene } from '../scene/sceneTime';
 import { startTutorial, stopTutorial, tutorialCheck } from '../tutorial/tutorial';
 import { markCleared } from './progress';
+import { captionOf } from './captions';
 import { openingCaption, useGame, type CaptionTone } from './store';
 
 export function openLevel(def: LevelDef) {
@@ -82,11 +83,11 @@ function showHints(shown: number) {
     .join('\n\n');
   useGame.setState({
     hintsShown: shown,
-    caption: {
+    caption: captionOf({
       text,
       tone: 'info',
       action: shown < hints.length ? { label: t().level.anotherHint, onClick: () => showHints(shown + 1) } : undefined,
-    },
+    }),
   });
 }
 
@@ -123,14 +124,14 @@ export async function check(): Promise<'refused' | void> {
   const next = levels[levels.findIndex((l) => l.id === level.id) + 1];
   sfx.cleared();
   useGame.setState({
-    caption: {
+    caption: captionOf({
       text: others ? `${t().level.proved}\n\n${others}` : t().level.proved,
       tone: 'success',
       proof,
       action: next
         ? { label: t().level.next(localizeLevel(next).title), onClick: () => openLevel(next) }
         : { label: t().level.backToLevels, onClick: () => goMenu('levels') },
-    },
+    }),
   });
 }
 
