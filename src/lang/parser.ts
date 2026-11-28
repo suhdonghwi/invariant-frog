@@ -1,4 +1,5 @@
 import { t } from '../i18n/i18n';
+import { findSlip } from './slips';
 import { BUILTIN_ARITY, COMPARISON_OPS, NO_SPAN, spanOf, type BinOp, type BuiltinFn, type Expr, type InputDecl, type Program, type RangeOp, type Span, type Stmt, type VarDecl } from './ast';
 
 const tr = () => t().langErrors;
@@ -11,8 +12,10 @@ export class LangError extends Error {
   }
 }
 
+export class Slip extends LangError {}
+
 type TokKind = 'num' | 'ident' | 'op' | 'bad' | 'eof';
-interface Token {
+export interface Token {
   kind: TokKind;
   text: string;
   span: Span;
@@ -22,6 +25,8 @@ const OPS = [
   '==', '!=', '<=', '>=', '&&', '||', '+=', '-=', '++', '--',
   '<', '>', '+', '-', '*', '/', '%', '!', '=', '(', ')', '{', '}', '[', ']', ',', ';', ':',
 ];
+
+const PROSE_OPS: Record<string, string> = { '≤': '<=', '≥': '>=', '≠': '!=' };
 
 export const KEYWORDS: ReadonlySet<string> = new Set(['input', 'var', 'requires', 'ensures', 'while', 'if', 'else', 'true', 'false', 'forall', 'exists']);
 export const BUILTINS: ReadonlySet<string> = new Set(Object.keys(BUILTIN_ARITY));
@@ -49,6 +54,12 @@ export function tokenize(src: string, { lenient = false, comments = false } = {}
       const s = i;
       while (i < src.length && /[A-Za-z0-9_]/.test(src[i])) i++;
       toks.push({ kind: 'ident', text: src.slice(s, i), span: { from: s, to: i } });
+      continue;
+    }
+    const prose = PROSE_OPS[c];
+    if (prose) {
+      toks.push({ kind: 'op', text: prose, span: { from: i, to: i + 1 } });
+      i++;
       continue;
     }
     const op = OPS.find((o) => src.startsWith(o, i));
@@ -135,7 +146,15 @@ class Parser {
     }
     if (ops.length === 0) return first;
     const eq = ops.find((op) => op === '==' || op === '!=');
-    if (eq && ops.length > 1) throw new LangError(tr().chainedEquality(eq), spanOf(first, operands[operands.length - 1]));
+    if (eq && ops.length > 1) {
+      const span = spanOf(first, operands[operands.length - 1]);
+      if (ops.every((op) => op === '==' || op === '!=') && operands.every((o) => o.kind === 'var' || o.kind === 'num')) {
+        const text = (o: Expr) => this.src.slice(o.span.from, o.span.to);
+        const joined = ops.map((op, k) => `${text(operands[k])} ${op} ${text(operands[k + 1])}`).join(' && ');
+        throw new Slip(tr().chainedPlain(eq, joined), span);
+      }
+      throw new LangError(tr().chainedEquality(eq), span);
+    }
     let result: Expr | null = null;
     for (let k = 0; k < ops.length; k++) {
       const l = operands[k];
@@ -353,13 +372,25 @@ class Parser {
   }
 }
 
-export function parseFormula(src: string): Expr {
-  const p = new Parser(src);
-  if (p.peek().kind === 'eof') throw new LangError(tr().empty, NO_SPAN);
-  const e = p.expr();
-  const t = p.peek();
-  if (t.kind !== 'eof') throw new LangError(tr().unexpected(t.text), t.span);
+function stretchToLastToken(src: string, e: LangError): LangError {
+  if (e.span.from !== e.span.to || e.span.from < src.trimEnd().length) return e;
+  const last = tokenize(src, { lenient: true }).filter((tok) => tok.kind !== 'eof').at(-1);
+  if (last) e.span = last.span;
   return e;
+}
+
+export function parseFormula(src: string): Expr {
+  try {
+    const p = new Parser(src);
+    if (p.peek().kind === 'eof') throw new LangError(tr().empty, NO_SPAN);
+    const e = p.expr();
+    const t = p.peek();
+    if (t.kind !== 'eof') throw new LangError(tr().unexpected(t.text), t.span);
+    return e;
+  } catch (e) {
+    if (!(e instanceof LangError)) throw e;
+    throw stretchToLastToken(src, e instanceof Slip ? e : (findSlip(src) ?? e));
+  }
 }
 
 export function parseProgram(src: string): Program {

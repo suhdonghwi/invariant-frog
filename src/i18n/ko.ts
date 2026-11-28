@@ -100,6 +100,7 @@ export const ko: Messages = {
     functions: '함수',
     arrays: '배열',
     constants: '상수',
+    quantBody: '`:` 뒤에는 비교 하나가 옵니다. 더 쓰려면 본문을 괄호로 묶으세요.',
   },
 
   level: {
@@ -173,6 +174,19 @@ export const ko: Messages = {
     endsEarly: '식이 완성되지 않았습니다',
     unexpected: (found) => `'${found}' 부분을 이해하지 못했습니다`,
     empty: '조건을 입력하세요',
+    assign: '비교할 때는 `==`를 쓰세요. `=` 하나는 변수에 값을 넣는 기호입니다.',
+    flipped: (op) => `\`${op[0]}\`를 먼저 써서 \`${op}\`로 쓰세요.`,
+    word: (word, op) => `\`${word}\` 대신 \`${op}\`를 쓰세요.`,
+    doubled: (c, op) => `\`${op}\`처럼 두 번 쓰세요. \`${c}\` 하나는 여기서 쓰는 기호가 아닙니다.`,
+    semicolon: '영역은 조건 하나입니다. 두 조건은 `&&`로 이으세요.',
+    trailingSemicolon: '영역은 조건 하나이고, 끝에 `;`를 붙이지 않습니다.',
+    implicitTimes: (num, name) => `곱하려면 \`${num} * ${name}\`처럼 쓰세요.`,
+    power: (name) => `거듭제곱 기호는 없습니다. \`${name} * ${name}\`처럼 곱해서 쓰세요.`,
+    implication: '`==>`는 없습니다. “`a`이면 `b`”는 `!a || b`로 쓰세요.',
+    unmatchedClose: '이 `)`와 짝이 맞는 `(`가 없습니다.',
+    caseName: (typed, name) => `이름은 대소문자를 구별합니다. \`${typed}\` 대신 \`${name}\`를 쓰세요.`,
+    chainedPlain: (op, joined) => `\`${op}\`는 이어 쓸 수 없습니다. \`${joined}\`를 쓰려던 건가요?`,
+    quantBody: (name, q) => `\`${name}\`는 \`:\` 뒤 첫 번째 비교 안에서만 쓸 수 있습니다. 더 쓰려면 본문을 괄호로 묶으세요: \`${q} … : (… && …)\``,
   },
 
   tutorial: {

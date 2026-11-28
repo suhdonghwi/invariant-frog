@@ -3,6 +3,7 @@ import { useT } from '../../i18n/i18n';
 import { scalarNames } from '../../levels/level';
 import { HighlightedCode } from '../codeColors';
 import { Dialog } from '../Dialog';
+import { Markdown } from '../Markdown';
 
 export function SyntaxCard() {
   const level = useGame((s) => s.level);
@@ -23,7 +24,14 @@ export function SyntaxCard() {
         {arr && (
           <Row
             name={s.arrays}
-            code={[`${arr[0]}[${a}] == ${b}`, `forall 0 <= k < ${a}: ${arr[0]}[k] <= ${b}`, `exists 0 <= k < ${arr[1]}: ${arr[0]}[k] == ${b}`, `forall 0 <= j <= k < ${arr[1]}: ${arr[0]}[j] <= ${arr[0]}[k]`]}
+            code={[
+              `${arr[0]}[${a}] == ${b}`,
+              `forall 0 <= k < ${a}: ${arr[0]}[k] <= ${b}`,
+              `exists 0 <= k < ${arr[1]}: ${arr[0]}[k] == ${b}`,
+              `forall 0 <= j <= k < ${arr[1]}: ${arr[0]}[j] <= ${arr[0]}[k]`,
+              `forall 0 <= k < ${a}: (${arr[0]}[k] <= ${b} && ${arr[0]}[k] >= 0)`,
+            ]}
+            note={s.quantBody}
           />
         )}
         <Row name={s.constants} code={['true', 'false']} />
@@ -32,7 +40,7 @@ export function SyntaxCard() {
   );
 }
 
-function Row({ name, code }: { name: string; code: string[] }) {
+function Row({ name, code, note }: { name: string; code: string[]; note?: string }) {
   return (
     <div className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-baseline gap-3 rounded-2xl bg-sky px-4 py-2.5 max-sm:grid-cols-1 max-sm:gap-1">
       <div className="font-display text-md font-semibold">{name}</div>
@@ -42,6 +50,11 @@ function Row({ name, code }: { name: string; code: string[] }) {
             <HighlightedCode src={c} />
           </code>
         ))}
+        {note && (
+          <div className="basis-full text-sm text-muted">
+            <Markdown text={note} />
+          </div>
+        )}
       </div>
     </div>
   );

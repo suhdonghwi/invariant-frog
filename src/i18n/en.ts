@@ -100,6 +100,7 @@ export const en = {
     functions: 'Functions',
     arrays: 'Arrays',
     constants: 'Constants',
+    quantBody: 'After the `:` comes one comparison. For more, put the body in parentheses.',
   },
 
   level: {
@@ -173,6 +174,20 @@ export const en = {
     endsEarly: 'The formula ends too early',
     unexpected: (found: string) => `Unexpected '${found}'`,
     empty: 'Type a condition',
+    assign: 'To compare, write `==`: a single `=` sets a variable.',
+    flipped: (op: string) => `Write \`${op}\`, with \`${op[0]}\` first.`,
+    word: (word: string, op: string) => `Write \`${op}\` for \`${word}\`.`,
+    doubled: (c: string, op: string) => `Write \`${op}\`, doubled: a single \`${c}\` isn’t an operator here.`,
+    semicolon: 'An area is one condition; join two with `&&`.',
+    trailingSemicolon: 'An area is one condition, with no `;` at the end.',
+    implicitTimes: (num: string, name: string) => `To multiply, write \`${num} * ${name}\`.`,
+    power: (name: string) => `There is no power operator; multiply instead, like \`${name} * ${name}\`.`,
+    implication: 'There is no `==>`. To say “if `a` then `b`”, write `!a || b`.',
+    unmatchedClose: 'This `)` has no `(` to match.',
+    caseName: (typed: string, name: string) => `Names are case-sensitive: write \`${name}\`, not \`${typed}\`.`,
+    chainedPlain: (op: string, joined: string) => `\`${op}\` can’t be chained. Did you mean \`${joined}\`?`,
+    quantBody: (name: string, q: string) =>
+      `\`${name}\` exists only in the first comparison after the \`:\`. To use it in more, put the body in parentheses: \`${q} … : (… && …)\`.`,
   },
 
   tutorial: {

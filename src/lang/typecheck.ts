@@ -17,11 +17,32 @@ function constantWidth(e: Quant): bigint | null {
   return (evaluate(to, {}) as bigint) - (evaluate(from[0], {}) as bigint) + 1n;
 }
 
-function typeOf(e: Expr, scope: Scope, src: string): Type {
+function quantified(e: Expr, out: Map<string, 'forall' | 'exists'> = new Map()): Map<string, 'forall' | 'exists'> {
+  switch (e.kind) {
+    case 'unary': quantified(e.arg, out); break;
+    case 'binary': quantified(e.left, out); quantified(e.right, out); break;
+    case 'call': e.args.forEach((a) => quantified(a, out)); break;
+    case 'index': quantified(e.index, out); break;
+    case 'quant': e.vars.forEach((v) => out.set(v, e.q)); quantified(e.lo, out); quantified(e.hi, out); quantified(e.body, out); break;
+    case 'ite': quantified(e.cond, out); quantified(e.then, out); quantified(e.else, out); break;
+  }
+  return out;
+}
+
+function unknownName(name: string, span: Span, scope: Scope, bound: ReadonlyMap<string, 'forall' | 'exists'>): LangError {
+  const E = messages().langErrors;
+  const q = bound.get(name);
+  if (q) return new LangError(E.quantBody(name, q), span);
+  const same = [...scope.keys()].find((k) => k.toLowerCase() === name.toLowerCase());
+  if (same) return new LangError(E.caseName(name, same), span);
+  return new LangError(E.unknownName(name, [...scope.keys()].join(', ')), span);
+}
+
+function typeOf(e: Expr, scope: Scope, src: string, bound: ReadonlyMap<string, 'forall' | 'exists'> = new Map()): Type {
   const E = messages().langErrors;
   const text = (x: Expr) => src.slice(x.span.from, x.span.to);
   const want = (x: Expr, t: Type, ctx: string): void => {
-    const got = typeOf(x, scope, src);
+    const got = typeOf(x, scope, src, bound);
     if (got !== t) {
       throw new LangError(
         t === 'int' ? E.needsNumber(text(x), ctx) : E.needsCondition(text(x), ctx),
@@ -29,7 +50,6 @@ function typeOf(e: Expr, scope: Scope, src: string): Type {
       );
     }
   };
-  const names = () => [...scope.keys()].join(', ');
   switch (e.kind) {
     case 'num':
       return 'int';
@@ -37,13 +57,13 @@ function typeOf(e: Expr, scope: Scope, src: string): Type {
       return 'bool';
     case 'var': {
       const kind = scope.get(e.name);
-      if (!kind) throw new LangError(E.unknownName(e.name, names()), e.span);
+      if (!kind) throw unknownName(e.name, e.span, scope, bound);
       if (kind === 'array') throw new LangError(E.isArray(e.name), e.span);
       return 'int';
     }
     case 'index': {
       const kind = scope.get(e.array);
-      if (!kind) throw new LangError(E.unknownName(e.array, names()), e.span);
+      if (!kind) throw unknownName(e.array, { from: e.span.from, to: e.span.from + e.array.length }, scope, bound);
       if (kind !== 'array') throw new LangError(E.notArray(e.array), e.span);
       want(e.index, 'int', E.anIndex);
       return 'int';
@@ -60,7 +80,7 @@ function typeOf(e: Expr, scope: Scope, src: string): Type {
       if (width !== null && width > BigInt(MAX_CONSTANT_RANGE)) {
         throw new LangError(E.rangeTooWide(MAX_CONSTANT_RANGE), { from: e.lo.span.from, to: e.hi.span.to });
       }
-      const got = typeOf(e.body, inner, src);
+      const got = typeOf(e.body, inner, src, bound);
       if (got !== 'bool') throw new LangError(E.needsCondition(text(e.body), e.q), e.body.span);
       return 'bool';
     }
@@ -98,7 +118,7 @@ function typeOf(e: Expr, scope: Scope, src: string): Type {
         return 'bool';
       }
       if (e.op === '==' || e.op === '!=') {
-        const l = typeOf(e.left, scope, src);
+        const l = typeOf(e.left, scope, src, bound);
         want(e.right, l, `'${e.op}'`);
         return 'bool';
       }
@@ -111,7 +131,7 @@ function typeOf(e: Expr, scope: Scope, src: string): Type {
 
 export function checkCondition(e: Expr, scope: Scope, src: string, what: string): void {
   const E = messages().langErrors;
-  const t = typeOf(e, scope, src);
+  const t = typeOf(e, scope, src, quantified(e));
   if (t !== 'bool') {
     const text = src.slice(e.span.from, e.span.to);
     throw new LangError(E.didYouMean(text, what), e.span);
