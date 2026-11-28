@@ -73,8 +73,8 @@ the tests are the safety net.
 ## Sequences
 
 - Anything scripted is a `director/` function. Each starts with `begin()`,
-  which cancels whatever was playing, and checks `tok.alive` after every
-  `await`.
+  which cancels whatever was playing and clears `busy` and `running`, and
+  checks `tok.alive` after every `await`. Nothing else resets those two flags.
 - **A check is abandoned, then interrupted**: a result for another level,
   mode or formula is dropped, and abandoning a check (leaving the level, an
   edit, Cancel) interrupts Z3 so the next check starts at once. `checking` is
@@ -111,6 +111,10 @@ the tests are the safety net.
 - **The GPU sees coordinates near a floating origin** (`scene/origin.ts`),
   since a 32-bit float has no fractions left near ten million.
 - Models are procedural, and shadows are soft blobs, not shadow maps.
+- **Scene time and the distance fade reach every shader through shared
+  uniforms** (`TIME_UNIFORM`, `FADE_UNIFORMS`), set once a frame in
+  `scene/Framing.tsx`. A material spreads them into its uniforms and never
+  sets them itself.
 - **Canvases register only the three.js classes their JSX uses**
   (`scene/Canvas.tsx`). A new intrinsic element such as `<lineSegments>` needs
   its class added to the `extend` call there.
