@@ -1,5 +1,6 @@
 import type { Context } from 'z3-solver';
 import { version } from 'z3-solver/package.json';
+import { useSolver } from './solverStatus';
 import { guardDecRefs } from './z3-guard';
 
 let pending: Promise<Context<'main'>> | null = null;
@@ -15,12 +16,18 @@ function loadScript(src: string): Promise<void> {
   });
 }
 
+const NOT_ISOLATED = 'The solver needs a cross-origin isolated page (COOP/COEP headers).';
+
+if (typeof window !== 'undefined' && !globalThis.crossOriginIsolated) {
+  useSolver.setState({ status: 'failed' });
+  console.error('The checker cannot start:', NOT_ISOLATED);
+}
+
 export function browserZ3(): Promise<Context<'main'>> {
+  if (!globalThis.crossOriginIsolated) return Promise.reject(new Error(NOT_ISOLATED));
   if (!pending) {
+    useSolver.setState({ status: 'loading' });
     pending = (async () => {
-      if (!globalThis.crossOriginIsolated) {
-        throw new Error('The solver needs a cross-origin isolated page (COOP/COEP headers).');
-      }
       // a classic script, as its Emscripten thread workers re-load it by URL
       await loadScript(`${import.meta.env.BASE_URL}z3/${version}/z3-built.js`);
       const { init } = await import('z3-solver');
@@ -28,9 +35,14 @@ export function browserZ3(): Promise<Context<'main'>> {
       guardDecRefs(api.Z3);
       return api.Context('main');
     })();
-    pending.catch(() => {
-      pending = null;
-    });
+    pending.then(
+      () => useSolver.setState({ status: 'ready' }),
+      (e: unknown) => {
+        pending = null;
+        useSolver.setState({ status: 'failed' });
+        console.error('The checker could not start:', e);
+      },
+    );
   }
   return pending;
 }

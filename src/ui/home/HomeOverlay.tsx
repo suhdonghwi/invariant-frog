@@ -1,4 +1,5 @@
-import { GraduationCap, LayoutGrid } from 'lucide-react';
+import { GraduationCap, LayoutGrid, TriangleAlert } from 'lucide-react';
+import { useSolver } from '../../checker/solverStatus';
 import { openTutorial, showLevels } from '../../game/actions';
 import { useGame } from '../../game/store';
 import { COMPACT_HOME, NARROW_HOME, useMedia } from '../../hooks/media';
@@ -66,6 +67,19 @@ function HeroCopy({ behind }: { behind: boolean }) {
       </h1>
       <p className="mb-6.5 animate-[rise_0.5s_var(--ease-entrance)_0.35s_both] text-lg leading-[1.55] text-muted max-sm:text-base short:mb-4 short:max-w-[min(29.5rem,48vw)] short:text-base">{tr.home.pitch}</p>
       <HomeButtons />
+      <CheckerNotice />
     </div>
+  );
+}
+
+function CheckerNotice() {
+  const failed = useSolver((s) => s.status === 'failed');
+  const tr = useT();
+  if (!failed) return null;
+  return (
+    <p role="status" className="mt-5 flex max-w-118 animate-fade items-start gap-2 rounded-xl bg-fail-soft px-3.5 py-2.5 text-left text-sm leading-normal text-ink narrow:mx-auto">
+      <TriangleAlert size={16} strokeWidth={2.4} className="mt-0.5 shrink-0 text-fail" />
+      {tr.home.checkerUnavailable}
+    </p>
   );
 }

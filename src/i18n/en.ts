@@ -23,6 +23,7 @@ export const en = {
     soundOn: 'Sound on',
     soundOff: 'Sound off',
     source: 'Source on GitHub',
+    checkerUnavailable: 'The checker can’t run on this page, so no area can be checked. Open the game directly in your browser, not inside another app or page.',
   },
 
   trouble: {
@@ -115,7 +116,11 @@ export const en = {
   },
 
   verdicts: {
-    solverFailed: (why: string) => `The solver could not start: ${why}`,
+    solverUnavailable: 'The checker can’t run on this page. Open the game directly in your browser, not inside another app or page.',
+    checkFailed: 'The checker ran into a problem with this check. Press **Check** to try again.',
+    loadingChecker: 'Loading the checker…',
+    stillChecking: (rule: string) => `Still checking **${rule}**…`,
+    cancel: 'Cancel',
     far: 'Everything nearby looked fine — but far away: ',
     tooFar: 'That spot is too far away to show on screen.',
     elsewhere: (here: string, there: string) => `Nothing breaks near this board (\`${here}\`), but something does at \`${there}\`.`,

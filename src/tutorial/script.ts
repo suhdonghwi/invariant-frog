@@ -1,3 +1,4 @@
+import { useSolver } from '../checker/solverStatus';
 import type { Rule } from '../checker/types';
 import { runChecker } from '../director/checkRun';
 import { sendFrogsHome } from '../director/frogs';
@@ -176,8 +177,15 @@ export function tutorialCheck(): 'refused' | void {
 function waitCheck(gen: Token): Promise<void> {
   return settled(gen, (settle) => {
     allow({ formula: true });
+    const off = useSolver.subscribe((s) => {
+      if (s.status !== 'failed') return;
+      off();
+      setTutorial({ check: null });
+      settle();
+    });
     setTutorial({
       check: () => {
+        off();
         setTutorial({ check: null });
         settle();
       },
@@ -201,12 +209,19 @@ export interface StageOptions {
   onFail?: (rule: Rule) => void;
 }
 
-export async function stage(gen: Token, o: StageOptions): Promise<void> {
+export async function stage(gen: Token, o: StageOptions): Promise<boolean> {
   useGame.setState({ callouts: [], region: o.region ?? null });
   setTutorial({ hint: { ask: o.ask, nudge: o.nudge, shown: false } });
   say(o.ask, 'check');
   for (;;) {
+    if (useSolver.getState().status === 'failed') {
+      allow({});
+      setTutorial({ hint: null, check: null });
+      await next(gen, messages().home.checkerUnavailable);
+      return false;
+    }
     await waitCheck(gen);
+    if (useSolver.getState().status === 'failed') continue;
     useGame.setState({ region: null });
     setTutorial({ spotlight: null });
     const stageRule = o.rules[o.rules.length - 1];
@@ -231,7 +246,7 @@ export async function stage(gen: Token, o: StageOptions): Promise<void> {
     }
     allow({});
     setTutorial({ hint: null });
-    return;
+    return true;
   }
 }
 
@@ -244,21 +259,24 @@ export async function demo(
   const g = useGame.getState();
   const mine = opts.restore ?? g.formulaText;
   useGame.setState({ busy: true, callouts: [], region: null });
-  void sendFrogsHome('test');
-  say(messages().tutorial.trying(formula), null, 'muted');
-  if (g.formulaText.trim() !== formula) {
-    setTutorial({ spotlight: 'formula' });
+  try {
+    void sendFrogsHome('test');
+    say(messages().tutorial.trying(formula), null, 'muted');
+    if (g.formulaText.trim() !== formula) {
+      setTutorial({ spotlight: 'formula' });
+      await sleep(ms(LONG));
+      gen.guard();
+      for (let k = 1; k <= formula.length; k++) {
+        g.setFormula(formula.slice(0, k));
+        await sleep(formula[k - 1] === ' ' ? TYPE_SPACE_MS : TYPE_KEY_MS);
+        gen.guard();
+      }
+    }
     await sleep(ms(LONG));
     gen.guard();
-    for (let k = 1; k <= formula.length; k++) {
-      g.setFormula(formula.slice(0, k));
-      await sleep(formula[k - 1] === ' ' ? TYPE_SPACE_MS : TYPE_KEY_MS);
-      gen.guard();
-    }
+  } finally {
+    if (gen.alive) useGame.setState({ busy: false });
   }
-  await sleep(ms(LONG));
-  gen.guard();
-  useGame.setState({ busy: false });
   const verdict = opts.guessedRight === undefined ? undefined : opts.guessedRight ? messages().tutorial.guessedRight : messages().tutorial.guessedWrong;
   const tone = opts.guessedRight ? 'success' : 'fail';
   const out = await checkAndPlay(rules, () => ({ prefix: verdict, tone, ghostExtra: opts.ghostExtra, area: messages().verdicts.theArea, action: nextAfterCounterexample }), gen);

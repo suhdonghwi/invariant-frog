@@ -23,6 +23,7 @@ export const ko: Messages = {
     soundOn: '소리 켜짐',
     soundOff: '소리 꺼짐',
     source: 'GitHub에서 소스 보기',
+    checkerUnavailable: '이 페이지에서는 검사기를 실행할 수 없어서 영역을 검사할 수 없습니다. 다른 앱이나 페이지 안이 아니라 브라우저에서 게임을 직접 여세요.',
   },
 
   trouble: {
@@ -115,7 +116,11 @@ export const ko: Messages = {
   },
 
   verdicts: {
-    solverFailed: (why) => `솔버를 시작하지 못했습니다: ${why}`,
+    solverUnavailable: '이 페이지에서는 검사기를 실행할 수 없습니다. 다른 앱이나 페이지 안이 아니라 브라우저에서 게임을 직접 여세요.',
+    checkFailed: '검사기가 이번 검사에서 문제를 만났습니다. **검사**를 눌러 다시 해 보세요.',
+    loadingChecker: '검사기를 불러오는 중입니다…',
+    stillChecking: (rule) => `**${rule}** 규칙을 아직 검사하고 있습니다…`,
+    cancel: '취소',
     far: '근처는 모두 괜찮았지만, 멀리 떨어진 곳에 문제가 있습니다. ',
     tooFar: '그곳은 너무 멀어서 화면에 보여 드릴 수 없습니다.',
     elsewhere: (here, there) => `지금 보이는 곳(\`${here}\`) 근처에는 문제가 없지만, \`${there}\`에서는 깨집니다.`,
