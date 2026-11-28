@@ -5,8 +5,8 @@ import { useGame } from '../../game/store';
 import { useT } from '../../i18n/i18n';
 import { displayNames } from '../../levels/level';
 import { NO_SPAN } from '../../lang/ast';
-import { applyFix, LangError } from '../../lang/parser';
-import { BUTTON, button } from '../classes';
+import { LangError } from '../../lang/parser';
+import { BUTTON } from '../classes';
 import { Markdown } from '../Markdown';
 import { reducedMotion } from '../../motion';
 import { HighlightedCode } from '../codeColors';
@@ -98,17 +98,6 @@ export function FormulaBox() {
             <div className="min-w-0 flex-1">
               <Markdown text={shownError.message} />
             </div>
-            {shownError.fix && (
-              <button
-                className={`${button('plain', 'none')} gap-1 px-2.5 py-0.5 text-xs font-medium`}
-                onClick={() => {
-                  editFormula(applyFix(formulaText, shownError.fix!));
-                  input.current?.focus();
-                }}
-              >
-                {tr.langErrors.fixTo} <code className="font-mono font-normal"><HighlightedCode src={applyFix(formulaText, shownError.fix).trim()} /></code>
-              </button>
-            )}
           </div>
         )}
         <div className="order-last -ml-1.5 mb-0.5 basis-full empty:hidden compact:-ml-1">
