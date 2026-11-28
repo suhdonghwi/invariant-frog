@@ -5,12 +5,14 @@ import type { useGame } from '../src/game/store';
 declare global {
   interface Window {
     __game: typeof useGame;
+    __open: (id: string) => void;
   }
 }
 
 const TUTORIAL_STEPS = [0, 6, 12, 18, 22];
 const CHECK_TIMEOUT = 40_000;
 const DOUBLE_CLICK_GUARD_MS = 300;
+const SETTLE_MS = 1500;
 
 const server = await createServer({ server: { host: '127.0.0.1', port: 0 }, logLevel: 'warn' });
 await server.listen();
@@ -60,6 +62,18 @@ async function level(page: Page) {
   await checkFormula(page, 'i >= 0', 'success');
 }
 
+async function levelSwitch(page: Page) {
+  console.log('array level to plain level');
+  await home(page);
+  await page.getByRole('button', { name: 'Levels', exact: true }).click();
+  await page.getByRole('button', { name: /Biggest So Far/ }).click();
+  await page.getByRole('textbox', { name: 'area' }).fill('A[0] <= m');
+  await page.waitForTimeout(SETTLE_MS);
+  await page.evaluate(() => window.__open('countdown'));
+  await page.waitForFunction(() => window.__game.getState().level?.id === 'countdown');
+  await page.waitForTimeout(SETTLE_MS);
+}
+
 async function tutorial(page: Page, step: number) {
   console.log(`tutorial step ${step}`);
   await home(page, `?step=${step}`);
@@ -92,6 +106,7 @@ async function fresh<T>(run: (page: Page) => Promise<T>) {
 
 try {
   await fresh(level);
+  await fresh(levelSwitch);
   for (const step of TUTORIAL_STEPS) await fresh((page) => tutorial(page, step));
 } catch (e) {
   errors.push(`smoke: ${e instanceof Error ? e.message : String(e)}`);
