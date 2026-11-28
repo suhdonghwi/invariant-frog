@@ -130,7 +130,7 @@ export function SceneTag({
     <group ref={group} position={start}>
       <Html zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
         <div ref={holder} className="origin-bottom pb-1.5" style={start ? HOLDER : { ...HOLDER, visibility: 'hidden' }}>
-          <div ref={measure} className={`${TAG} ${TONE[tone]} ${leaving ? 'animate-tag-out' : 'animate-tag-in'}`}>
+          <div ref={measure} data-scene-tag className={`${TAG} ${TONE[tone]} ${leaving ? 'animate-tag-out' : 'animate-tag-in'}`}>
             {children}
           </div>
         </div>
