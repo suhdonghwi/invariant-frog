@@ -20,8 +20,6 @@ export const ko: Messages = {
     clearedCount: (n, of) => `${of}개 레벨 중 ${n}개 클리어`,
     resetTitle: '클리어한 레벨 기록을 지웁니다',
     resetConfirm: '기록을 지울까요?',
-    resetDone: '기록을 지웠습니다',
-    undo: '되돌리기',
     soundOn: '소리 켜짐',
     soundOff: '소리 꺼짐',
     source: 'GitHub에서 소스 보기',
