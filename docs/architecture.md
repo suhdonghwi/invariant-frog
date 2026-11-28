@@ -47,6 +47,12 @@ which feeds:
   clamped and sums and products wrap, so a tile whose values overflow can be
   drawn wrong.
 
+After a proof, `lang/dafny.ts` prints the level as a Dafny method with the
+area on its `invariant` line, offered under the success caption. It covers
+levels without arrays only: the game reads a cell outside an array as 0, which
+Dafny rejects. A variable declared without a value becomes a parameter named
+with a trailing `0`.
+
 Change semantics in `lang/` and make every backend agree. `pnpm validate` and
 the tests are the safety net.
 

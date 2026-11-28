@@ -133,6 +133,9 @@ export const ko: Messages = {
     pickEgg: '먼저 알을 고르세요',
     frogStopped: '이 개구리는 멈췄습니다',
     otherAnswers: () => '이런 답도 정답입니다.',
+    dafny: '같은 증명을 Dafny로',
+    copy: '복사',
+    copied: '복사했습니다',
   },
 
   verdicts: {
