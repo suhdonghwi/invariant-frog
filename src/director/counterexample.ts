@@ -115,7 +115,7 @@ export async function counterexample(tok: Token, cex: Counterexample, opts: Coun
   sfx.seeThrough();
   if (cex.rule === 'maintenance' && cex.next) {
     const { state, next } = cex;
-    const frog = previewHop(state, 1, next, false);
+    const frog = previewHop(state, 1, false);
     after(ms(SEE_THROUGH_RISE + ARC_AFTER_RISE), () => tok.alive && traceHop(L, state, next, ARC_DRAW));
     await sleep(ms(SEE_THROUGH_RISE + ARC_AFTER_RISE + ARC_DRAW));
     if (!tok.alive) return;

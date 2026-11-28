@@ -17,7 +17,7 @@ import { busyWhile, currentLevel } from './sequence';
 export const SEE_THROUGH_RISE = 0.6;
 const TURNS = 2;
 export const ARC_AFTER_RISE = 0.1;
-export const PROOF_PICTURE = SEE_THROUGH_RISE + ARC_AFTER_RISE + ARC_DRAW + APPEAR + BEAT;
+const PROOF_PICTURE = SEE_THROUGH_RISE + ARC_AFTER_RISE + ARC_DRAW + APPEAR + BEAT;
 
 export function raiseSeeThrough(s: State, fade = 1): FrogSim {
   const L = currentLevel();
@@ -28,10 +28,10 @@ export function raiseSeeThrough(s: State, fade = 1): FrogSim {
   return f;
 }
 
-export function previewHop(s: State, fade = 1, to: State = hop(currentLevel(), s), ring = true): FrogSim {
+export function previewHop(s: State, fade = 1, ring = true): FrogSim {
   const L = currentLevel();
   const f = raiseSeeThrough(s, fade);
-  const [tx, ty] = tileOf(L, to);
+  const [tx, ty] = tileOf(L, hop(L, s));
   hopArcs.add({
     frog: f.id,
     fx: f.x,

@@ -13,10 +13,9 @@ import { HATCH_GROW } from '../scene/frogs/motion';
 import { EGG_ALONE, EGG_ASIDE, occupancy } from '../scene/frogs/occupancy';
 import { after, sceneNow, sleep } from '../scene/sceneTime';
 import { traceHop } from './codeTrace';
-import { joinHopBatch, landInBatch } from './hopBatch';
 import { begin, busyWhile, currentLevel, events } from './sequence';
 
-export const HATCH_MS = ms(HATCH_EMERGE + HATCH_GROW);
+const HATCH_MS = ms(HATCH_EMERGE + HATCH_GROW);
 export const HATCHED_MS = HATCH_MS + ms(BEAT);
 export const RUN_BEATS = 80;
 const TEST_EGGS = 10;
@@ -76,17 +75,21 @@ function hatchUntrailed(s: State): FrogSim {
   return f;
 }
 
-export function hopFrog(L: CompiledLevel, f: FrogSim, next: State, dur = HOP): Promise<void> {
-  const from = f.state;
-  const batch = joinHopBatch(() => traceHop(L, from, next, dur));
-  return frogWorld.hopTo(L, f, next, dur).then(() => landInBatch(batch));
+async function hopTogether(L: CompiledLevel, frogs: FrogSim[]): Promise<void> {
+  const last = frogs[frogs.length - 1];
+  sfx.hop(frogs.length);
+  traceHop(L, last.state, hop(L, last.state), HOP);
+  await Promise.all(
+    frogs.map(async (f) => {
+      const next = hop(L, f.state);
+      await frogWorld.hopTo(L, f, next, HOP);
+      f.stopped = !running(L, next);
+    }),
+  );
+  sfx.land();
 }
 
-export async function hopOn(L: CompiledLevel, f: FrogSim): Promise<void> {
-  const next = hop(L, f.state);
-  await hopFrog(L, f, next);
-  f.stopped = !running(L, next);
-}
+export const hopOn = (L: CompiledLevel, f: FrogSim) => hopTogether(L, [f]);
 
 export async function whileStepping<T>(body: () => Promise<T>): Promise<T> {
   useGame.setState({ stepping: true });
@@ -119,7 +122,7 @@ async function hopAllOnce(): Promise<number> {
   const L = currentLevel();
   const frogs = movingFrogs();
   if (frogs.length === 0) return 0;
-  await whileStepping(() => Promise.all(frogs.map((f) => hopOn(L, f))));
+  await whileStepping(() => hopTogether(L, frogs));
   return frogs.length;
 }
 

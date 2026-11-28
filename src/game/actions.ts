@@ -39,7 +39,7 @@ export function goMenu(view: 'home' | 'levels' = 'home') {
   switchScene(() => {
     stopTutorial();
     resetLevel();
-    useGame.getState().backToMenu(view);
+    useGame.setState({ mode: 'menu', menuView: view, level: null, inputs: {}, caption: null, valid: null, formula: null, formulaText: '' });
     if (view === 'levels') warmSolver();
   });
 }

@@ -66,7 +66,6 @@ function play(from: number, opening = false) {
   void (async () => {
     if (opening) {
       void cameraRig.frame(shotOf(STEPS[0].scene));
-      setTutorial({ allow: NO_TUTORIAL.allow });
       await sleep(ms(LONG));
       gen.guard();
     } else restore(STEPS[from].scene);

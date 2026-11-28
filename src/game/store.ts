@@ -97,7 +97,6 @@ export interface Game {
   failMark: { x: number; y: number; label: string; t0: number; frog?: number; fail?: Expr } | null;
 
   openLevel(def: LevelDef, mode: 'level' | 'tutorial'): void;
-  backToMenu(view?: 'home' | 'levels'): void;
   setFormula(text: string): void;
   setReveal(r: Partial<Reveal>): void;
 }
@@ -193,25 +192,12 @@ export const useGame = create<Game>((set, get) => ({
       reveal: mode === 'tutorial' ? EMPTY_REVEAL : FULL_REVEAL,
     });
   },
-  backToMenu(view = 'home') {
-    set({ mode: 'menu', menuView: view, level: null, inputs: {}, caption: null, running: false, busy: false, valid: null, formula: null, formulaText: '' });
-  },
   setFormula(text) {
     const { level } = get();
     if (!level) return;
-    if (text.trim() === '') {
-      set({ formulaText: text, formula: null, valid: null, verdicts: {}, pitfallMessage: null, failMark: null });
-      return;
-    }
-    const formula = compileFormula(level, text);
-    set({
-      formulaText: text,
-      formula,
-      valid: formula.ok ? formula : get().valid,
-      verdicts: {},
-      pitfallMessage: null,
-      failMark: null,
-    });
+    const formula = text.trim() === '' ? null : compileFormula(level, text);
+    const valid = !formula ? null : formula.ok ? formula : get().valid;
+    set({ formulaText: text, formula, valid, verdicts: {}, pitfallMessage: null, failMark: null });
   },
   setReveal(r) {
     set({ reveal: { ...get().reveal, ...r } });
