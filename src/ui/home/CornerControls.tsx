@@ -1,7 +1,7 @@
-import { RotateCcw, Undo2, Volume2, VolumeX } from 'lucide-react';
+import { RotateCcw, Volume2, VolumeX } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { setMuted, useSound } from '../../audio/sfx';
-import { resetCleared, restoreCleared, useProgress } from '../../game/progress';
+import { resetCleared, useProgress } from '../../game/progress';
 import { useT } from '../../i18n/i18n';
 import { PILL } from '../classes';
 
@@ -10,7 +10,6 @@ const ICON = 'grid size-7.5 place-items-center rounded-full text-muted transitio
 const SOURCE_URL = 'https://github.com/suhdonghwi/invariant-frog';
 
 const CONFIRM_MS = 3000;
-const UNDO_MS = 6000;
 
 export function CornerControls() {
   const tr = useT();
@@ -50,35 +49,11 @@ function ResetProgress() {
   const tr = useT();
   const any = useProgress((s) => s.cleared.length > 0);
   const [confirming, setConfirming] = useState(false);
-  const [erased, setErased] = useState<string[] | null>(null);
   useEffect(() => {
     if (!confirming) return;
     const t = setTimeout(() => setConfirming(false), CONFIRM_MS);
     return () => clearTimeout(t);
   }, [confirming]);
-  useEffect(() => {
-    if (!erased) return;
-    const t = setTimeout(() => setErased(null), UNDO_MS);
-    return () => clearTimeout(t);
-  }, [erased]);
-  if (erased)
-    return (
-      <div className={`${PILL} gap-1 pl-3 font-display text-sm font-medium`}>
-        <span role="status" className="text-muted">
-          {tr.home.resetDone}
-        </span>
-        <button
-          className="flex h-7.5 cursor-pointer items-center gap-1.5 rounded-full px-3 text-brand transition-colors duration-150 hover:bg-shade/6"
-          onClick={() => {
-            restoreCleared(erased);
-            setErased(null);
-          }}
-        >
-          <Undo2 size={14} strokeWidth={2.4} aria-hidden />
-          {tr.home.undo}
-        </button>
-      </div>
-    );
   return (
     <div className={PILL}>
       <button
@@ -90,7 +65,7 @@ function ResetProgress() {
         title={tr.home.resetTitle}
         onClick={() => {
           if (!confirming) return setConfirming(true);
-          setErased(resetCleared());
+          resetCleared();
           setConfirming(false);
         }}
       >
