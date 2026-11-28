@@ -76,7 +76,7 @@ function toZ3(ctx: Ctx, e: Expr, env: Env): Z {
   }
 }
 
-type SolveResult = { kind: 'sat'; state: State } | { kind: 'unsat' } | { kind: 'unknown' };
+type SolveResult = { kind: 'sat'; state: State } | { kind: 'long' } | { kind: 'unsat' } | { kind: 'unknown' };
 
 const MIN_SOLVER_MS = 20;
 
@@ -137,6 +137,7 @@ export async function solve(ctx: Ctx, level: CompiledLevel, dims: string[], quer
     if (hasQuantifier(form)) continue;
     const r = await check(form, undefined, (solver) => {
       for (const d of Object.values(env.ints)) solver.add(d.ge(-b), d.le(b));
+      for (const len of arrayLens) solver.add(len.le(MAX_LEN));
       for (const a of Object.values(env.arrays)) {
         for (let k = 0; k < Math.min(b, MAX_LEN); k++) {
           const c = a.fn.call(ctx.Int.val(k)) as Arith<'main'>;
@@ -146,24 +147,27 @@ export async function solve(ctx: Ctx, level: CompiledLevel, dims: string[], quer
     });
     if (r.kind === 'sat' && (!opts.verify || opts.verify(r.state))) return r;
   }
-  const passes: ((solver: InstanceType<Ctx['Solver']>) => void)[] = arrayLens.length ? [(solver) => arrayLens.forEach((len) => solver.add(len.le(MAX_LEN))), () => {}] : [() => {}];
-  for (const bound of passes) {
+  const unbounded = async (bound: (solver: InstanceType<Ctx['Solver']>) => void): Promise<SolveResult> => {
     const logics = !quantified && arrayLens.length === 0 ? [undefined, 'QF_NIA'] : [undefined];
     let r: SolveResult = { kind: 'unknown' };
     for (const logic of logics) {
       r = await check(query, logic, bound);
       if (r.kind !== 'unknown') break;
     }
-    if (r.kind !== 'unsat') return r;
-  }
-  return { kind: 'unsat' };
+    return r;
+  };
+  const r = await unbounded((solver) => arrayLens.forEach((len) => solver.add(len.le(MAX_LEN))));
+  if (r.kind === 'sat') return !opts.verify || opts.verify(r.state) ? r : { kind: 'unknown' };
+  if (r.kind === 'unknown' || arrayLens.length === 0) return r;
+  const long = await unbounded(() => {});
+  return long.kind === 'sat' ? { kind: 'long' } : long;
 }
 
 export async function compareFormulas(ctx: Ctx, level: CompiledLevel, a: Expr, b: Expr, left: () => number): Promise<'same' | 'different' | 'unknown'> {
   const differ: Expr = { kind: 'binary', op: '!=', left: a, right: b, span: a.span };
   const query = mk.and(level.planeReq, differ);
   const r = await solve(ctx, level, level.names, query, { left, verify: (s) => withinBudget(() => holds(query, s)) });
-  return r.kind === 'unsat' ? 'same' : r.kind === 'sat' ? 'different' : 'unknown';
+  return r.kind === 'unsat' ? 'same' : r.kind === 'sat' || r.kind === 'long' ? 'different' : 'unknown';
 }
 
 export async function equivalent(ctx: Ctx, level: CompiledLevel, a: Expr, b: Expr, left: () => number): Promise<boolean> {

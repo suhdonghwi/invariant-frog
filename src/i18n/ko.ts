@@ -124,6 +124,7 @@ export const ko: Messages = {
     cancel: '취소',
     far: '근처는 모두 괜찮았지만, 멀리 떨어진 곳에 문제가 있습니다. ',
     tooFar: '그곳은 너무 멀어서 화면에 보여 드릴 수 없습니다.',
+    longOnly: (rule, max) => `**${rule}** 규칙이 깨집니다. 다만 길이가 ${max}보다 긴 배열에서만 깨져서 여기에 보여 줄 수 없습니다. 영역이 모든 길이에서 성립하는지 살펴보세요.`,
     elsewhere: (here, there) => `지금 보이는 곳(\`${here}\`) 근처에는 문제가 없지만, \`${there}\`에서는 깨집니다.`,
     showThere: (there) => `${there}에서 보기`,
     yourArea: '영역',

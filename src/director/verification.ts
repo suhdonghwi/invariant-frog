@@ -14,7 +14,9 @@ import { counterexample, offerOtherBoard, onOtherBoard, type CounterexampleOptio
 import { sendFrogsHome } from './frogs';
 import { proofWave } from './ghosts';
 import { eggRegion, endingsRegion } from './regions';
-import { busyWhile, currentLevel, type Token } from './sequence';
+import { busyWhile, caption, currentLevel, type Token } from './sequence';
+import { MAX_LEN } from '../levels/inputs';
+import { sfx } from '../audio/sfx';
 
 
 export function revealAll(res: CheckResult) {
@@ -71,6 +73,12 @@ async function verifyRules(tok: Token, res: CheckResult, rules: Rule[], onFail: 
       }
       await counterexample(tok, v.cex, onFail(rule));
       if (!tok.alive) return null;
+      reveal(rule, res);
+      return { failing: rule, undecided };
+    }
+    if (v.status === 'long') {
+      sfx.fail();
+      caption(messages().verdicts.longOnly(messages().rules[rule], MAX_LEN), 'fail');
       reveal(rule, res);
       return { failing: rule, undecided };
     }

@@ -126,6 +126,7 @@ export const en = {
     tooFar: 'That spot is too far away to show on screen.',
     elsewhere: (here: string, there: string) => `Nothing breaks near this board (\`${here}\`), but something does at \`${there}\`.`,
     showThere: (there: string) => `Show ${there}`,
+    longOnly: (rule: string, max: number) => `**${rule}** fails, but only for arrays longer than ${max}, too long to show here. Check that your area holds for every length.`,
     yourArea: 'your area',
     theArea: 'the area',
     noLongerHolds: (part: string) => ` \`${part}\` no longer holds.`,

@@ -58,7 +58,9 @@ async function checkAlone(ctx: Context<'main'>, level: CompiledLevel, inv: Formu
         ? { status: 'pass', how: 'proved' }
         : r.kind === 'sat'
           ? { status: 'fail', cex: counterexample(level, inv, rule, r.state, true) }
-          : { status: 'undecided' };
+          : r.kind === 'long'
+            ? { status: 'long' }
+            : { status: 'undecided' };
   }
 
   const firstEquivalent = async <T>(items: T[], formula: (x: T) => string, cap = Infinity) => {
@@ -71,7 +73,7 @@ async function checkAlone(ctx: Context<'main'>, level: CompiledLevel, inv: Formu
   };
 
   const undecided = rules.filter((r) => verdicts[r]?.status === 'undecided');
-  const failed = rules.some((r) => verdicts[r]?.status === 'fail');
+  const failed = rules.some((r) => verdicts[r]?.status === 'fail' || verdicts[r]?.status === 'long');
   if (undecided.length > 0 && !failed && (await firstEquivalent(level.solutions, (s) => s)) !== undefined) {
     for (const r of undecided) verdicts[r] = { status: 'pass', how: 'equivalent' } satisfies RuleVerdict;
   }

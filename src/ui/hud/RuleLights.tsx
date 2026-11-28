@@ -19,7 +19,7 @@ export function RuleLights() {
         .filter((r) => lights.includes(r))
         .map((r) => {
           const v = verdicts[r];
-          const status: LightStatus = !awake.includes(r) ? 'dim' : v ? v.status : pending.includes(r) ? 'checking' : 'idle';
+          const status: LightStatus = !awake.includes(r) ? 'dim' : v ? (v.status === 'long' ? 'fail' : v.status) : pending.includes(r) ? 'checking' : 'idle';
           return (
             <button
               key={r}

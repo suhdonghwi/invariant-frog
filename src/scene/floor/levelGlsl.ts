@@ -1,5 +1,6 @@
 import type * as THREE from 'three';
 import { freeVars, rangeBounds, type Expr, type Quant } from '../../lang/ast';
+import { EVAL_BUDGET } from '../../lang/eval';
 import { MAX_LEN, type Inputs } from '../../levels/inputs';
 import type { CompiledLevel } from '../../levels/level';
 
@@ -53,8 +54,7 @@ class Compiler {
     for (let k = e.vars.length - 1; k >= 0; k--) {
       const v = ident(e.vars[k]);
       const start = k === 0 ? 'first' : this.expr(from[k]);
-      // GLSL ES 1.0 loops need a constant bound
-      inner = `for (int i${k} = 0; i${k} <= ${MAX_LEN}; i${k}++) { int ${v} = ${start} + i${k}; if (${v} > last) break; ${inner} }`;
+      inner = `for (int ${v} = ${start}; ${v} <= last; ${v}++) { if (--gLeft < 0) { gOver = true; return ${all}; } ${inner} }`;
     }
     const params = free.map((n) => `int ${ident(n)}`).join(', ');
     this.fns.push(`bool ${name}(${params}) { int first = ${this.expr(from[0])}; int last = ${this.expr(to)}; ${inner} return ${all}; }`);
@@ -63,9 +63,14 @@ class Compiler {
 }
 
 const GLSL_INT_HELPERS = /* glsl */ `
-int fdiv(int a, int k) { return int(floor(float(a) / float(k))); }
+int fdiv(int a, int k) { int q = a / k; if (a - q * k < 0) q--; return q; }
 int emod(int a, int k) { return a - k * fdiv(a, k); }
+int gLeft;
+bool gOver;
 `;
+
+const metered = (decls: string, expr: string, over: 'true' | 'false') =>
+  `${decls} gLeft = ${EVAL_BUDGET}; gOver = false; bool r = ${expr}; return gOver ? ${over} : r;`;
 
 export function levelGlsl(level: CompiledLevel, areas?: { area: Expr | null; before: Expr | null }): string {
   const c = new Compiler(level);
@@ -80,6 +85,7 @@ export function levelGlsl(level: CompiledLevel, areas?: { area: Expr | null; bef
   const goal = c.expr(level.post);
   const area = areas?.area ? c.expr(areas.area) : 'false';
   const before = areas?.before ? c.expr(areas.before) : 'false';
+  const egg = areas ? c.expr(level.eggAt) : 'false';
   const decls = [`int ${ident(level.view.x)} = t.x;`, `int ${ident(level.view.y)} = t.y;`, ...level.offAxis.filter((n) => !level.arrays[n]).map((n) => `int ${ident(n)} = ${inputUniform(n)};`)].join(' ');
   return `
 ${GLSL_INT_HELPERS}
@@ -87,10 +93,10 @@ uniform bool uExists;
 ${uniforms}
 ${cells}
 ${c.fns.join('\n')}
-bool L_exists(ivec2 t) { ${decls} return ${exists}; }
-bool L_stop(ivec2 t) { ${decls} return !(${stop}); }
-bool L_goal(ivec2 t) { ${decls} return ${goal}; }
-${areas ? `bool L_area(ivec2 t) { ${decls} return ${area}; }\nbool L_before(ivec2 t) { ${decls} return ${before}; }\nbool L_egg(ivec2 t) { ${decls} return ${c.expr(level.eggAt)}; }` : ''}
+bool L_exists(ivec2 t) { ${metered(decls, exists, 'false')} }
+bool L_stop(ivec2 t) { ${metered(decls, `!(${stop})`, 'true')} }
+bool L_goal(ivec2 t) { ${metered(decls, goal, 'false')} }
+${areas ? `bool L_area(ivec2 t) { ${metered(decls, area, 'false')} }\nbool L_before(ivec2 t) { ${metered(decls, before, 'false')} }\nbool L_egg(ivec2 t) { ${metered(decls, egg, 'false')} }` : ''}
 `;
 }
 

@@ -10,7 +10,7 @@ export function euclidMod(a: bigint, k: bigint): bigint {
   return r < 0n ? r + k : r;
 }
 
-const EVAL_BUDGET = 4096;
+export const EVAL_BUDGET = 4096;
 
 export class OverBudget extends Error {
   constructor() {
