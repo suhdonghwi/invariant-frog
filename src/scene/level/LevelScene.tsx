@@ -12,11 +12,13 @@ import { Callouts, FailMarker } from '../labels/Callouts';
 import { FrogTags } from '../labels/FrogTags';
 import { OutlineRegion } from '../labels/Region';
 import { HoverPreview } from './HoverPreview';
+import { useKeyboardCursor } from './keyboardCursor';
 
 export function LevelScene() {
   const level = useGame((s) => s.level)!;
   const inputs = useGame((s) => s.inputs);
   const reveal = useGame((s) => s.reveal);
+  useKeyboardCursor();
   const valid = useGame((s) => s.valid);
   const formula = useGame((s) => s.formula);
   useEffect(() => {
