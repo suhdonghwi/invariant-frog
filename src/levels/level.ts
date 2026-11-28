@@ -34,7 +34,6 @@ export interface CompiledLevel extends LevelDef {
   initExprs: Record<string, Expr>;
   planeReq: Expr;
   axisReq: Expr;
-  inputsReq: Expr;
   eggReq: Expr;
   eggAt: Expr;
   guard: Expr;
@@ -45,7 +44,6 @@ export interface CompiledLevel extends LevelDef {
     inputsReq: FastFn;
     eggReq: FastFn;
     guard: FastFn;
-    post: FastFn;
     next: Record<string, FastFn>;
     init: Record<string, FastFn>;
   };
@@ -108,7 +106,6 @@ export function compileLevel(def: LevelDef): CompiledLevel {
     initExprs,
     planeReq,
     axisReq,
-    inputsReq,
     eggReq,
     eggAt,
     guard,
@@ -119,7 +116,6 @@ export function compileLevel(def: LevelDef): CompiledLevel {
       inputsReq: compileFast(inputsReq),
       eggReq: compileFast(eggReq),
       guard: compileFast(guard),
-      post: compileFast(post),
       next: fastMap(next),
       init: fastMap(initExprs),
     },
@@ -161,15 +157,6 @@ export function hop(level: CompiledLevel, s: State): State {
 
 export function running(level: CompiledLevel, s: State): boolean {
   return holds(level.guard, s);
-}
-
-export function toNum(s: State): FastState {
-  const o: FastState = {};
-  for (const k in s) {
-    const v = s[k];
-    o[k] = Array.isArray(v) ? v.map(Number) : Number(v);
-  }
-  return o;
 }
 
 export function toBig(s: FastState): State {

@@ -82,7 +82,7 @@ const MIN_SOLVER_MS = 20;
 
 interface SolveOptions {
   left: () => number;
-  verify?: (s: State) => boolean;
+  verify: (s: State) => boolean;
 }
 
 const BOUNDS = [NEAR, 64, 1024];
@@ -96,7 +96,6 @@ function declare(ctx: Ctx, level: CompiledLevel, dims: string[]): { env: Env; re
   for (const d of dims) {
     const len = level.arrays[d];
     if (!len) continue;
-    if (!env.ints[len]) env.ints[len] = ctx.Int.const(len);
     env.arrays[d] = { fn: ctx.Function.declare(d, ctx.Int.sort(), ctx.Int.sort()), len: env.ints[len] };
   }
   const readModel = (m: Model<'main'>): State => {
@@ -145,7 +144,7 @@ export async function solve(ctx: Ctx, level: CompiledLevel, dims: string[], quer
         }
       }
     });
-    if (r.kind === 'sat' && (!opts.verify || opts.verify(r.state))) return r;
+    if (r.kind === 'sat' && opts.verify(r.state)) return r;
   }
   const unbounded = async (bound: (solver: InstanceType<Ctx['Solver']>) => void): Promise<SolveResult> => {
     const logics = !quantified && arrayLens.length === 0 ? [undefined, 'QF_NIA'] : [undefined];
@@ -157,19 +156,15 @@ export async function solve(ctx: Ctx, level: CompiledLevel, dims: string[], quer
     return r;
   };
   const r = await unbounded((solver) => arrayLens.forEach((len) => solver.add(len.le(MAX_LEN))));
-  if (r.kind === 'sat') return !opts.verify || opts.verify(r.state) ? r : { kind: 'unknown' };
+  if (r.kind === 'sat') return opts.verify(r.state) ? r : { kind: 'unknown' };
   if (r.kind === 'unknown' || arrayLens.length === 0) return r;
   const long = await unbounded(() => {});
   return long.kind === 'sat' ? { kind: 'long' } : long;
 }
 
-export async function compareFormulas(ctx: Ctx, level: CompiledLevel, a: Expr, b: Expr, left: () => number): Promise<'same' | 'different' | 'unknown'> {
+export async function equivalent(ctx: Ctx, level: CompiledLevel, a: Expr, b: Expr, left: () => number): Promise<boolean> {
   const differ: Expr = { kind: 'binary', op: '!=', left: a, right: b, span: a.span };
   const query = mk.and(level.planeReq, differ);
   const r = await solve(ctx, level, level.names, query, { left, verify: (s) => withinBudget(() => holds(query, s)) });
-  return r.kind === 'unsat' ? 'same' : r.kind === 'sat' || r.kind === 'long' ? 'different' : 'unknown';
-}
-
-export async function equivalent(ctx: Ctx, level: CompiledLevel, a: Expr, b: Expr, left: () => number): Promise<boolean> {
-  return (await compareFormulas(ctx, level, a, b, left)) === 'same';
+  return r.kind === 'unsat';
 }

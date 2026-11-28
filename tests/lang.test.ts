@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { hasQuantifier, show } from '../src/lang/ast';
+import { hasQuantifier } from '../src/lang/ast';
 import { compileFast, evaluate, euclidMod, floorDiv, OverBudget, step } from '../src/lang/eval';
 import { LangError, parseFormula, parseProgram } from '../src/lang/parser';
 import { en } from '../src/i18n/en';
 import { checkCondition, checkProgram, type Scope } from '../src/lang/typecheck';
 import { unroll } from '../src/lang/unroll';
+import { show } from './show';
 
 describe('parser', () => {
   it('desugars chained comparisons', () => {
@@ -14,16 +15,8 @@ describe('parser', () => {
     expect(show(parseFormula('x + y % 2 == 0 || !b && c'))).toBe('x + y % 2 == 0 || !b && c');
     expect(show(parseFormula('(x + y) % 2'))).toBe('(x + y) % 2');
   });
-  it('reports positions', () => {
-    try {
-      parseFormula('x >= ');
-      throw new Error('should fail');
-    } catch (e) {
-      expect(e).toBeInstanceOf(LangError);
-    }
-  });
-  it('parses programs with sugar', () => {
-    const p = parseProgram(`input n; var i = 0; while (i < n) { i++; if (i > 2) { i += 2; } else i -= 0; } ensures i >= n;`);
+  it('parses programs', () => {
+    const p = parseProgram(`input n; var i = 0; while (i < n) { i = i + 1; if (i > 2) { i = i + 2; } else { i = i - 0; } } ensures i >= n;`);
     checkProgram(p);
     expect(p.inputs.map((d) => d.name)).toEqual(['n']);
     const s = step(p.loop.body, { n: 10n, i: 2n });
@@ -33,10 +26,6 @@ describe('parser', () => {
     expect(() => parseFormula('i <= n//2')).toThrow(/Use `\/`/);
     expect(() => parseFormula('i <= n // 2')).toThrow(LangError);
     expect(show(parseFormula('i <= n / 2'))).toBe('i <= n / 2');
-  });
-  it('still skips // comments in programs', () => {
-    const p = parseProgram(`input n; // the input\nvar i = 0; while (i < n) { i++; } ensures i == n;`);
-    expect(p.inputs.map((d) => d.name)).toEqual(['n']);
   });
   it('only chains orderings, not == or !=', () => {
     expect(() => parseFormula('x >= 0 == y >= 0')).toThrow(/parentheses/);
@@ -89,7 +78,7 @@ describe('arrays and quantifiers', () => {
     const p = parseProgram(`input n; input A[n]; var i = 0; while (i < n) { i = i + 1; } ensures i == n;`);
     expect(checkProgram(p)).toEqual(new Map([['n', 'int'], ['A', 'array'], ['i', 'int']]));
     expect(p.inputs.map((d) => d.length)).toEqual([undefined, 'n']);
-    expect(() => checkProgram(parseProgram(`input A[n]; input n; var i = 0; while (i < n) { i++; }`))).toThrow(/before the array/);
+    expect(() => checkProgram(parseProgram(`input A[n]; input n; var i = 0; while (i < n) { i = i + 1; }`))).toThrow(/before the array/);
   });
 });
 

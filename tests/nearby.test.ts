@@ -6,7 +6,7 @@ import { RULES, type Counterexample, type Rule } from '../src/checker/types';
 import { nodeZ3, shutdownZ3 } from '../src/checker/z3-node';
 import { allLevels } from '../src/levels/catalog';
 import { startInputs, type Inputs } from '../src/levels/inputs';
-import { compileFormula, compileLevel, toNum } from '../src/levels/level';
+import { compileFormula, compileLevel } from '../src/levels/level';
 
 const level = (id: string) => compileLevel(allLevels.find((l) => l.id === id)!);
 const formula = (lvl: ReturnType<typeof compileLevel>, text: string) => {
@@ -27,12 +27,12 @@ const onRun = (id: string, text: string, inputs?: Inputs) => {
 
 describe('tutorial counterexamples match the design', () => {
   it('A: i == n fails initialization at the egg (0, 1)', () => {
-    expect(toNum(smallest('tutorial', 'i == n').initialization!.state)).toEqual({ n: 1, i: 0 });
+    expect(smallest('tutorial', 'i == n').initialization!.state).toEqual({ n: 1n, i: 0n });
   });
   it('B: start-or-done fails maintenance (0, 2) → (1, 2), from an egg', () => {
     const c = onRun('tutorial', 'i == 0 || i == n')!;
-    expect(toNum(c.state)).toEqual({ n: 2, i: 0 });
-    expect(toNum(c.next!)).toEqual({ n: 2, i: 1 });
+    expect(c.state).toEqual({ n: 2n, i: 0n });
+    expect(c.next!).toEqual({ n: 2n, i: 1n });
     const s = smallest('tutorial', 'i == 0 || i == n');
     expect(s.initialization).toBeUndefined();
     expect(s.exit).toBeUndefined();
@@ -41,7 +41,7 @@ describe('tutorial counterexamples match the design', () => {
     const c = smallest('tutorial', 'i >= 0');
     expect(c.initialization).toBeUndefined();
     expect(c.maintenance).toBeUndefined();
-    expect(toNum(c.exit!.state)).toEqual({ n: 0, i: 1 });
+    expect(c.exit!.state).toEqual({ n: 0n, i: 1n });
   });
   it('D passes nearby', () => {
     expect(smallest('tutorial', '0 <= i <= n')).toEqual({});
@@ -52,24 +52,24 @@ describe('tutorial counterexamples match the design', () => {
 describe('failures on a run are picked first', () => {
   it('sum to n: a bound that is too tight fails on the run, not on the smaller tile off it', () => {
     const c = onRun('sum-to-n', 'i <= 3')!;
-    expect(toNum(c.state)).toEqual({ n: 4, i: 3, s: 6 });
-    expect(toNum(smallest('sum-to-n', 'i <= 3').maintenance!.state)).toEqual({ n: 4, i: 3, s: 0 });
+    expect(c.state).toEqual({ n: 4n, i: 3n, s: 6n });
+    expect(smallest('sum-to-n', 'i <= 3').maintenance!.state).toEqual({ n: 4n, i: 3n, s: 0n });
   });
   it('a failure on a run far from the origin is still found', () => {
     const c = onRun('sum-to-n', 'i <= 20', { n: 30 })!;
-    expect(toNum(c.state)).toEqual({ n: 30, i: 20, s: 210 });
+    expect(c.state).toEqual({ n: 30n, i: 20n, s: 210n });
   });
   it('tag along: true of real frogs but not kept by a hop, so no run fails', () => {
     expect(onRun('tag-along', 'i <= n && s >= 0')).toBeUndefined();
     const c = smallest('tag-along', 'i <= n && s >= 0').maintenance!;
-    expect(toNum(c.state)).toEqual({ n: 4, i: -2, s: 0 });
+    expect(c.state).toEqual({ n: 4n, i: -2n, s: 0n });
     expect(c.broken).toBe('s >= 0');
   });
 });
 
 describe('levels', () => {
   it('parity: the smallest tile is (-1, 1)', () => {
-    expect(toNum(smallest('parity', '(x + y) % 2 == 0').exit!.state)).toEqual({ x: -1, y: 1 });
+    expect(smallest('parity', '(x + y) % 2 == 0').exit!.state).toEqual({ x: -1n, y: 1n });
   });
   it('even out: names the broken conjunct', () => {
     const c = smallest('even-out', 'x >= 0 && x == x');
@@ -79,7 +79,7 @@ describe('levels', () => {
   it('biggest so far: the goal copied fails initialization on the array in view', () => {
     const c = smallest('biggest-so-far', 'forall 0 <= k < n: A[k] <= m');
     expect(c.initialization).toBeDefined();
-    expect(toNum(c.initialization!.state)).toMatchObject({ i: 1, m: 3 });
+    expect(c.initialization!.state).toMatchObject({ i: 1n, m: 3n });
     expect(smallest('biggest-so-far', 'forall 0 <= k < i: A[k] <= m')).toEqual({});
   });
 });
@@ -102,7 +102,7 @@ describe('check', () => {
   });
   it('a failure on a run is the one Check shows', async () => {
     const m = (await check('sum-to-n', 'i <= 3')).maintenance!;
-    expect(m.status === 'fail' && toNum(m.cex.state)).toEqual({ n: 4, i: 3, s: 6 });
+    expect(m.status === 'fail' && m.cex.state).toEqual({ n: 4n, i: 3n, s: 6n });
   });
   it('a counterexample never shows an array shorter than its length', async () => {
     const v = await check('biggest-so-far', 'i <= 32 && forall 0 <= k < i: A[k] <= m');
