@@ -1,16 +1,32 @@
 import * as THREE from 'three';
 import { COLORS } from '../constants';
+import { figurePage } from '../figureClip';
 import type { TagTone } from './SceneTag';
 
-const INFO = '#2b3445';
+const SCREEN = {
+  ring: { info: '#64748b', good: COLORS.trail, fail: COLORS.fail },
+  wash: { info: '#64748b', good: '#34d058', fail: COLORS.fail },
+  washAlpha: 0.3,
+  outer: 0.96,
+  inner: 0.84,
+};
 
-export const RING_COLORS: Record<TagTone, string> = { info: INFO, good: '#166534', fail: '#a3121a' };
-export const WASH_COLORS: Record<TagTone, string> = { info: INFO, good: '#34d058', fail: COLORS.fail };
+const PRINT = {
+  ring: { info: '#2b3445', good: '#166534', fail: '#a3121a' },
+  wash: { info: '#2b3445', good: '#34d058', fail: COLORS.fail },
+  washAlpha: 0.45,
+  outer: 0.88,
+  inner: 0.72,
+};
+
+const STYLE = figurePage ? PRINT : SCREEN;
+
+export const RING_COLORS: Record<TagTone, string> = STYLE.ring;
+export const WASH_COLORS: Record<TagTone, string> = STYLE.wash;
 export const RING_ALPHA = 1;
-export const WASH_ALPHA = 0.3;
+export const WASH_ALPHA = STYLE.washAlpha;
 
-const OUTER = 0.96;
-const INNER = 0.84;
+const { outer: OUTER, inner: INNER } = STYLE;
 
 function roundedRect(w: number, r: number): THREE.Shape {
   const s = new THREE.Shape();
@@ -28,7 +44,7 @@ function roundedRect(w: number, r: number): THREE.Shape {
 }
 
 const INNER_R = 0.115;
-const OUTER_R = INNER_R + 0.05;
+const OUTER_R = INNER_R + (OUTER - INNER) / 2;
 
 export const ringGeometry = (() => {
   const outer = roundedRect(OUTER, OUTER_R);
