@@ -4,6 +4,7 @@ import { sfx } from '../../audio/sfx';
 import { planeKey, type Inputs } from '../../levels/inputs';
 import type { CompiledLevel, Formula } from '../../levels/level';
 import { cameraRig } from '../cameraRig';
+import { sceneNow } from '../sceneTime';
 import { goalEvents, landEvents } from '../tileEvents';
 import { Eggs } from './Eggs';
 import { field } from './field';
@@ -28,7 +29,7 @@ function useArea(level: CompiledLevel, inputs: Inputs, area: Formula | null) {
   const showArea = useEffectEvent(() => {
     field.inputs = inputs;
     field.show(level, area);
-    areaMask.show(level, area?.expr ?? null, field.before?.expr ?? null);
+    areaMask.show(level, area?.expr ?? null, area);
     const t = cameraRig.target();
     const { rising, sinking } = field.movedNear({ cx: Math.round(t.x), cy: Math.round(-t.z), R: HEARD_WITHIN });
     sfx.slabs(rising, sinking);
@@ -53,7 +54,8 @@ function useArea(level: CompiledLevel, inputs: Inputs, area: Formula | null) {
     }
     goalEvents.sync(planeKey(inputs));
     landEvents.sync(planeKey(inputs));
-    areaMask.draw(gl, t.x, -t.z, inputs, field.risen());
+    const now = sceneNow();
+    if (areaMask.draw(gl, t.x, -t.z, inputs, now)) field.begin(areaMask.level, areaMask.tag as Formula | null, inputs, now, t.x, -t.z);
   }, -1);
 }
 

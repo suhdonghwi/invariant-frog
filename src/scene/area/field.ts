@@ -2,51 +2,71 @@ import type { FastFn, FastState } from '../../lang/eval';
 import type { Inputs } from '../../levels/inputs';
 import type { CompiledLevel, Formula } from '../../levels/level';
 import { tilesNear, tileState, type TileWindow } from '../../levels/tiles';
-import { BASE } from '../../motion';
+import { RISE, RISE_OVERSHOOT, WAVE_CAP, WAVE_END, WAVE_SPREAD } from '../../motion';
 import { SLAB_H } from '../constants';
-import { clamp01, smoothstep } from '../easing';
+import { popIn, smoothstep } from '../easing';
 import { sceneNow } from '../sceneTime';
 import { SETTLE_POWER } from './glsl';
 import { landSquash } from './landBounce';
 
-const RISE_DUR = BASE;
+type Rise = (x: number, y: number) => number;
+
+interface Wave {
+  level: CompiledLevel | null;
+  area: FastFn | null;
+  inputs: Inputs;
+  from: Rise | null;
+  t0: number;
+  cx: number;
+  cy: number;
+}
+
+const still: Wave = { level: null, area: null, inputs: {}, from: null, t0: -Infinity, cx: 0, cy: 0 };
+
+function target(w: Wave, x: number, y: number): number {
+  if (!w.level) return 0;
+  const s = tileState(w.level, x, y, w.inputs);
+  return w.level.fast.planeReq(s) === true && w.area?.(s) === true ? 1 : 0;
+}
+
+function riseAt(w: Wave, x: number, y: number, t: number): number {
+  const to = target(w, x, y);
+  if (!w.from) return to;
+  const a = (t - w.t0 - Math.min(Math.hypot(x - w.cx, y - w.cy) * WAVE_SPREAD, WAVE_CAP)) / RISE;
+  if (a >= 1) return to;
+  const from = w.from(x, y);
+  if (a <= 0) return from;
+  return from + (to - from) * (to > from ? popIn(a, RISE_OVERSHOOT) : smoothstep(a));
+}
 
 class AreaField {
   level: CompiledLevel | null = null;
   inputs: Inputs = {};
   area: Formula | null = null;
   before: Formula | null = null;
-  private since = -Infinity;
+  private wave: Wave = still;
 
   reset() {
     this.level = null;
     this.area = null;
     this.before = null;
-    this.since = -Infinity;
+    this.wave = still;
   }
 
   show(level: CompiledLevel, area: Formula | null) {
     this.before = level === this.level ? this.area : null;
     this.level = level;
     this.area = area;
-    this.since = sceneNow();
   }
 
-  risen(): number {
-    return smoothstep(clamp01((sceneNow() - this.since) / RISE_DUR));
+  begin(level: CompiledLevel | null, area: Formula | null, inputs: Inputs, t: number, cx: number, cy: number) {
+    const was = this.wave;
+    const from: Rise = was.level !== level ? () => 0 : !was.from || t >= was.t0 + WAVE_END ? (x, y) => target(was, x, y) : (x, y) => riseAt(was, x, y, t);
+    this.wave = { level, area: area?.fast ?? null, inputs, from, t0: t, cx, cy };
   }
 
   heightAt(x: number, y: number): number {
-    const level = this.level;
-    if (!level) return 0;
-    const s = tileState(level, Math.round(x), Math.round(y), this.inputs);
-    if (level.fast.planeReq(s) !== true) return 0;
-    const covers = (f: FastFn | undefined) => (f?.(s) === true ? 1 : 0);
-    const to = covers(this.area?.fast);
-    const risen = this.risen();
-    if (risen >= 1) return to;
-    const from = covers(this.before?.fast);
-    return (from + (to - from) * risen) ** SETTLE_POWER;
+    return Math.max(0, riseAt(this.wave, Math.round(x), Math.round(y), sceneNow())) ** SETTLE_POWER;
   }
 
   planeMovedNear(near: TileWindow, before: Inputs): { rising: number; sinking: number } {

@@ -22,7 +22,7 @@ function asJs(glsl: string): string {
 function shaderArea(level: CompiledLevel, text: string, inputs: Inputs): Area {
   const f = compileFormula(level, text);
   if (!f.ok) throw f.error;
-  const js = asJs(levelGlsl(level, { area: f.expr, before: null }));
+  const js = asJs(levelGlsl(level, { area: f.expr }));
   const args: Record<string, unknown> = { min: Math.min, max: Math.max, abs: Math.abs, int: Math.trunc, float: Number, floor: Math.floor, uExists: true };
   for (const n of level.offAxis) args[level.arrays[n] ? `uArr_${n}` : `uIn_${n}`] = inputs[n];
   for (const [a, len] of Object.entries(level.arrays)) args[`uIn_${len}`] = (inputs[a] as number[]).length;

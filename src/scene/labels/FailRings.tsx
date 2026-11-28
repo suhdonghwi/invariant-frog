@@ -46,7 +46,7 @@ void main() {
   }
   float a = clamp((uTime - uT0) / ${APPEAR.toFixed(2)}, 0.0, 1.0);
   float s = ringPopScale(a);
-  vec4 w = vec4(position * vec3(s, 1.0, s) + vec3(tile.x, heightOf(maskAt(tile)) * ${SLAB_H.toFixed(3)} + 0.012, -tile.y), 1.0);
+  vec4 w = vec4(position * vec3(s, 1.0, s) + vec3(tile.x, heightOf(maskAt(tile), tile) * ${SLAB_H.toFixed(3)} + 0.012, -tile.y), 1.0);
   vWorld = w.xyz;
   vA = ringPopAlpha(a);
   gl_Position = projectionMatrix * modelViewMatrix * w;
@@ -79,7 +79,7 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
   const inputs = useGame((s) => s.inputs);
   const cells = useMemo(() => new VisibleCells(), []);
   useEffect(() => {
-    failMask.show(level, fail, null);
+    failMask.show(level, fail);
     return () => failMask.clear();
   }, [level, fail]);
 
@@ -127,7 +127,7 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
     if (!ring.current || !wash.current) return;
     const u = ring.current.material.uniforms;
     const target = cameraRig.target();
-    failMask.draw(gl, target.x, -target.z, inputs, 1);
+    failMask.draw(gl, target.x, -target.z, inputs, sceneNow());
     const reach = Math.min(MASK_REACH, Math.ceil(updateFade(u)));
     (u.uGrid.value as THREE.Vector2).set(Math.round(target.x) - origin.x, Math.round(-target.z) - origin.y);
     const box = figureClip.box;

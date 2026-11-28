@@ -1,23 +1,41 @@
 import * as THREE from 'three';
-import { SHORT } from '../../motion';
-import { MASK_SIZE } from './mask';
+import { RISE, RISE_OVERSHOOT, SHORT, WAVE_CAP, WAVE_SPREAD } from '../../motion';
 
+export const MASK_SIZE = 352;
 export const SETTLE_POWER = 2.5;
+export const FROM_SCALE = 255 / 127;
 
 export const GLSL_MASK = /* glsl */ `
 uniform highp sampler2D uMask;
 uniform vec2 uMaskOrigin;
-uniform float uRise;
+uniform highp sampler2D uFrom;
+uniform vec2 uFromOrigin;
+uniform float uWaveAge;
+uniform vec2 uWaveCenter;
 vec4 maskAt(vec2 tile) {
   ivec2 at = ivec2(floor(tile - uMaskOrigin + 0.5));
   if (at.x < 0 || at.y < 0 || at.x >= ${MASK_SIZE} || at.y >= ${MASK_SIZE}) return vec4(0.0);
   return texelFetch(uMask, at, 0);
 }
-float riseOf(vec4 m) {
-  return mix(m.g, m.r, uRise);
+float fromAt(vec2 tile, float to) {
+  ivec2 at = ivec2(floor(tile - uFromOrigin + 0.5));
+  if (at.x < 0 || at.y < 0 || at.x >= ${MASK_SIZE} || at.y >= ${MASK_SIZE}) return to;
+  return texelFetch(uFrom, at, 0).r * ${FROM_SCALE.toFixed(6)};
 }
-float heightOf(vec4 m) {
-  return pow(riseOf(m), ${SETTLE_POWER.toFixed(1)});
+float riseOf(vec4 m, vec2 tile) {
+  float a = (uWaveAge - min(length(tile - uWaveCenter) * ${WAVE_SPREAD.toFixed(4)}, ${WAVE_CAP.toFixed(3)})) / ${RISE.toFixed(3)};
+  if (a >= 1.0) return m.r;
+  float from = fromAt(tile, m.r);
+  if (a <= 0.0) return from;
+  float b = a - 1.0;
+  float e = m.r > from ? 1.0 + ${(RISE_OVERSHOOT + 1).toFixed(3)} * b * b * b + ${RISE_OVERSHOOT.toFixed(3)} * b * b : smoothstep(0.0, 1.0, a);
+  return from + (m.r - from) * e;
+}
+float settle(float rise) {
+  return pow(max(rise, 0.0), ${SETTLE_POWER.toFixed(1)});
+}
+float heightOf(vec4 m, vec2 tile) {
+  return settle(riseOf(m, tile));
 }
 `;
 
@@ -30,7 +48,8 @@ vec2 tileAt() {
   return aTile + uTileShift;
 }
 float heightNow() {
-  return heightOf(maskAt(tileAt()));
+  vec2 t = tileAt();
+  return heightOf(maskAt(t), t);
 }
 `;
 

@@ -13,6 +13,12 @@ export const EXIT_MS = EXIT * 1000;
 
 export const ms = (seconds: number) => seconds * 1000;
 
+export const RISE = BASE;
+export const RISE_OVERSHOOT = 0.9;
+export const WAVE_SPREAD = 0.012;
+export const WAVE_CAP = SHORT;
+export const WAVE_END = WAVE_CAP + RISE;
+
 export const REDUCE = '(prefers-reduced-motion: reduce)';
 const query = typeof matchMedia !== 'undefined' ? matchMedia(REDUCE) : null;
 let reduce = query?.matches ?? false;
