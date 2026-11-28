@@ -228,7 +228,7 @@ export async function stage(gen: Token, o: StageOptions): Promise<boolean> {
     const out = await checkAndPlay(
       o.rules,
       (failing) => ({
-        prefix: failing !== stageRule ? messages().tutorial.lostRule(messages().rules[failing]) : undefined,
+        note: failing !== stageRule ? messages().tutorial.lostRule : undefined,
         extra: messages().tutorial.fixAndCheck,
         ghostExtra: o.ghost?.[failing],
       }),
