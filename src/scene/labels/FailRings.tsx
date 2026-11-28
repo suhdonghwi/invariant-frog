@@ -17,7 +17,7 @@ import { origin } from '../origin';
 import { sceneNow, TIME_UNIFORM } from '../sceneTime';
 import { FADE_UNIFORMS, fadeRadius, GLSL_FADE } from '../shaders/fade';
 import { APPEAR, GLSL_RING_POP } from './Region';
-import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
+import { CASING_COLOR, casingGeometry, RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 
 
 const vertex = /* glsl */ `
@@ -108,25 +108,26 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
         depthWrite: false,
         uniforms: { ...shared, ...areaMask.uniforms, uAlpha: { value: alpha }, uColor: { value: new THREE.Color(color) } },
       });
-    return { ring: make(RING_ALPHA, RING_COLORS.fail), wash: make(WASH_ALPHA, WASH_COLORS.fail) };
+    return { ring: make(RING_ALPHA, RING_COLORS.fail), casing: make(RING_ALPHA, CASING_COLOR), wash: make(WASH_ALPHA, WASH_COLORS.fail) };
   }, [shared]);
-  useEffect(() => () => (materials.ring.dispose(), materials.wash.dispose()), [materials]);
+  useEffect(() => () => (materials.ring.dispose(), materials.casing.dispose(), materials.wash.dispose()), [materials]);
   const geoms = useMemo(() => {
     const at = (base: THREE.BufferGeometry) => {
       const g = instanced(base, 0, {});
       g.setAttribute('aOffset', cells.near);
       return g;
     };
-    return { ring: at(ringGeometry), wash: at(washGeometry) };
+    return { ring: at(ringGeometry), casing: at(casingGeometry), wash: at(washGeometry) };
   }, [cells]);
-  useEffect(() => () => (geoms.ring.dispose(), geoms.wash.dispose()), [geoms]);
+  useEffect(() => () => (geoms.ring.dispose(), geoms.casing.dispose(), geoms.wash.dispose()), [geoms]);
   const exit = useExitFade(leaving);
 
   const ring = useRef<THREE.Mesh<THREE.InstancedBufferGeometry, THREE.ShaderMaterial>>(null);
   const wash = useRef<THREE.Mesh<THREE.InstancedBufferGeometry, THREE.ShaderMaterial>>(null);
+  const casing = useRef<THREE.Mesh<THREE.InstancedBufferGeometry, THREE.ShaderMaterial>>(null);
 
   useFrame(() => {
-    if (!ring.current || !wash.current) return;
+    if (!ring.current || !wash.current || !casing.current) return;
     const u = ring.current.material.uniforms;
     const target = cameraRig.target();
     failMask.draw(gl, target.x, -target.z, inputsOf, inputs, sceneNow());
@@ -138,12 +139,13 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
     u.uT0.value = t0;
     u.uOut.value = exit();
     cells.update(camera, target, reach, Infinity);
-    ring.current.geometry.instanceCount = wash.current.geometry.instanceCount = cells.nearCount;
+    ring.current.geometry.instanceCount = casing.current.geometry.instanceCount = wash.current.geometry.instanceCount = cells.nearCount;
   });
 
   return (
     <AtOrigin>
       <mesh ref={wash} geometry={geoms.wash} material={materials.wash} frustumCulled={false} renderOrder={8} />
+      <mesh ref={casing} geometry={geoms.casing} material={materials.casing} frustumCulled={false} renderOrder={9} />
       <mesh ref={ring} geometry={geoms.ring} material={materials.ring} frustumCulled={false} renderOrder={9} />
     </AtOrigin>
   );

@@ -10,7 +10,7 @@ import { AtOrigin } from '../AtOrigin';
 import { uploadInstances } from '../instances';
 import { origin } from '../origin';
 import { APPEAR, ringPop } from '../labels/Region';
-import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from '../labels/markStyle';
+import { CASING_COLOR, casingGeometry, RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from '../labels/markStyle';
 import { sceneNow } from '../sceneTime';
 import { frogWorld, leaveFade, type FrogSim } from './frogWorld';
 import { HopLine } from './HopLine';
@@ -73,6 +73,7 @@ const pos = new THREE.Vector3();
 const scl = new THREE.Vector3();
 const RING = new THREE.Color(RING_COLORS.good);
 const WASH = new THREE.Color(WASH_COLORS.good);
+const CASING = new THREE.Color(CASING_COLOR);
 
 function SeeThroughHop({ arc, plane }: { arc: Arc; plane: string }) {
   return (
@@ -98,14 +99,16 @@ export function HopArcs() {
   const list = useHopArcs((s) => s.arcs);
   const rings = useRef<THREE.InstancedMesh>(null);
   const washes = useRef<THREE.InstancedMesh>(null);
+  const casings = useRef<THREE.InstancedMesh>(null);
   const plane = useGame((s) => planeKey(s.inputs));
-  const parts = useMemo(() => ({ ring: instancedParts(ringGeometry, MAX), wash: instancedParts(washGeometry, MAX) }), []);
-  useEffect(() => () => [parts.ring, parts.wash].forEach((p) => (p.g.dispose(), p.mat.dispose())), [parts]);
+  const parts = useMemo(() => ({ ring: instancedParts(ringGeometry, MAX), casing: instancedParts(casingGeometry, MAX), wash: instancedParts(washGeometry, MAX) }), []);
+  useEffect(() => () => [parts.ring, parts.casing, parts.wash].forEach((p) => (p.g.dispose(), p.mat.dispose())), [parts]);
 
   useFrame(() => {
     const r = rings.current;
     const w = washes.current;
-    if (!r || !w) return;
+    const cs = casings.current;
+    if (!r || !w || !cs) return;
     const t = sceneNow();
     let { arcs } = useHopArcs.getState();
     if (arcs.some((a) => !frogWorld.frogs.includes(a.frog))) {
@@ -123,6 +126,7 @@ export function HopArcs() {
       const fade = alpha * (frog.fade ?? 1) * leaveFade(frog, t);
       for (const [mesh, p, opacity, c] of [
         [r, parts.ring, RING_ALPHA, RING],
+        [cs, parts.casing, RING_ALPHA, CASING],
         [w, parts.wash, WASH_ALPHA, WASH],
       ] as const) {
         mesh.setMatrixAt(nr, m);
@@ -133,6 +137,7 @@ export function HopArcs() {
     }
     for (const [mesh, p] of [
       [r, parts.ring],
+      [cs, parts.casing],
       [w, parts.wash],
     ] as const) {
       mesh.count = nr;
@@ -147,6 +152,7 @@ export function HopArcs() {
       ))}
       <AtOrigin>
         <instancedMesh ref={washes} args={[parts.wash.g, parts.wash.mat, MAX]} count={0} frustumCulled={false} renderOrder={8} />
+        <instancedMesh ref={casings} args={[parts.casing.g, parts.casing.mat, MAX]} count={0} frustumCulled={false} renderOrder={9} />
         <instancedMesh ref={rings} args={[parts.ring.g, parts.ring.mat, MAX]} count={0} frustumCulled={false} renderOrder={9} />
       </AtOrigin>
     </>

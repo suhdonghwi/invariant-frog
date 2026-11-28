@@ -13,7 +13,7 @@ import { sceneNow, TIME_UNIFORM } from '../sceneTime';
 import { sfx } from '../../audio/sfx';
 import { LINGER, SHORT } from '../../motion';
 import { FADE_UNIFORMS, GLSL_FADE } from '../shaders/fade';
-import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
+import { CASING_COLOR, casingGeometry, RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 import { useTileWindow } from './useTileWindow';
 
 export const APPEAR = SHORT;
@@ -146,6 +146,7 @@ function useTicks(region: Region | null, plan: Sweep | null, t0: number) {
 const colors = (tones: Record<string, string>) => Object.fromEntries(Object.entries(tones).map(([k, v]) => [k, new THREE.Color(v)]));
 const RING = colors(RING_COLORS);
 const WASH = colors(WASH_COLORS);
+const CASING = new THREE.Color(CASING_COLOR);
 
 export function OutlineRegion() {
   const { value: region, leaving } = useLingering(useGame((s) => s.region));
@@ -172,6 +173,7 @@ export function OutlineRegion() {
     const tile = new Float32Array(n * 2);
     const ringColor = new Float32Array(n * 3);
     const washColor = new Float32Array(n * 3);
+    const casingColor = new Float32Array(n * 3);
     const delay = new Float32Array(n);
     const delays = plan.sweep?.delays;
     tiles.forEach((t, i) => {
@@ -179,12 +181,13 @@ export function OutlineRegion() {
       const [r, w] = [RING[t.tone], WASH[t.tone]];
       ringColor.set([r.r, r.g, r.b], i * 3);
       washColor.set([w.r, w.g, w.b], i * 3);
+      casingColor.set([CASING.r, CASING.g, CASING.b], i * 3);
       delay[i] = delays?.[i] ?? 0;
     });
     const attrs = (color: Float32Array) => ({ aTile: [tile, 2], aColor: [color, 3], aDelay: [delay, 1] }) as const;
-    return { ring: instanced(ringGeometry, n, attrs(ringColor)), wash: instanced(washGeometry, n, attrs(washColor)), at: { x: origin.x, y: origin.y } };
+    return { ring: instanced(ringGeometry, n, attrs(ringColor)), casing: instanced(casingGeometry, n, attrs(casingColor)), wash: instanced(washGeometry, n, attrs(washColor)), at: { x: origin.x, y: origin.y } };
   }, [plan]);
-  useEffect(() => () => (geoms?.ring.dispose(), geoms?.wash.dispose()), [geoms]);
+  useEffect(() => () => (geoms?.ring.dispose(), geoms?.casing.dispose(), geoms?.wash.dispose()), [geoms]);
 
   useFrame(() => {
     const out = exit();
@@ -199,6 +202,7 @@ export function OutlineRegion() {
   return (
     <AtOrigin>
       <mesh geometry={geoms.wash} material={wash} frustumCulled={false} renderOrder={8} />
+      <mesh geometry={geoms.casing} material={ring} frustumCulled={false} renderOrder={9} />
       <mesh geometry={geoms.ring} material={ring} frustumCulled={false} renderOrder={9} />
     </AtOrigin>
   );
