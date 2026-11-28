@@ -106,6 +106,8 @@ the tests are the safety net.
   infinite.
 - **Slabs are one instanced grid centred on the camera**, so the area reaches
   the horizon at any zoom.
+- **Eggs take their detail from their size on screen**, and only eggs inside a
+  slightly widened view are drawn.
 - **The GPU sees coordinates near a floating origin** (`scene/origin.ts`),
   since a 32-bit float has no fractions left near ten million.
 - Models are procedural, and shadows are soft blobs, not shadow maps.
