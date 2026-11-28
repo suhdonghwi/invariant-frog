@@ -14,41 +14,65 @@ export function usePresence(show: boolean): { mounted: boolean; leaving: boolean
 }
 
 export function useLingering<T>(current: T | null | undefined): { value: T | null; leaving: boolean } {
-  const last = useRef<T | null>(current ?? null);
-  if (current != null) last.current = current;
+  const [last, setLast] = useState<T | null>(current ?? null);
+  if (current != null && current !== last) setLast(current);
   const { mounted, leaving } = usePresence(current != null);
-  return { value: mounted ? last.current : null, leaving };
+  return { value: mounted ? (current ?? last) : null, leaving };
+}
+
+interface Gone<T> {
+  item: T;
+  key: string;
+  index: number;
 }
 
 export function usePresentList<T>(items: readonly T[], keyOf: (t: T) => string): { item: T; key: string; leaving: boolean }[] {
-  const gone = useRef(new Map<string, { item: T; at: number; index: number }>());
-  const prev = useRef<{ item: T; key: string }[]>([]);
-  const [, bump] = useState(0);
-  const now = performance.now();
+  const [prev, setPrev] = useState(items);
+  const [gone, setGone] = useState<Gone<T>[]>([]);
   const keys = new Set(items.map(keyOf));
-  prev.current.forEach((p, index) => {
-    if (!keys.has(p.key) && !gone.current.has(p.key)) gone.current.set(p.key, { item: p.item, at: now, index });
-  });
-  for (const k of keys) gone.current.delete(k);
-  for (const [k, g] of gone.current) if (now - g.at > EXIT_MS) gone.current.delete(k);
-  prev.current = items.map((item) => ({ item, key: keyOf(item) }));
+  const changed = prev.length !== items.length || prev.some((item, i) => keyOf(item) !== keyOf(items[i]));
+  if (changed) {
+    const next = gone.filter((g) => !keys.has(g.key));
+    prev.forEach((item, index) => {
+      const key = keyOf(item);
+      if (!keys.has(key) && !next.some((g) => g.key === key)) next.push({ item, key, index });
+    });
+    setPrev(items);
+    setGone(next);
+  }
 
+  const timers = useRef(new Map<Gone<T>, ReturnType<typeof setTimeout>>());
   useEffect(() => {
-    if (!gone.current.size) return;
-    const t = setTimeout(() => bump((n) => n + 1), EXIT_MS + 20);
-    return () => clearTimeout(t);
-  });
+    for (const g of gone) {
+      if (timers.current.has(g)) continue;
+      const t = setTimeout(() => {
+        timers.current.delete(g);
+        setGone((list) => list.filter((x) => x !== g));
+      }, EXIT_MS);
+      timers.current.set(g, t);
+    }
+  }, [gone]);
+  useEffect(() => {
+    const live = timers.current;
+    return () => live.forEach(clearTimeout);
+  }, []);
 
   const out = items.map((item) => ({ item, key: keyOf(item), leaving: false }));
-  for (const [key, g] of gone.current) out.splice(Math.min(g.index, out.length), 0, { item: g.item, key, leaving: true });
+  for (const g of gone) if (!keys.has(g.key)) out.splice(Math.min(g.index, out.length), 0, { item: g.item, key: g.key, leaving: true });
   return out;
 }
 
+class ExitFade {
+  private leftAt: number | null = null;
+
+  at(leaving: boolean): number {
+    if (!leaving) this.leftAt = null;
+    else if (this.leftAt === null) this.leftAt = performance.now();
+    return this.leftAt === null ? 1 : 1 - easeIn(clamp01((performance.now() - this.leftAt) / EXIT_MS));
+  }
+}
+
 export function useExitFade(leaving: boolean): () => number {
-  const leftAt = useRef<number | null>(null);
-  return () => {
-    if (!leaving) leftAt.current = null;
-    else if (leftAt.current === null) leftAt.current = performance.now();
-    return leftAt.current === null ? 1 : 1 - easeIn(clamp01((performance.now() - leftAt.current) / EXIT_MS));
-  };
+  const [fade] = useState(() => new ExitFade());
+  return () => fade.at(leaving);
 }

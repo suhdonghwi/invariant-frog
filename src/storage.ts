@@ -10,6 +10,8 @@ export const storage = {
     try {
       if (value === null) localStorage.removeItem(key);
       else localStorage.setItem(key, value);
-    } catch {}
+    } catch {
+      return;
+    }
   },
 };

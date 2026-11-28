@@ -1,4 +1,6 @@
 import { useFrame, useThree } from '@react-three/fiber';
+import { useRef } from 'react';
+import type { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
 import { COLORS } from '../constants';
 import { arcPoints, fitArcLine, setArc, useArcLine, type ArcEnd } from './hopArc';
 
@@ -14,8 +16,11 @@ interface HopPath {
 export function HopLine({ path }: { path: () => HopPath | null }) {
   const size = useThree((s) => s.size);
   const line = useArcLine(COLORS.hopLine);
+  const lineRef = useRef<LineSegments2>(null);
 
   useFrame(() => {
+    const line = lineRef.current;
+    if (!line) return;
     const p = path();
     line.visible = !!p && p.opacity > 0 && p.drawn > 0;
     if (!p || !line.visible) return;
@@ -29,5 +34,5 @@ export function HopLine({ path }: { path: () => HopPath | null }) {
     fitArcLine(line, size);
   });
 
-  return <primitive object={line} />;
+  return <primitive ref={lineRef} object={line} />;
 }

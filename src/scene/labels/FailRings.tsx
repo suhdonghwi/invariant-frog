@@ -1,5 +1,5 @@
 import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useGame } from '../../game/store';
 import { useExitFade } from '../../hooks/presence';
@@ -120,25 +120,30 @@ export function FailRings({ level, fail, t0, leaving }: FailRingsProps) {
   useEffect(() => () => (geoms.ring.dispose(), geoms.wash.dispose()), [geoms]);
   const exit = useExitFade(leaving);
 
+  const ring = useRef<THREE.Mesh<THREE.InstancedBufferGeometry, THREE.ShaderMaterial>>(null);
+  const wash = useRef<THREE.Mesh<THREE.InstancedBufferGeometry, THREE.ShaderMaterial>>(null);
+
   useFrame(() => {
+    if (!ring.current || !wash.current) return;
+    const u = ring.current.material.uniforms;
     const target = cameraRig.target();
     failMask.draw(gl, target.x, -target.z, inputs, 1);
-    const reach = Math.min(MASK_REACH, Math.ceil(updateFade(shared)));
-    (shared.uGrid.value as THREE.Vector2).set(Math.round(target.x) - origin.x, Math.round(-target.z) - origin.y);
+    const reach = Math.min(MASK_REACH, Math.ceil(updateFade(u)));
+    (u.uGrid.value as THREE.Vector2).set(Math.round(target.x) - origin.x, Math.round(-target.z) - origin.y);
     const box = figureClip.box;
-    shared.uClipOn.value = box ? 1 : 0;
-    if (box) (shared.uClip.value as THREE.Vector4).set(box.x0 - origin.x, box.y0 - origin.y, box.x1 - origin.x, box.y1 - origin.y);
-    shared.uTime.value = sceneNow();
-    shared.uT0.value = t0;
-    shared.uOut.value = exit();
+    u.uClipOn.value = box ? 1 : 0;
+    if (box) (u.uClip.value as THREE.Vector4).set(box.x0 - origin.x, box.y0 - origin.y, box.x1 - origin.x, box.y1 - origin.y);
+    u.uTime.value = sceneNow();
+    u.uT0.value = t0;
+    u.uOut.value = exit();
     cells.update(camera, target, reach, Infinity);
-    geoms.ring.instanceCount = geoms.wash.instanceCount = cells.nearCount;
+    ring.current.geometry.instanceCount = wash.current.geometry.instanceCount = cells.nearCount;
   });
 
   return (
     <AtOrigin>
-      <mesh geometry={geoms.wash} material={materials.wash} frustumCulled={false} renderOrder={8} />
-      <mesh geometry={geoms.ring} material={materials.ring} frustumCulled={false} renderOrder={9} />
+      <mesh ref={wash} geometry={geoms.wash} material={materials.wash} frustumCulled={false} renderOrder={8} />
+      <mesh ref={ring} geometry={geoms.ring} material={materials.ring} frustumCulled={false} renderOrder={9} />
     </AtOrigin>
   );
 }

@@ -23,7 +23,7 @@ interface WordProps {
   side: string;
   wave: number;
   phase?: number;
-  clock: { t: number };
+  clock: React.RefObject<{ t: number }>;
   first?: number;
 }
 
@@ -48,7 +48,7 @@ export function Word({ text, xs, position, face, side, wave, phase = 0, clock, f
     const t = sceneNow();
     refs.current.forEach((g, i) => {
       if (!g) return;
-      const s = entrance(clock.t, (first + i) * STAGGER);
+      const s = entrance(clock.current.t, (first + i) * STAGGER);
       const { mid } = letters[i];
       g.scale.setScalar(s);
       g.position.set(mid.x * (1 - s), waveAt(t, i, phase) * wave + mid.y * (1 - s), 0);

@@ -1,5 +1,5 @@
 import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import { sfx } from '../../audio/sfx';
 import { planeKey, type Inputs } from '../../levels/inputs';
 import type { CompiledLevel, Formula } from '../../levels/level';
@@ -25,16 +25,15 @@ const HEARD_WITHIN = 12;
 
 function useArea(level: CompiledLevel, inputs: Inputs, area: Formula | null) {
   const gl = useThree((s) => s.gl);
-  const latest = useRef(inputs);
-  latest.current = inputs;
-  useEffect(() => {
-    field.inputs = latest.current;
+  const showArea = useEffectEvent(() => {
+    field.inputs = inputs;
     field.show(level, area);
     areaMask.show(level, area?.expr ?? null, field.before?.expr ?? null);
     const t = cameraRig.target();
     const { rising, sinking } = field.movedNear({ cx: Math.round(t.x), cy: Math.round(-t.z), R: HEARD_WITHIN });
     sfx.slabs(rising, sinking);
-  }, [level, area]);
+  });
+  useEffect(() => showArea(), [level, area]);
   useEffect(
     () => () => {
       field.reset();
