@@ -1,10 +1,11 @@
 import { CameraControls, CameraControlsImpl } from '@react-three/drei';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { prepareSound } from '../audio/sfx';
 import { useGame } from '../game/store';
 import { keepAlive, live, restless, touched, wake } from './awake';
 import { cameraRig, FOV, MAX_DISTANCE } from './cameraRig';
+import { Canvas } from './Canvas';
 import { MAX_DPR } from './constants';
 import { HomeScene } from './home/HomeScene';
 import { LevelScene } from './level/LevelScene';
