@@ -6,35 +6,15 @@ export interface Slot {
   scale: number;
 }
 
-const LAYOUTS: Slot[][] = [
-  [{ dx: 0, dy: 0, scale: 1 }],
-  [
-    { dx: -0.2, dy: 0.02, scale: 0.78 },
-    { dx: 0.2, dy: -0.02, scale: 0.78 },
-  ],
-  [
-    { dx: -0.2, dy: -0.13, scale: 0.7 },
-    { dx: 0.2, dy: -0.13, scale: 0.7 },
-    { dx: 0, dy: 0.18, scale: 0.7 },
-  ],
-  [
-    { dx: -0.2, dy: 0.19, scale: 0.62 },
-    { dx: 0.2, dy: 0.19, scale: 0.62 },
-    { dx: -0.2, dy: -0.19, scale: 0.62 },
-    { dx: 0.2, dy: -0.19, scale: 0.62 },
-  ],
-];
-
-export const MAX_SHOWN = 4;
-
 export const EGG_ALONE: Slot = { dx: 0, dy: 0, scale: 1 };
 export const EGG_ASIDE: Slot = { dx: 0.27, dy: -0.25, scale: 0.5 };
 
-export function slotFor(index: number, count: number): Slot {
-  const layout = LAYOUTS[Math.min(count, MAX_SHOWN) - 1] ?? LAYOUTS[0];
-  if (index >= MAX_SHOWN) return { dx: 0, dy: 0, scale: 0 };
-  return layout[index] ?? LAYOUTS[0][0];
-}
+const PAIR: Slot[] = [
+  { dx: -0.2, dy: 0.02, scale: 0.78 },
+  { dx: 0.2, dy: -0.02, scale: 0.78 },
+];
+
+export const slotFor = (index: number, count: number): Slot => (count > 1 ? PAIR[index % 2] : EGG_ALONE);
 
 export const tileKey = (f: FrogSim) => (f.hop ? `${f.hop.tx},${f.hop.ty}` : `${f.x},${f.y}`);
 export const leftTiles = (f: FrogSim) => (f.hop ? f.trail! : f.trail!.slice(0, -1));

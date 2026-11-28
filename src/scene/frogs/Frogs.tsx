@@ -11,13 +11,11 @@ import { origin } from '../origin';
 import { clipBelowFloor, frogGeometry, frogMaterial, seeThroughDepthMaterial } from '../models';
 import { sceneNow } from '../sceneTime';
 import { blobShadowMaterial, stencilMark } from '../shaders/common';
-import { placeBadge } from './badges';
 import { frogWorld, leaveFade, trailFrogs, yawToward, type FrogSim } from './frogWorld';
 import { pose } from './motion';
-import { byTile, leftTiles, MAX_SHOWN, occupancy, slotFor, tileKey, type Slot } from './occupancy';
+import { byTile, leftTiles, occupancy, slotFor, tileKey, type Slot } from './occupancy';
 
 const MAX_FROGS = 400;
-const BADGES = 24;
 const FROG_SHADOW_SIZE = 0.66;
 
 const dummy = new THREE.Object3D();
@@ -92,7 +90,6 @@ export function Frogs() {
   );
   const plane = useGame((s) => planeKey(s.inputs));
   const lastT = useRef<number | undefined>(undefined);
-  const badgeRefs = useRef<(THREE.Sprite | null)[]>([]);
 
   const shown = useRef<FrogSim[]>([]);
   const tiles = useRef(new Map<string, FrogSim[]>());
@@ -116,16 +113,11 @@ export function Frogs() {
     const dt = Math.min(0.1, t - (lastT.current ?? t));
     const k = 1 - Math.exp(-dt * 11);
     lastT.current = t;
-    let badges = 0;
     for (const f of visible) {
       if (n >= MAX_FROGS) break;
       const p = pose(f, t);
       const g = groups.get(tileKey(f))!;
-      const i = g.indexOf(f);
-      if (g.length > MAX_SHOWN && i === 0 && badges < BADGES) {
-        placeBadge(badgeRefs.current[badges++], f.x, f.y, p.ground, g.length);
-      }
-      const slot = easeSlot(f, slotFor(i, g.length), t, dt, k);
+      const slot = easeSlot(f, slotFor(g.indexOf(f), g.length), t, dt, k);
       const os = slot.scale;
       const px = p.x + slot.dx;
       const pz = p.z - slot.dy;
@@ -161,10 +153,6 @@ export function Frogs() {
       n++;
     }
     nSeeThrough = placeEchoes(walkers, t, nSeeThrough, gd, gh, fades, clears);
-    for (let i = badges; i < BADGES; i++) {
-      const sp = badgeRefs.current[i];
-      if (sp) sp.visible = false;
-    }
     b.count = nReal;
     gh.count = gd.count = nSeeThrough;
     sh.count = n;
@@ -176,18 +164,11 @@ export function Frogs() {
   });
 
   return (
-    <group>
-      <AtOrigin>
-        <instancedMesh ref={shadows} args={[shadowGeom, shadowMat, MAX_FROGS]} count={0} frustumCulled={false} renderOrder={3} />
-        <instancedMesh ref={body} args={[geom, mat, MAX_FROGS]} count={0} frustumCulled={false} onClick={(e) => e.stopPropagation()} />
-        <instancedMesh ref={seeThroughDepth} args={[geom, seeThroughDepthMat, MAX_FROGS]} count={0} frustumCulled={false} renderOrder={4} />
-        <instancedMesh ref={seeThrough} args={[seeThroughGeom, seeThroughMat, MAX_FROGS]} count={0} frustumCulled={false} renderOrder={5} onClick={(e) => e.stopPropagation()} />
-      </AtOrigin>
-      {Array.from({ length: BADGES }, (_, i) => (
-        <sprite key={i} ref={(el) => void (badgeRefs.current[i] = el)} visible={false} scale={[0.5, 0.3, 1]} renderOrder={10}>
-          <spriteMaterial depthTest={false} transparent />
-        </sprite>
-      ))}
-    </group>
+    <AtOrigin>
+      <instancedMesh ref={shadows} args={[shadowGeom, shadowMat, MAX_FROGS]} count={0} frustumCulled={false} renderOrder={3} />
+      <instancedMesh ref={body} args={[geom, mat, MAX_FROGS]} count={0} frustumCulled={false} onClick={(e) => e.stopPropagation()} />
+      <instancedMesh ref={seeThroughDepth} args={[geom, seeThroughDepthMat, MAX_FROGS]} count={0} frustumCulled={false} renderOrder={4} />
+      <instancedMesh ref={seeThrough} args={[seeThroughGeom, seeThroughMat, MAX_FROGS]} count={0} frustumCulled={false} renderOrder={5} onClick={(e) => e.stopPropagation()} />
+    </AtOrigin>
   );
 }

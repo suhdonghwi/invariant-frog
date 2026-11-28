@@ -1,8 +1,8 @@
 import { createRoot, events, extend, type ReconcilerRoot, type RenderProps } from '@react-three/fiber';
 import { Component, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { DirectionalLight, Group, HemisphereLight, InstancedMesh, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial, Sprite, SpriteMaterial } from 'three';
+import { DirectionalLight, Group, HemisphereLight, InstancedMesh, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial } from 'three';
 
-extend({ DirectionalLight, Group, HemisphereLight, InstancedMesh, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial, Sprite, SpriteMaterial });
+extend({ DirectionalLight, Group, HemisphereLight, InstancedMesh, Mesh, MeshBasicMaterial, PlaneGeometry, ShaderMaterial });
 
 type CanvasProps = Omit<RenderProps<HTMLCanvasElement>, 'size' | 'events'> & { children: ReactNode };
 
