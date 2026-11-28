@@ -45,11 +45,18 @@ export function showInputs(level: CompiledLevel, inputs: Inputs): string {
     .join(', ');
 }
 
+const planeKeys = new WeakMap<Inputs, string>();
+
 export function planeKey(inputs: Inputs): string {
-  return Object.keys(inputs)
-    .sort()
-    .map((k) => `${k}=${String(inputs[k])}`)
-    .join(';');
+  let key = planeKeys.get(inputs);
+  if (key === undefined) {
+    key = Object.keys(inputs)
+      .sort()
+      .map((k) => `${k}=${String(inputs[k])}`)
+      .join(';');
+    planeKeys.set(inputs, key);
+  }
+  return key;
 }
 
 export function planeExists(level: CompiledLevel, inputs: Inputs): boolean {

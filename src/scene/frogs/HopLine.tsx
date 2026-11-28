@@ -17,6 +17,7 @@ export function HopLine({ path }: { path: () => HopPath | null }) {
   const size = useThree((s) => s.size);
   const line = useArcLine(COLORS.hopLine);
   const lineRef = useRef<LineSegments2>(null);
+  const drawn = useRef({ count: 0, ends: [] as number[] });
 
   useFrame(() => {
     const line = lineRef.current;
@@ -25,9 +26,10 @@ export function HopLine({ path }: { path: () => HopPath | null }) {
     line.visible = !!p && p.opacity > 0 && p.drawn > 0;
     if (!p || !line.visible) return;
     const count = Math.max(1, Math.round(SEGMENTS * Math.min(1, p.drawn)));
-    const key = [...p.from, ...p.to].map((v) => v.toFixed(3)).join() + `:${count}`;
-    if (key !== line.userData.key) {
-      line.userData.key = key;
+    const last = drawn.current;
+    if (last.count !== count || [...p.from, ...p.to].some((v, k) => Math.abs(v - last.ends[k]) > 1e-3)) {
+      last.count = count;
+      last.ends = [...p.from, ...p.to];
       setArc(line, arcPoints(p.from, p.to, SEGMENTS, count));
     }
     line.material.opacity = 0.9 * p.opacity;

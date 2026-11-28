@@ -2,6 +2,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useEffectEvent, useLayoutEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGame } from '../../game/store';
+import { layoutVersion } from '../freeRect';
 import { cameraRig, type Shot } from '../cameraRig';
 import { easeInOut } from '../easing';
 import { sceneNow } from '../sceneTime';
@@ -18,8 +19,12 @@ const eye = new THREE.Vector3();
 const target = new THREE.Vector3();
 const sph = new THREE.Spherical();
 
+let fitted: { key: string; at: { x: number; y: number; d: number } } | null = null;
+
 function restingPose(t: number, size: { width: number; height: number }) {
-  const at = cameraRig.fitInto(RING, ANGLE, size, PADDING) ?? FALLBACK;
+  const key = `${size.width}|${size.height}|${layoutVersion()}`;
+  if (fitted?.key !== key) fitted = { key, at: cameraRig.fitInto(RING, ANGLE, size, PADDING) ?? FALLBACK };
+  const at = fitted.at;
   target.set(at.x, 0, -at.y);
   eye.setFromSpherical(sph.set(at.d, ANGLE.po, ANGLE.az + (reducedMotion() ? 0 : Math.sin(t * 0.13) * SWAY))).add(target);
 }

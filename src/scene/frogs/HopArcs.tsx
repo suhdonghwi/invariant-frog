@@ -12,7 +12,7 @@ import { origin } from '../origin';
 import { APPEAR, ringPop } from '../labels/Region';
 import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from '../labels/markStyle';
 import { sceneNow } from '../sceneTime';
-import { frogWorld, leaveFade } from './frogWorld';
+import { frogWorld, leaveFade, type FrogSim } from './frogWorld';
 import { HopLine } from './HopLine';
 import { ARC_DRAW } from '../../motion';
 
@@ -108,12 +108,16 @@ export function HopArcs() {
   const parts = useMemo(() => ({ ring: instancedParts(ringGeometry, MAX), wash: instancedParts(washGeometry, MAX) }), []);
   useEffect(() => () => [parts.ring, parts.wash].forEach((p) => (p.g.dispose(), p.mat.dispose())), [parts]);
 
+  const byId = useRef(new Map<number, FrogSim>());
+
   useFrame(() => {
     const r = rings.current;
     const w = washes.current;
     if (!r || !w) return;
     const t = sceneNow();
-    const ghosts = new Map(frogWorld.frogs.map((f) => [f.id, f]));
+    const ghosts = byId.current;
+    ghosts.clear();
+    for (const f of frogWorld.frogs) ghosts.set(f.id, f);
     let { arcs } = useHopArcs.getState();
     if (arcs.some((a) => !ghosts.has(a.frog))) {
       arcs = arcs.filter((a) => ghosts.has(a.frog));
