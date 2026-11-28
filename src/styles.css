@@ -65,6 +65,7 @@
   --color-wash: #f4f6fa;
   --color-glass: #c4cddc;
   --color-brand: #3b82f6;
+  --color-ring: color-mix(in oklab, var(--color-brand) 60%, transparent);
   --color-brand-light: #4a8cf7;
   --color-brand-deep: #2563d4;
   --color-brand-soft: #e7f0fe;
@@ -131,6 +132,9 @@
     word-break: keep-all;
     overflow-wrap: break-word;
   }
+  * {
+    outline-color: var(--color-ring);
+  }
   :focus-visible {
     @apply focus-ring;
   }
@@ -140,7 +144,7 @@
 }
 
 @utility focus-ring {
-  outline: 3px solid --alpha(var(--color-brand) / 60%);
+  outline: 3px solid var(--color-ring);
   outline-offset: 2px;
 }
 

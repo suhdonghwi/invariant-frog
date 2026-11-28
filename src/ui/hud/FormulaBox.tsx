@@ -64,7 +64,7 @@ export function FormulaBox() {
     <div className="animate-rise-slow [--formula-size:17px] compact:[--formula-size:16px]">
       <div
         ref={box}
-        className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-2xl border-2 bg-white py-1.25 pr-2.5 pl-4 shadow-card compact:gap-x-2 compact:pr-2 compact:pl-3 transition-colors duration-150 ${shownError ? 'border-fail/50' : 'border-brand/30 focus-within:border-brand/65'} has-[textarea:focus-visible]:focus-ring ${spot === 'formula' ? 'spotlight' : ''}`}
+        className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-2xl border-2 bg-white py-1.25 pr-2.5 pl-4 shadow-card compact:gap-x-2 compact:pr-2 compact:pl-3 transition-colors duration-150 ${shownError ? 'border-fail/50' : 'border-brand/30 focus-within:border-brand/65'} ${spot === 'formula' ? 'spotlight' : ''}`}
       >
         <span className="flex items-center gap-1.75 compact:ml-0.5 font-display text-xs font-semibold tracking-[0.08em] text-brand uppercase before:size-3 before:-translate-y-px before:rounded-sm before:bg-slab before:shadow-slab">
           <span className="compact:sr-only">{tr.formula.area}</span>
