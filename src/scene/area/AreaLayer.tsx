@@ -20,16 +20,18 @@ interface AreaLayerProps {
   showStop: boolean;
   showGoal: boolean;
   showEggs: boolean;
+  silent?: boolean;
 }
 
 const HEARD_WITHIN = 12;
 
-function useArea(level: CompiledLevel, inputs: Inputs, area: Formula | null) {
+function useArea(level: CompiledLevel, inputs: Inputs, area: Formula | null, silent: boolean) {
   const gl = useThree((s) => s.gl);
   const showArea = useEffectEvent(() => {
     field.inputs = inputs;
     field.show(level, area);
     areaMask.show(level, area?.expr ?? null, area);
+    if (silent) return;
     const t = cameraRig.target();
     const { rising, sinking } = field.movedNear({ cx: Math.round(t.x), cy: Math.round(-t.z), R: HEARD_WITHIN });
     sfx.slabs(rising, sinking);
@@ -48,7 +50,7 @@ function useArea(level: CompiledLevel, inputs: Inputs, area: Formula | null) {
     const t = cameraRig.target();
     const was = shown.current;
     shown.current = { level, inputs };
-    if (was.level === level && planeKey(was.inputs) !== planeKey(inputs)) {
+    if (!silent && was.level === level && planeKey(was.inputs) !== planeKey(inputs)) {
       const { rising, sinking } = field.planeMovedNear({ cx: Math.round(t.x), cy: Math.round(-t.z), R: HEARD_WITHIN }, was.inputs);
       sfx.slabs(rising, sinking);
     }
@@ -60,8 +62,8 @@ function useArea(level: CompiledLevel, inputs: Inputs, area: Formula | null) {
   }, -1);
 }
 
-export function AreaLayer({ level, inputs, area, dim, showStop, showGoal, showEggs }: AreaLayerProps) {
-  useArea(level, inputs, area);
+export function AreaLayer({ level, inputs, area, dim, showStop, showGoal, showEggs, silent = false }: AreaLayerProps) {
+  useArea(level, inputs, area, silent);
   return (
     <group>
       <Slabs level={level} dim={dim} showStop={showStop} showGoal={showGoal} />
