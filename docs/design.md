@@ -130,13 +130,15 @@ language.
 - Integers and booleans, strictly typed: a number is not a condition.
 - **Mathematical integers**: unbounded, no overflow.
 - **Chained comparisons**: `0 <= i <= n`. `==` and `!=` don't chain.
+- `≤`, `≥` and `≠` are read as `<=`, `>=` and `!=`.
 - **`/` and `%` only by positive literals**, Euclidean. This removes division
   by zero and keeps formulas decidable.
 - `*` between variables is allowed; it and the quantifiers are the sources of
   *undecided*.
 - **Arrays** are read-only inputs; a cell outside the array reads as 0.
 - **`forall` / `exists`** over a range of indices, written as a chain:
-  `forall 0 <= k < i: A[k] <= m`.
+  `forall 0 <= k < i: A[k] <= m`. The body is one comparison; a longer body
+  goes in parentheses, and the syntax card says so.
 
 While typing, the slabs follow the last valid formula; errors wait for Check.
 
@@ -147,8 +149,9 @@ whose body has assignments and `if/else`, and `ensures`. No nested loops, no
 calls, no writing to arrays. **Eggs are every state satisfying `requires`
 after the initialisation code.**
 
-Every level carries **solutions** (shown after a proof, so the learner sees a
-loop has more than one invariant), **pitfalls** (the wrong answers learners are
+Every level carries **solutions** (after a proof, the ones the checker cannot
+show equivalent to the learner's are listed, so the learner sees a loop has
+more than one invariant), **pitfalls** (the wrong answers learners are
 expected to try, matched by meaning, each with its own message) and three
 **hints** that never spell out a solution. `pnpm validate` checks all of them.
 
