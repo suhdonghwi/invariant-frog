@@ -135,9 +135,6 @@ export const en = {
     pickEgg: 'pick an egg first',
     frogStopped: 'this frog has stopped',
     otherAnswers: (count: number): string => (count > 1 ? 'Other answers that work:' : 'Another answer that works:'),
-    dafny: 'The same proof in Dafny',
-    copy: 'Copy',
-    copied: 'Copied',
   },
 
   verdicts: {

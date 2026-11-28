@@ -1,5 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, Copy, RotateCcw, X } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, ArrowRight, Check, RotateCcw, X } from 'lucide-react';
 import { useGame, type CaptionTone } from '../../game/store';
 import { useT } from '../../i18n/i18n';
 import { button } from '../classes';
@@ -21,24 +20,6 @@ export function CaptionAnnouncer() {
     <p role="status" className="sr-only">
       {caption ? plain([caption.text, caption.aside].filter(Boolean).join('\n\n')) : ''}
     </p>
-  );
-}
-
-function Proof({ source }: { source: string }) {
-  const tr = useT();
-  const [copied, setCopied] = useState(false);
-  const copy = () => void navigator.clipboard.writeText(source).then(() => setCopied(true));
-  return (
-    <details className="group mt-2.5 border-t border-line pt-2 compact:mt-2">
-      <summary className="w-fit cursor-pointer rounded-md text-sm font-medium text-muted hover:text-ink">{tr.level.dafny}</summary>
-      <div className="relative mt-2">
-        <pre className="max-h-56 overflow-auto rounded-xl bg-shade/5 py-2.5 pr-24 pl-3 font-mono text-xs leading-normal text-ink">{source}</pre>
-        <button className={`${button('plain', 'none')} absolute top-1.5 right-1.5 gap-1 px-2.5 py-1 text-xs font-medium`} onClick={copy}>
-          {copied ? <Check size={13} strokeWidth={2.6} className="text-pass" /> : <Copy size={13} strokeWidth={2.4} />}
-          {copied ? tr.level.copied : tr.level.copy}
-        </button>
-      </div>
-    </details>
   );
 }
 
@@ -72,7 +53,6 @@ export function CaptionBar() {
             <Markdown text={caption.aside} />
           </div>
         )}
-        {caption.proof && <Proof source={caption.proof} />}
       </div>
       {(caption.action || caption.replay || caption.choices || back) && (
         <div className="-mr-1.5 flex min-h-8.5 flex-wrap items-center justify-end gap-1.5 compact:-mr-1">

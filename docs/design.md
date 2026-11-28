@@ -151,8 +151,7 @@ after the initialisation code.**
 
 Every level carries **solutions** (after a proof, the ones the checker cannot
 show equivalent to the learner's are listed, so the learner sees a loop has
-more than one invariant, and a level without arrays shows the same proof as a
-Dafny method), **pitfalls** (the wrong answers learners are
+more than one invariant), **pitfalls** (the wrong answers learners are
 expected to try, matched by meaning, each with its own message) and three
 **hints** that never spell out a solution. `pnpm validate` checks all of them.
 
