@@ -47,9 +47,9 @@ green, the checker's frogs pale blue, goals amber, and red only for failures.
 Each idea has one channel, and channels stack without changing each other:
 the area is height and blue, the stop region is stripes, a goal is a pool.
 A ringed tile takes its tag's colour on screen (slate for a plain pointer).
-The paper's figures (`?figure`) draw rings darker, thicker and inset from the
-tile edge, with a stronger wash, so a ringed slab stays apart from the rest in
-grayscale print.
+The paper's figures (`?figure`) draw rings darker, along the tile's own
+rounded edge, with a stronger wash, so a ringed slab stays apart from the rest
+in grayscale print.
 
 Goals are drawn only in the stop region, because Exit reads the postcondition
 only there. Drawn everywhere, they would invite the learner to copy the
