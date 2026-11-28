@@ -166,9 +166,6 @@ html[data-started] .world {
 html[data-leaving] .screen {
   animation: var(--animate-fade-out);
 }
-html[data-leaving] dialog * {
-  animation: none;
-}
 
 .font-display {
   font-synthesis-weight: none;

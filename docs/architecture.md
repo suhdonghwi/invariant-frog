@@ -71,7 +71,9 @@ the tests are the safety net.
 - **Each screen starts together**: scene time and CSS animations hold until
   the first frame is drawn and the fonts are in.
 - **Each screen leaves together**: on a scene switch the screen fades out as
-  one, and an open dialog leaves the top layer so it fades with the screen.
+  one. Everything the player sees is inside `.screen`, dialogs included, so
+  nothing needs its own leave or start rule. A dialog is not a native modal
+  `<dialog>` for this reason: the top layer is outside the screen.
 - **Every duration and pause is a token** from `motion.ts`, mirrored in CSS as
   `--duration-*`. The scene's own durations (flights, hatching, ripples, the
   home loop) are named there too, built from the base tokens where they match.
