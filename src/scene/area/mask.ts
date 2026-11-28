@@ -74,6 +74,7 @@ interface Shown {
   material: THREE.ShaderMaterial;
   level: CompiledLevel | null;
   tag: unknown;
+  inputs?: Inputs;
 }
 
 interface Pending extends Shown {
@@ -222,14 +223,17 @@ class AreaMask {
     this.place();
   }
 
-  draw(gl: THREE.WebGLRenderer, x: number, y: number, inputs: Inputs, now: number, reach = MASK_REACH): boolean {
+  draw(gl: THREE.WebGLRenderer, x: number, y: number, of: CompiledLevel | null, given: Inputs, now: number, reach = MASK_REACH): boolean {
     this.compile(gl);
+    const level = this.current.level;
+    if (level && level === of) this.current.inputs = given;
+    const inputs = this.current.inputs;
+    if (level && !inputs) return false;
     this.target ??= maskTarget();
     this.uniforms.uMask.value = this.target.texture;
     this.uniforms.uWaveAge.value = now - this.wave.t0;
     this.place();
-    const level = this.current.level;
-    const plane = level ? planeKey(inputs) : '';
+    const plane = level && inputs ? planeKey(inputs) : '';
     const ox = Math.round(x / SNAP) * SNAP - MASK_SIZE / 2;
     const oy = Math.round(y / SNAP) * SNAP - MASK_SIZE / 2;
     const content = `${this.shown}|${plane}`;
@@ -246,7 +250,7 @@ class AreaMask {
     this.at = { x: ox, y: oy };
     this.place();
     const u = this.current.material.uniforms;
-    if (level) {
+    if (level && inputs) {
       setInputUniforms(u, level, inputs, planeExists(level, inputs));
       (u.uOrigin.value as THREE.Vector2).set(ox, oy);
     }
