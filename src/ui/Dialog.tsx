@@ -4,37 +4,39 @@ import { usePresence } from '../hooks/presence';
 import { useT } from '../i18n/i18n';
 import { button } from './classes';
 
-const modal = (d: HTMLDialogElement | null) => {
-  if (!d) return;
-  if (!d.open) d.showModal();
-  return () => d.close();
+const modal = (el: HTMLDivElement | null) => {
+  if (!el) return;
+  const opener = document.activeElement;
+  const rest = [...el.parentElement!.children].filter((c): c is HTMLElement => c !== el && c instanceof HTMLElement && !c.inert);
+  for (const c of rest) c.inert = true;
+  (el.querySelector('button') ?? el).focus();
+  return () => {
+    for (const c of rest) c.inert = false;
+    if (opener instanceof HTMLElement) opener.focus();
+  };
 };
 
 export function Overlay({ open, onClose, label, card, children }: { open: boolean; onClose: () => void; label: string; card: string; children: React.ReactNode }) {
   const { mounted, leaving } = usePresence(open);
   if (!mounted) return null;
   return (
-    <dialog
+    <div
       ref={modal}
+      role="dialog"
+      aria-modal="true"
       aria-label={label}
-      className="fixed inset-0 z-50 m-0 size-full max-h-none max-w-none overflow-visible bg-transparent p-0 backdrop:bg-transparent"
-      onCancel={(e) => {
-        e.preventDefault();
-        onClose();
-      }}
+      tabIndex={-1}
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-horizon/55 p-4 outline-none backdrop-blur-xs max-sm:p-2.5 ${leaving ? 'pointer-events-none animate-fade-out' : 'animate-fade'}`}
+      onClick={onClose}
+      onKeyDown={(e) => e.key === 'Escape' && onClose()}
     >
       <div
-        className={`fixed inset-0 flex items-center justify-center bg-horizon/55 p-4 backdrop-blur-xs max-sm:p-2.5 ${leaving ? 'pointer-events-none animate-fade-out' : 'animate-fade'}`}
-        onClick={onClose}
+        className={`max-h-full w-full rounded-3xl shadow-float ${card} ${leaving ? 'animate-pop-out' : 'animate-[pop_var(--duration-short)_var(--ease-entrance)]'}`}
+        onClick={(e) => e.stopPropagation()}
       >
-        <div
-          className={`max-h-full w-full rounded-3xl shadow-float ${card} ${leaving ? 'animate-pop-out' : 'animate-[pop_var(--duration-short)_var(--ease-entrance)]'}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {children}
-        </div>
+        {children}
       </div>
-    </dialog>
+    </div>
   );
 }
 
