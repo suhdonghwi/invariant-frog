@@ -87,7 +87,8 @@ the tests are the safety net.
 - **The camera follows one rule.** A moment names only the tiles it must show
   (`cameraRig.frame({ focus, labels })`), never a position or a zoom, and the
   rig picks the closest pose that fits them into the screen the panels leave
-  free. Don't move the camera any other way.
+  free. Don't move the camera any other way. Zoom is distance: the camera's
+  own `zoom` stays 1, because fade, slab reach and tag size follow distance.
 - **Tutorial steps declare the scene they start from**, so Back and
   skip-ahead can rebuild any step instantly. A step runs under a generation
   token and calls `gen.guard()` after every `await`.

@@ -23,6 +23,7 @@ export interface Shot {
 let controls: CameraControls | null = null;
 let size = { width: 1, height: 1 };
 let current: Shot | null = null;
+let framed: Shot | null = null;
 let layout = { key: '', changed: 0, settled: true };
 let pending: { shot: Shot; since: number; lead: number; done: () => void; settled: Promise<void> } | null = null;
 let flight: { plan: Flight; t0: number; waiters: { at: number; done: () => void }[] } | null = null;
@@ -42,6 +43,7 @@ const TAG_HALF = 64;
 const TILE_RADIUS = 0.5;
 export const FOV = 36;
 export const MAX_DISTANCE = HIGHEST;
+export const ZOOM = 1.25;
 const DEFAULT_DISTANCE = 14;
 const MIN_DISTANCE = 15;
 const TOO_FAR = 1.5;
@@ -273,6 +275,7 @@ function keyOf(r: Rect): string {
 
 function retarget(shot: Shot) {
   current = shot;
+  framed = shot;
   pending?.done();
   pending = null;
 }
@@ -328,6 +331,19 @@ export const cameraRig = {
     if (!grip || !under) return;
     void c.moveTo(x + grip.x - under.x, 0, -(y + grip.y - under.y), false);
     if (d !== v.d) void c.dollyTo(d, false);
+  },
+  dollyAt(x: number, y: number, factor: number) {
+    cameraRig.drag({ x, y, spread: factor }, { x, y, spread: 1 });
+  },
+  zoomBy(factor: number) {
+    if (!controls) return;
+    void cameraRig.zoomTo(THREE.MathUtils.clamp(endView().d * factor, controls.minDistance, controls.maxDistance));
+  },
+  resetView() {
+    if (!controls || !framed) return;
+    land();
+    current = framed;
+    void apply(framed, sceneStarted(), 0, ANGLE);
   },
   get flying() {
     return flight !== null;

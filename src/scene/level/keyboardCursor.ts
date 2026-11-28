@@ -2,7 +2,7 @@ import { useThree } from '@react-three/fiber';
 import { useEffect } from 'react';
 import { clickTile } from '../../director/controls';
 import { useT } from '../../i18n/i18n';
-import { cameraRig, MAX_DISTANCE } from '../cameraRig';
+import { cameraRig, ZOOM } from '../cameraRig';
 import { hover } from '../hover';
 
 const STEPS: Record<string, [number, number]> = {
@@ -11,8 +11,6 @@ const STEPS: Record<string, [number, number]> = {
   ArrowUp: [0, 1],
   ArrowDown: [0, -1],
 };
-const DOLLY = 1.25;
-const MIN_DISTANCE = 6;
 
 function onKey(e: KeyboardEvent) {
   const step = STEPS[e.key];
@@ -31,8 +29,7 @@ function onKey(e: KeyboardEvent) {
   }
   if (e.key === '+' || e.key === '=' || e.key === '-' || e.key === '−') {
     e.preventDefault();
-    const d = cameraRig.distance() * (e.key === '-' || e.key === '−' ? DOLLY : 1 / DOLLY);
-    void cameraRig.zoomTo(Math.min(MAX_DISTANCE, Math.max(MIN_DISTANCE, d)));
+    cameraRig.zoomBy(e.key === '-' || e.key === '−' ? ZOOM : 1 / ZOOM);
     return;
   }
   if (e.key === 'Escape') hover.set(null);

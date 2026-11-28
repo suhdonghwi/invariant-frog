@@ -22,15 +22,28 @@ function Lights() {
   );
 }
 
+const LINE_PX = 16;
+const WHEEL = 0.002;
+const PINCH = 0.01;
+
+function wheel(e: WheelEvent) {
+  if (!cameraRig.controls?.enabled) return;
+  e.preventDefault();
+  cameraRig.userMoved();
+  const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+  const px = e.deltaY * (e.deltaMode === 1 ? LINE_PX : e.deltaMode === 2 ? r.height : 1);
+  cameraRig.dollyAt(e.clientX - r.left, e.clientY - r.top, Math.exp(px * (e.ctrlKey ? PINCH : WHEEL)));
+}
+
 function Controls() {
   const ref = useRef<CameraControls>(null);
   const interactive = useGame((s) => s.mode !== 'menu');
   const canvas = useThree((s) => s.gl.domElement);
   useLayoutEffect(() => {
-    canvas.addEventListener('wheel', cameraRig.userMoved, { passive: true });
+    canvas.addEventListener('wheel', wheel, { passive: false });
     const release = grab(canvas);
     return () => {
-      canvas.removeEventListener('wheel', cameraRig.userMoved);
+      canvas.removeEventListener('wheel', wheel);
       release();
     };
   }, [canvas]);
@@ -40,6 +53,7 @@ function Controls() {
     if (c) {
       c.mouseButtons.left = CameraControlsImpl.ACTION.NONE;
       c.mouseButtons.right = CameraControlsImpl.ACTION.ROTATE;
+      c.mouseButtons.wheel = CameraControlsImpl.ACTION.NONE;
       c.touches.one = CameraControlsImpl.ACTION.NONE;
       c.touches.two = CameraControlsImpl.ACTION.NONE;
       c.touches.three = CameraControlsImpl.ACTION.NONE;
@@ -53,6 +67,8 @@ function Controls() {
       enabled={interactive}
       minDistance={6}
       maxDistance={MAX_DISTANCE}
+      minZoom={1}
+      maxZoom={1}
       minPolarAngle={0.25}
       maxPolarAngle={1.15}
       dollySpeed={0.6}
