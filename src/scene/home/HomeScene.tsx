@@ -94,7 +94,7 @@ export function HomeScene() {
   return (
     <group>
       <Floor level={DIAGONAL} inputs={NO_INPUTS} fadeIn={HOME_FLOOR_IN} showAxes={false} />
-      <AreaLayer level={DIAGONAL} inputs={NO_INPUTS} area={AREA} dim={false} showStop showGoal showEggs={false} />
+      <AreaLayer level={DIAGONAL} inputs={NO_INPUTS} area={AREA} dim={false} showStop showGoal showEggs={false} silent />
       <StartEggs eggs={eggs} />
       <Frogs />
       <HatchShells />
