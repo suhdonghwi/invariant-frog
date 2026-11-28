@@ -66,8 +66,12 @@ the tests are the safety net.
 - Anything scripted is a `director/` function. Each starts with `begin()`,
   which cancels whatever was playing, and checks `tok.alive` after every
   `await`.
-- **A check can't be stopped, only abandoned**: a result for another level,
-  mode or formula is dropped.
+- **A check is abandoned, then interrupted**: a result for another level,
+  mode or formula is dropped, and abandoning a check (leaving the level, an
+  edit, Cancel) interrupts Z3 so the next check starts at once. `checking` is
+  true only while the current run is alive.
+- Async errors that are not `Aborted` reach the crash card through one
+  `unhandledrejection` handler.
 - **The camera follows one rule.** A moment names only the tiles it must show
   (`cameraRig.frame({ focus, labels })`), never a position or a zoom, and the
   rig picks the closest pose that fits them into the screen the panels leave
@@ -101,7 +105,10 @@ Z3 runs as WebAssembly with threads, so the page must be cross-origin isolated
 (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy:
 require-corp`). It is loaded as a plain script, not bundled, because its
 thread workers re-load it by URL, and warmed up only once the player opens
-the level list, a level or the tutorial.
+the level list, a level or the tutorial. Its status (`idle`, `loading`,
+`ready`, `failed`) lives in `checker/solverStatus.ts`; a page that is not
+cross-origin isolated is `failed` from the start, and the reason goes to the
+console.
 
 ## Conventions
 

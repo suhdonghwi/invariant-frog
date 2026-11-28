@@ -113,6 +113,10 @@ every input not on an axis; changing one switches the plane.
   counterexample is the one tagged and the only one a frog shows.
 - **Three verdicts**: proved, a counterexample, or **undecided** (the level is
   not cleared).
+- **One time budget per Check** (`CHECK_BUDGET_MS`, about 8 s), shared by every
+  solver pass and the fallback that compares the formula with the stored
+  solutions. A rule still open when it runs out is undecided. Validation uses
+  the same budget, so a level never needs more time than a player gets.
 - **One definition, three uses.** The same parsed program and formula drive the
   frogs, the proofs and the floor, so what the learner sees and what is proved
   can't disagree.
