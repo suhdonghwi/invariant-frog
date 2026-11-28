@@ -30,6 +30,7 @@ function reveal(rule: Rule, res: CheckResult) {
 interface Outcome {
   failing?: Rule;
   undecided: boolean;
+  others?: string[];
 }
 
 export async function checkAndPlay(rules: Rule[], onFail?: (rule: Rule) => CounterexampleOptions, owner?: Token): Promise<Outcome | null> {
@@ -93,7 +94,7 @@ async function verifyRules(tok: Token, res: CheckResult, rules: Rule[], onFail: 
       if (!tok.alive) return null;
     }
   }
-  return { undecided };
+  return { undecided, others: res.others };
 }
 
 type Callout = Game['callouts'][number];

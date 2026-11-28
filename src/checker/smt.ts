@@ -159,9 +159,13 @@ export async function solve(ctx: Ctx, level: CompiledLevel, dims: string[], quer
   return { kind: 'unsat' };
 }
 
-export async function equivalent(ctx: Ctx, level: CompiledLevel, a: Expr, b: Expr, left: () => number): Promise<boolean> {
+export async function compareFormulas(ctx: Ctx, level: CompiledLevel, a: Expr, b: Expr, left: () => number): Promise<'same' | 'different' | 'unknown'> {
   const differ: Expr = { kind: 'binary', op: '!=', left: a, right: b, span: a.span };
   const query = mk.and(level.planeReq, differ);
   const r = await solve(ctx, level, level.names, query, { left, verify: (s) => withinBudget(() => holds(query, s)) });
-  return r.kind === 'unsat';
+  return r.kind === 'unsat' ? 'same' : r.kind === 'sat' ? 'different' : 'unknown';
+}
+
+export async function equivalent(ctx: Ctx, level: CompiledLevel, a: Expr, b: Expr, left: () => number): Promise<boolean> {
+  return (await compareFormulas(ctx, level, a, b, left)) === 'same';
 }

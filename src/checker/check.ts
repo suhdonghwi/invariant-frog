@@ -5,7 +5,7 @@ import { compileFormula, type CompiledLevel, type Formula, type Pitfall } from '
 import { failureOnARun, smallestOnPlane } from './nearby';
 import { breaksRule, counterexample, ruleQuery } from './rules';
 import { CheckControl } from './budget';
-import { equivalent, solve } from './smt';
+import { compareFormulas, equivalent, solve } from './smt';
 import { RULES, type Rule, type RuleVerdict, type Verdicts } from './types';
 
 interface CheckOptions {
@@ -16,6 +16,7 @@ interface CheckOptions {
 export interface CheckResult {
   verdicts: Partial<Verdicts>;
   pitfall?: Pitfall;
+  others?: string[];
 }
 
 const PITFALL_MS = 1000;
@@ -75,5 +76,21 @@ async function checkAlone(ctx: Context<'main'>, level: CompiledLevel, inv: Formu
     for (const r of undecided) verdicts[r] = { status: 'pass', how: 'equivalent' } satisfies RuleVerdict;
   }
   const pitfall = failed ? await firstEquivalent(level.pitfalls ?? [], (p) => p.formula, PITFALL_MS) : undefined;
-  return { verdicts, pitfall };
+  const proved = rules.every((r) => verdicts[r]?.status === 'pass');
+  const others = proved ? await otherSolutions(ctx, level, inv, control) : undefined;
+  return { verdicts, pitfall, others };
+}
+
+const squash = (s: string) => s.replace(/\s+/g, '');
+
+async function otherSolutions(ctx: Context<'main'>, level: CompiledLevel, inv: Formula, control: CheckControl): Promise<string[]> {
+  const others: string[] = [];
+  for (const s of level.solutions) {
+    if (squash(s) === squash(inv.text)) continue;
+    const f = compileFormula(level, s);
+    const same = f.ok ? await compareFormulas(ctx, level, inv.expr, f.expr, () => Math.min(PITFALL_MS, control.left())) : 'unknown';
+    control.guard();
+    if (same !== 'same') others.push(s);
+  }
+  return others;
 }

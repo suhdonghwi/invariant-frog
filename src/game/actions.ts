@@ -117,7 +117,7 @@ export async function check(): Promise<'refused' | void> {
   }
   const level = g.level;
   markCleared(level.id);
-  const others = otherAnswers(level.solutions, g.formulaText);
+  const others = otherAnswers(out.others ?? []);
   const next = levels[levels.findIndex((l) => l.id === level.id) + 1];
   sfx.cleared();
   useGame.setState({
@@ -131,8 +131,6 @@ export async function check(): Promise<'refused' | void> {
   });
 }
 
-function otherAnswers(solutions: string[], typed: string): string | null {
-  const squash = (s: string) => s.replace(/\s+/g, '');
-  const rest = solutions.filter((s) => squash(s) !== squash(typed));
+function otherAnswers(rest: string[]): string | null {
   return rest.length ? `${t().level.otherAnswers(rest.length)}\n\n${rest.map((s) => `- \`${s}\``).join('\n')}` : null;
 }
