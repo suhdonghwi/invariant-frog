@@ -26,10 +26,11 @@ export function RuleLights() {
               className={`flex animate-pop items-center gap-1 rounded-full py-1 pr-1.75 pl-1.25 font-display text-xs font-medium max-xs:gap-0.75 max-xs:px-1.25 max-xs:text-[11px] [&_svg]:shrink-0 ${LIGHT[status]}`}
               disabled={locked || v?.status !== 'fail'}
               title={v?.status === 'fail' ? tr.formula.replay : tr.rules[r]}
+              aria-label={`${tr.rules[r]}: ${tr.lightState[status]}`}
               onClick={() => v?.status === 'fail' && void playCounterexample(v.cex)}
             >
               <LightIcon status={status} />
-              {tr.rules[r]}
+              <span aria-hidden>{tr.rules[r]}</span>
             </button>
           );
         })}
@@ -43,9 +44,9 @@ const LIGHT: Record<LightStatus, string> = {
   dim: 'text-faint opacity-60',
   idle: 'text-muted',
   checking: 'text-muted',
-  pass: 'bg-pass-soft text-pass',
-  fail: 'cursor-pointer bg-fail-soft text-fail',
-  undecided: 'bg-warn-soft text-warn',
+  pass: 'bg-pass-soft text-pass-text [&_svg]:text-pass',
+  fail: 'cursor-pointer bg-fail-soft text-fail-text [&_svg]:text-fail',
+  undecided: 'bg-warn-soft text-warn-text [&_svg]:text-warn',
 };
 
 function LightIcon({ status }: { status: LightStatus }) {

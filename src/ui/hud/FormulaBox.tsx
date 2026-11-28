@@ -1,5 +1,5 @@
 import { Check, LoaderCircle } from 'lucide-react';
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { check, editFormula } from '../../game/actions';
 import { useGame } from '../../game/store';
 import { useT } from '../../i18n/i18n';
@@ -8,6 +8,7 @@ import { NO_SPAN } from '../../lang/ast';
 import { applyFix, LangError } from '../../lang/parser';
 import { BUTTON, button } from '../classes';
 import { Markdown } from '../Markdown';
+import { reducedMotion } from '../../motion';
 import { HighlightedCode } from '../codeColors';
 import { RuleLights } from './RuleLights';
 
@@ -29,6 +30,7 @@ export function FormulaBox() {
   const locked = useGame((s) => s.mode === 'tutorial' && !s.tutorial.allow.formula);
   const spot = useGame((s) => s.tutorial.spotlight);
   const tr = useT();
+  const errorId = useId();
   const box = useRef<HTMLDivElement>(null);
   const [refused, setRefused] = useState<typeof formula | 'empty'>(null);
   const emptyRefused = refused === 'empty' && formulaText.trim() === '';
@@ -46,7 +48,7 @@ export function FormulaBox() {
     void check().then((r) => {
       if (r !== 'refused') return;
       setRefused(useGame.getState().formula ?? 'empty');
-      box.current?.animate(SHAKE, { duration: 320, easing: 'ease-in-out' });
+      if (!reducedMotion()) box.current?.animate(SHAKE, { duration: 320, easing: 'ease-in-out' });
     });
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
@@ -62,14 +64,14 @@ export function FormulaBox() {
     <div className="animate-rise-slow [--formula-size:17px] compact:[--formula-size:16px]">
       <div
         ref={box}
-        className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-2xl border-2 bg-white py-1.25 pr-2.5 pl-4 shadow-card compact:gap-x-2 compact:pr-2 compact:pl-3 transition-colors duration-150 ${shownError ? 'border-fail/50' : 'border-brand/30 focus-within:border-brand/65'} ${spot === 'formula' ? 'spotlight' : ''}`}
+        className={`flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-2xl border-2 bg-white py-1.25 pr-2.5 pl-4 shadow-card compact:gap-x-2 compact:pr-2 compact:pl-3 transition-colors duration-150 ${shownError ? 'border-fail/50' : 'border-brand/30 focus-within:border-brand/65'} has-[textarea:focus-visible]:focus-ring ${spot === 'formula' ? 'spotlight' : ''}`}
       >
         <span className="flex items-center gap-1.75 compact:ml-0.5 font-display text-xs font-semibold tracking-[0.08em] text-brand uppercase before:size-3 before:-translate-y-px before:rounded-sm before:bg-slab before:shadow-slab">
           <span className="compact:sr-only">{tr.formula.area}</span>
         </span>
         <div className={`grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] ${locked ? 'cursor-default opacity-60' : ''}`}>
           <div aria-hidden className={`${TEXT} pointer-events-none text-ink`}>
-            {formulaText ? <HighlightedCode src={formulaText} boldNames mark={shownError?.span} /> : <span className="relative -top-[1.5px] font-sans text-[0.9em] text-[#a8afbb]">{placeholder}</span>}
+            {formulaText ? <HighlightedCode src={formulaText} boldNames mark={shownError?.span} /> : <span className="relative -top-[1.5px] font-sans text-[0.9em] text-faint">{placeholder}</span>}
             {'\u200b'}
           </div>
           <textarea
@@ -79,6 +81,8 @@ export function FormulaBox() {
             value={formulaText}
             placeholder={placeholder}
             aria-label={tr.formula.area}
+            aria-invalid={shownError ? true : undefined}
+            aria-describedby={shownError ? errorId : undefined}
             readOnly={locked || (mode === 'tutorial' && (busy || checking))}
             tabIndex={locked ? -1 : 0}
             spellCheck={false}
@@ -90,7 +94,7 @@ export function FormulaBox() {
           />
         </div>
         {shownError && (
-          <div className="order-last mr-1.5 mb-1 flex basis-full animate-fade flex-wrap items-center gap-x-2 gap-y-1 rounded-lg bg-[#fff1f0] px-2.5 py-1 text-xs leading-normal text-[#b42318]">
+          <div id={errorId} className="order-last mr-1.5 mb-1 flex basis-full animate-fade flex-wrap items-center gap-x-2 gap-y-1 rounded-lg bg-[#fff1f0] px-2.5 py-1 text-xs leading-normal text-[#b42318]">
             <div className="min-w-0 flex-1">
               <Markdown text={shownError.message} />
             </div>

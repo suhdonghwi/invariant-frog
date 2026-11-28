@@ -48,6 +48,10 @@ export const ko: Messages = {
     no: '아니요',
   },
 
+  board: {
+    label: '보드. 화살표 키로 칸 위의 커서를 옮기고, Enter로 커서 아래의 알을 고르고, +와 −로 확대하고 축소합니다.',
+  },
+
   code: {
     title: '코드',
     show: '펼치기',
@@ -81,6 +85,15 @@ export const ko: Messages = {
     increase: (name) => `${name} 하나 늘리기`,
     random: (name) => `${name} 무작위로 뽑기`,
     impossible: '불가능한 입력',
+  },
+
+  lightState: {
+    dim: '아직 검사 전',
+    idle: '아직 검사 전',
+    checking: '검사 중',
+    pass: '성립',
+    fail: '깨짐',
+    undecided: '판단하지 못함',
   },
 
   rulesCard: {
