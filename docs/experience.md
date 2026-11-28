@@ -27,7 +27,12 @@ adding UI.
   they belong to.
 - **Screens hand over, they don't cut.** The first frame is already right: the
   camera is placed before anything is drawn.
-- **Reduced motion is respected.**
+- **Reduced motion is respected.** With the setting on (`reducedMotion()` in
+  `src/motion.ts`, read live), the camera fades to its new view instead of
+  flying; frogs don't squash, breathe or cheer; slabs don't bounce, goals don't
+  ripple, tags don't pulse; the home camera doesn't sway or fly in, its frogs
+  don't loop and the title doesn't wave. Hops still play, since a hop is
+  content. In CSS, nothing loops and entrances are shortened.
 
 ## Verifying
 
@@ -80,6 +85,11 @@ adding UI.
   The checker's see-through frogs never hop, so they leave none.
 - **Hovering a tile answers the checker's question**: a see-through frog shows
   the hop a frog there would make.
+- **The board works from the keyboard.** The canvas takes focus; the arrow keys
+  move the same tile cursor the mouse sets, starting from the centre of the
+  view, and the camera follows when it leaves the view. Enter acts as a click
+  on that tile (picking an egg), under the same tutorial limits; `+` and `−`
+  zoom. The tile readout is announced.
 - **Errors wait for Check.** A formula is never marked wrong while it is typed.
 - **An error names the slip.** Habits from other languages (`=`, `=<`, `and`,
   `;`, `^`, `2i`, `==>`) and a name in the wrong case get their own message. An
@@ -105,6 +115,20 @@ adding UI.
 - **Predict before you see**: a yes-or-no question comes before a pitfall's
   demo.
 - **Spotlight** whatever the caption is talking about.
+
+## Access
+
+- **Dialogs are modal.** While Rules, Syntax or the level list is open, the
+  rest of the screen is inert: focus moves in, Tab stays inside, Esc and the
+  backdrop close it, and focus returns to the button that opened it.
+- **What the screen says is announced.** Every caption is read out through a
+  status region that stays mounted; a formula error is tied to the box; each
+  rule light's name carries its state ("Exit: fails").
+- **Text on a light background passes 4.5:1.** Status text uses darker shades
+  (`--color-pass-text`, `--color-fail-text`, `--color-warn-text`); icons, pills,
+  buttons and the scene keep their colours.
+- **One focus ring**, in the spotlight's blue, on whatever has keyboard focus;
+  the formula box shows it on the box.
 
 ## Layout
 

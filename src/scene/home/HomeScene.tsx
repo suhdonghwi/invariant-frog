@@ -10,6 +10,7 @@ import { after, sceneNow } from '../sceneTime';
 import { goalEvents, landEvents } from '../tileEvents';
 import { StartEggs, type StartEgg } from './StartEggs';
 import { useHomeCamera } from './useHomeCamera';
+import { reducedMotion } from '../../motion';
 
 const DIAGONAL = compileLevel({
   id: 'home-diagonal',
@@ -71,6 +72,7 @@ export function HomeScene() {
     });
     const lastOut = Math.max(...frogs.map((f) => f.hatchT0 ?? t0)) + 0.6;
     const beat = () => {
+      if (reducedMotion()) return;
       timers.push(after(BEAT, beat));
       if (sceneNow() < lastOut) return;
       frogs.forEach((f, j) => {

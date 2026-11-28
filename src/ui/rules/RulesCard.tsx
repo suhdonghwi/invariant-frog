@@ -6,7 +6,7 @@ export function RulesCard() {
   const tr = useT();
   const card = tr.rulesCard;
   return (
-    <Dialog flag="showRules" wide>
+    <Dialog flag="showRules" label={card.title} wide>
       <h2 className="mb-1.5 font-display text-2xl font-semibold max-sm:mb-1 max-sm:text-xl">{card.title}</h2>
       <p className="my-4 leading-[1.55] text-muted max-sm:my-3 max-sm:text-sm max-sm:leading-normal">{card.intro}</p>
       <div className="my-4.5 grid grid-cols-3 gap-3 max-sm:my-3.5 max-sm:grid-cols-1 max-sm:gap-2">

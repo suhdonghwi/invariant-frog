@@ -7,6 +7,7 @@ import { CARD, CARD_LABEL, FOLD, FOLD_EASE, FOLD_MS } from '../classes';
 import { CodeListing } from './CodeListing';
 import { inputRows, InputsSection } from './Inputs';
 import { ResizeHandle, useStoredWidth } from './ResizeHandle';
+import { reducedMotion } from '../../motion';
 
 export function CodePanel() {
   const level = useGame((s) => s.level)!;
@@ -35,7 +36,7 @@ export function CodePanel() {
   useLayoutEffect(() => {
     const el = card.current;
     const from = lastWidth.current;
-    if (!el || from === null || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!el || from === null || reducedMotion()) return;
     const to = el.getBoundingClientRect().width;
     if (Math.abs(to - from) < 1) return;
     const grow = el.animate({ width: [`${from}px`, `${to}px`] }, { duration: FOLD_MS, easing: FOLD_EASE });

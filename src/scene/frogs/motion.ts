@@ -2,6 +2,7 @@ import { SHORT } from '../../motion';
 import { field } from '../area/field';
 import { bump, clamp01, popIn, smoothstep } from '../easing';
 import type { FrogSim } from './frogWorld';
+import { reducedMotion } from '../../motion';
 
 interface Pose {
   x: number;
@@ -102,6 +103,7 @@ function blinkAt(f: FrogSim, t: number) {
 }
 
 export function pose(f: FrogSim, t: number): Pose {
+  const calm = reducedMotion();
   const dt = f.lastT === undefined ? 0 : Math.min(0.1, t - f.lastT);
   f.lastT = t;
   let x = f.x;
@@ -150,7 +152,7 @@ export function pose(f: FrogSim, t: number): Pose {
   }
   if (f.cheerT0 !== undefined && !f.hop) {
     const u = (t - f.cheerT0) / CHEER_DUR;
-    if (u >= 1) f.cheerT0 = undefined;
+    if (u >= 1 || calm) f.cheerT0 = undefined;
     else if (u > 0) {
       h += 0.22 * bump(clamp01((u - 0.3) / 0.55));
       squash += keyed(u, CHEER_KEYS);
@@ -170,7 +172,8 @@ export function pose(f: FrogSim, t: number): Pose {
     emerged = smoothstep(clamp01(u * 1.6 - 0.2));
     if (raw >= 1.3) f.rise = undefined;
   }
-  const breath = 0.022 * Math.sin(t * 2.4 + f.phase);
+  const breath = calm ? 0 : 0.022 * Math.sin(t * 2.4 + f.phase);
+  if (calm) squash = 0;
   let s = 1;
   if (f.hatchT0 !== undefined) {
     const raw = (t - f.hatchT0) / HATCH_GROW;

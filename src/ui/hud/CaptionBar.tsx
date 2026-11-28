@@ -12,6 +12,17 @@ const TONE: Record<CaptionTone, string> = {
   success: 'border-pass/40',
 };
 
+const plain = (md: string) => md.replace(/\*\*|`/g, '').replace(/^\s*[-*]\s+/gm, '');
+
+export function CaptionAnnouncer() {
+  const caption = useGame((s) => s.caption);
+  return (
+    <p role="status" className="sr-only">
+      {caption ? plain([caption.text, caption.aside].filter(Boolean).join('\n\n')) : ''}
+    </p>
+  );
+}
+
 export function CaptionBar() {
   const { value: caption, leaving } = useLingering(useGame((s) => s.caption));
   const back = useGame((s) => (s.mode === 'tutorial' ? s.tutorial.back : null));

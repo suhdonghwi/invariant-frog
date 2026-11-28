@@ -23,7 +23,7 @@ function parseArray(text: string): number[] | null {
 const INT = /^-?\d{1,9}$/;
 
 const FIELD =
-  'h-6 min-w-0 rounded-md border border-line bg-white px-1.5 font-mono text-sm text-ink outline-none transition-colors focus:border-brand/60 disabled:opacity-60';
+  'h-6 min-w-0 rounded-md border border-line bg-white px-1.5 font-mono text-sm text-ink transition-colors focus:border-brand/60 disabled:opacity-60';
 const SMALL_BUTTON =
   'flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md border border-line bg-sky text-muted transition-colors enabled:hover:bg-horizon enabled:hover:text-ink enabled:active:translate-y-px disabled:cursor-default';
 

@@ -14,7 +14,7 @@ export function LevelPicker({ open }: { open: boolean }) {
   const done = levels.filter((l) => cleared.includes(l.id)).length;
   const close = () => useGame.setState({ menuView: 'home' });
   return (
-    <Overlay open={open} onClose={close} card="flex max-w-110 flex-col border border-line bg-card backdrop-blur-lg">
+    <Overlay open={open} onClose={close} label={tr.home.levels} card="flex max-w-110 flex-col border border-line bg-card backdrop-blur-lg">
       <div className="flex items-center px-4 pt-3.5 pb-1.5">
         <button className={button('quiet')} onClick={close}>
           <ArrowLeft size={16} strokeWidth={2.4} /> {tr.home.back}

@@ -4,7 +4,7 @@ import { BUILTINS, KEYWORDS, tokenize } from '../lang/parser';
 export const TOKEN = {
   keyword: 'font-semibold text-[#7c4ddb]',
   name: 'text-[#1f63c4]',
-  num: 'text-[#c06a00]',
+  num: 'text-[#a85b00]',
   op: 'text-muted',
 };
 

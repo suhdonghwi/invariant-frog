@@ -7,6 +7,7 @@ import { useExitFade } from '../../hooks/presence';
 import { sceneNow } from '../sceneTime';
 import { RING_ALPHA, RING_COLORS, ringGeometry, WASH_ALPHA, WASH_COLORS, washGeometry } from './markStyle';
 import { SceneTag, type TagTone } from './SceneTag';
+import { reducedMotion } from '../../motion';
 
 const MARK = 'mr-1 inline size-[0.9em] align-[-0.15em]';
 export const TONE_PREFIX: Record<TagTone, ReactNode> = {
@@ -39,7 +40,7 @@ export function TileTag({ x, y, label, tone, pulse = false, wash = false, leavin
     g.position.set(x, field.groundAt(x, y) + 0.012, -y);
     const out = exit();
     const pop = Math.min(1, t / 0.3) * out;
-    const beat = pulse ? 0.5 + 0.5 * Math.sin(t * 4.2) : 1;
+    const beat = pulse && !reducedMotion() ? 0.5 + 0.5 * Math.sin(t * 4.2) : 1;
     if (ring.current) {
       ring.current.scale.setScalar(0.9 + 0.1 * pop + (pulse ? 0.035 * beat : 0));
       (ring.current.material as THREE.MeshBasicMaterial).opacity = pop * RING_ALPHA * (pulse ? 0.85 + 0.15 * beat : 1);

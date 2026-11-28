@@ -56,7 +56,7 @@
 
   --color-ink: #1c2333;
   --color-muted: #66708a;
-  --color-faint: #a3abbc;
+  --color-faint: #6c7590;
   --color-shade: #202c46;
   --color-line: rgb(32 44 70 / 0.09);
   --color-card: rgb(255 255 255 / 0.9);
@@ -65,14 +65,18 @@
   --color-wash: #f4f6fa;
   --color-glass: #c4cddc;
   --color-brand: #3b82f6;
+  --color-ring: color-mix(in oklab, var(--color-brand) 60%, transparent);
   --color-brand-light: #4a8cf7;
   --color-brand-deep: #2563d4;
   --color-brand-soft: #e7f0fe;
   --color-pass: #3fae37;
+  --color-pass-text: #237a1d;
   --color-pass-soft: #e5f6e2;
   --color-fail: #e5484d;
+  --color-fail-text: #c42b31;
   --color-fail-soft: #fdecec;
   --color-warn: #d98b0b;
+  --color-warn-text: #8f5a00;
   --color-warn-soft: #fdf2dc;
   --color-slab: #5c9df5;
   --color-slab-edge: #4687e6;
@@ -128,6 +132,20 @@
     word-break: keep-all;
     overflow-wrap: break-word;
   }
+  * {
+    outline-color: var(--color-ring);
+  }
+  :focus-visible {
+    @apply focus-ring;
+  }
+  canvas:focus-visible {
+    outline-offset: -3px;
+  }
+}
+
+@utility focus-ring {
+  outline: 3px solid var(--color-ring);
+  outline-offset: 2px;
 }
 
 html:not([data-started]) *,
@@ -300,5 +318,37 @@ html[data-leaving] .screen {
   }
   50% {
     box-shadow: 0 0 0 4px --alpha(var(--color-brand) / 42%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: var(--duration-micro) !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: var(--duration-micro) !important;
+  }
+  .spotlight::after {
+    animation: fade var(--duration-micro) !important;
+    box-shadow:
+      0 0 0 3px --alpha(var(--color-brand) / 75%),
+      0 0 0 8px --alpha(var(--color-brand) / 12%);
+  }
+  .spotlight-soft::after {
+    box-shadow:
+      0 0 0 2px --alpha(var(--color-brand) / 65%),
+      0 0 0 4px --alpha(var(--color-brand) / 8%);
+  }
+  .spotlight-glow:not(:disabled) {
+    animation: none !important;
+  }
+  .spotlight-glow::after {
+    animation: none !important;
+    box-shadow: 0 0 0 4px --alpha(var(--color-brand) / 42%);
+  }
+  .animate-spin {
+    animation: none !important;
   }
 }

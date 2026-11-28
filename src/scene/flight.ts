@@ -21,6 +21,7 @@ export const HIGHEST = 60;
 const CUT_FROM = 40;
 const CUT_VIEWS = 2;
 const CUT_DUR = 1.4;
+const FADE_DUR = 0.7;
 const VEILED = 0.04;
 const CLEARED = 0.5;
 
@@ -31,6 +32,7 @@ export interface Flight {
   dur: number;
   lift: number;
   cut: { dx: number; dy: number } | null;
+  fade?: boolean;
 }
 
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
@@ -44,6 +46,7 @@ export function travel(from: Pose, to: Pose): number {
 
 export function plan(from: Pose, to: Pose, v0: Pose = STILL, reduced = false): Flight {
   const target = { ...to, az: from.az + wrap(to.az - from.az) };
+  if (reduced) return { from, to: target, v0: STILL, dur: FADE_DUR, lift: 0, cut: { dx: 0, dy: 0 }, fade: true };
   const w = travel(from, target);
   const span = Math.hypot(target.x - from.x, target.y - from.y);
   const low = Math.max(1e-3, from.d, target.d);
@@ -71,6 +74,7 @@ export interface Sample {
 export function sample(f: Flight, elapsed: number): Sample {
   const u = clamp01(elapsed / f.dur);
   const done = elapsed >= f.dur;
+  if (f.fade) return { pose: { ...(u < 0.5 ? f.from : f.to) }, done };
   const s = smootherstep(u);
   const c = carry(u) * f.dur;
   const pose = { ...f.to };

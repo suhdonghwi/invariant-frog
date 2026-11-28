@@ -11,7 +11,7 @@ export function SyntaxCard() {
   const arr = level ? Object.entries(level.arrays)[0] : undefined;
   const s = useT().syntax;
   return (
-    <Dialog flag="showSyntax">
+    <Dialog flag="showSyntax" label={s.title}>
       <h2 className="mb-1.5 font-display text-2xl font-semibold">{s.title}</h2>
       <div className="my-4.5 grid gap-2 text-left">
         <Row name={s.compare} code={[`${a} == ${b}`, `${a} != ${b}`, `${a} < ${b}`, `${a} <= ${b}`, `${a} > ${b}`, `${a} >= ${b}`, `0 <= ${a} <= ${b}`]} />

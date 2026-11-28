@@ -48,6 +48,10 @@ export const en = {
     no: 'No',
   },
 
+  board: {
+    label: 'Board. Arrow keys move a cursor over the tiles, Enter picks the egg under it, and + and − zoom.',
+  },
+
   code: {
     title: 'Code',
     show: 'Show',
@@ -81,6 +85,15 @@ export const en = {
     increase: (name: string) => `${name} up by one`,
     random: (name: string) => `A random ${name}`,
     impossible: 'not a possible input',
+  },
+
+  lightState: {
+    dim: 'not checked yet',
+    idle: 'not checked yet',
+    checking: 'checking',
+    pass: 'holds',
+    fail: 'fails',
+    undecided: 'undecided',
   },
 
   rulesCard: {

@@ -5,6 +5,7 @@ import { useGame } from '../../game/store';
 import { cameraRig, type Shot } from '../cameraRig';
 import { easeInOut } from '../easing';
 import { sceneNow } from '../sceneTime';
+import { reducedMotion } from '../../motion';
 
 const RING: Shot = { focus: [[1, 8], [7, 8], [1, 12], [7, 12]] };
 const ANGLE = { az: 0, po: 0.95 };
@@ -21,7 +22,7 @@ const sph = new THREE.Spherical();
 function restingPose(t: number, size: { width: number; height: number }) {
   const at = cameraRig.fitInto(RING, ANGLE, size, PADDING) ?? FALLBACK;
   target.set(at.x, 0, -at.y);
-  eye.setFromSpherical(sph.set(at.d, ANGLE.po, ANGLE.az + Math.sin(t * 0.13) * SWAY)).add(target);
+  eye.setFromSpherical(sph.set(at.d, ANGLE.po, ANGLE.az + (reducedMotion() ? 0 : Math.sin(t * 0.13) * SWAY))).add(target);
 }
 
 export function useHomeCamera() {
@@ -43,7 +44,7 @@ export function useHomeCamera() {
     if (mode !== 'menu' || !intro.current) return;
     const t = sceneNow();
     restingPose(t, size);
-    const u = Math.min(1, (t - intro.current.t0) / INTRO_SECONDS);
+    const u = reducedMotion() ? 1 : Math.min(1, (t - intro.current.t0) / INTRO_SECONDS);
     const e = easeInOut(u);
     eye.lerpVectors(intro.current.eye, eye, e);
     target.lerpVectors(intro.current.target, target, e);
