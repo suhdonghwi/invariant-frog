@@ -20,8 +20,6 @@ export const en = {
     clearedCount: (n: number, of: number) => `${n} of ${of} levels cleared`,
     resetTitle: 'Forget which levels you have cleared',
     resetConfirm: 'Erase progress?',
-    resetDone: 'Progress erased',
-    undo: 'Undo',
     soundOn: 'Sound on',
     soundOff: 'Sound off',
     source: 'Source on GitHub',
